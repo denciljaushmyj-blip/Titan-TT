@@ -34,6 +34,26 @@
         font-size: 18px;
     }
 
+    .back-to-dashboard-btn {
+        background-color: #e7f6f7;
+        color: #028084;
+        border: 1px solid #028084;
+        border-radius: 25px;
+        padding: 5px 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background 0.2s, color 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .back-to-dashboard-btn:hover {
+        background-color: #028084;
+        color: #fff;
+        text-decoration: none;
+    }
+
     .model-title {
         font-weight: 600;
         font-size: 18px;
@@ -370,6 +390,25 @@
 </style>
 
 <div class="container-fluid mt-4">
+    <div style="padding-bottom: 14px;">
+        <a href="{% url 'index' %}" class="back-to-dashboard-btn" title="Back" id="visualAidBackBtn"><i class="fa fa-arrow-left"></i> Back</a>
+    </div>
+    <script nonce="{{ csp_nonce }}">
+    (function(){
+        var backBtn = document.getElementById('visualAidBackBtn');
+        if (!backBtn) return;
+        backBtn.addEventListener('click', function(e){
+            // This page is opened via same-tab navigation from ~48 different pick/reject/
+            // completed tables app-wide. Prefer returning to that originating page; only
+            // fall back to the Dashboard href when there's no same-origin history to return to
+            // (e.g. page opened directly via URL).
+            if (document.referrer && document.referrer.indexOf(window.location.origin) === 0 && window.history.length > 1) {
+                e.preventDefault();
+                window.history.back();
+            }
+        });
+    })();
+    </script>
     {% if error %}
         <div class="alert alert-danger" role="alert">
             {{ error }}
