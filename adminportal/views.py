@@ -26,6 +26,7 @@ import re
 import logging
 import hashlib
 import time as perf_time
+from decimal import Decimal, InvalidOperation
 from django_ratelimit.decorators import ratelimit
 from django_ratelimit.exceptions import Ratelimited
 from .forms import AdaptiveCaptchaAuthenticationForm
@@ -958,34 +959,36 @@ def _build_similar_model_list(model_master_instance, creation_model=None):
 
     creation_model = creation_model or ModelMasterCreation
     current_pk = getattr(model_master_instance, 'pk', None)
-    seen = set()
     current_stock_no = str(getattr(model_master_instance, 'plating_stk_no', '') or '').strip()
     current_model_no = str(getattr(model_master_instance, 'model_no', '') or '').strip()
-    current_prefix = (current_stock_no or current_model_no)[:4]
-    similar_prefix = SIMILAR_MODEL_PREFIX_MAP.get(current_prefix)
-
-    if similar_prefix:
-        return [{
-            'model_no': similar_prefix,
-            'plating_stk_no': '',
-            'model_master_id': None,
-            'has_creation': False,
-            'has_model_master': False,
-            'version': '',
-            'polish_finish': None,
-        }]
+    current_match = re.search(r'\d{4}', current_stock_no or current_model_no)
+    current_model_digits = current_match.group(0) if current_match else current_model_no[:4]
+    target_model_digits = SIMILAR_MODEL_PREFIX_MAP.get(current_model_digits)
+    seen_models = set()
 
     def add_model(model, items):
+        stock_value = str(
+            getattr(model, 'plating_stk_no', None)
+            or getattr(model, 'model_no', None)
+            or ''
+        ).strip()
+        match = re.search(r'\d{4}', stock_value)
+        if not match or getattr(model, 'pk', None) == current_pk:
+            return
+
+        model_digits = match.group(0)
+        if model_digits == current_model_digits:
+            return
+        if target_model_digits and model_digits != target_model_digits:
+            return
+        if model_digits in seen_models:
+            return
+
+        seen_models.add(model_digits)
         stock_no = str(getattr(model, 'plating_stk_no', '') or '').strip()
-        if not stock_no or getattr(model, 'pk', None) == current_pk:
-            return
 
-        key = stock_no.upper()
-        if key in seen:
-            return
-
-        seen.add(key)
         items.append({
+            'model_no': model_digits,
             'plating_stk_no': stock_no,
             'model_master_id': model.pk,
             'has_creation': False,
@@ -994,29 +997,53 @@ def _build_similar_model_list(model_master_instance, creation_model=None):
             'polish_finish': str(model.polish_finish) if model.polish_finish else None,
         })
 
-    look_like_items = []
-    look_like_obj = (
-        LookLikeModel.objects
-        .filter(same_plating_stk_no=model_master_instance)
-        .prefetch_related('plating_stk_no')
-        .first()
-    )
-    logger.debug("LookLikeModel object: %s", look_like_obj)
+    similar_items = []
 
-    if look_like_obj:
-        for related_master in look_like_obj.plating_stk_no.all():
-            add_model(related_master, look_like_items)
+    if target_model_digits:
+        mapped_masters = (
+            ModelMaster.objects
+            .filter(
+                Q(plating_stk_no__startswith=target_model_digits)
+                | Q(model_no__startswith=target_model_digits)
+            )
+            .order_by('id')
+        )
+        for related_master in mapped_masters:
+            add_model(related_master, similar_items)
+    else:
+        look_like_obj = (
+            LookLikeModel.objects
+            .filter(same_plating_stk_no=model_master_instance)
+            .prefetch_related('plating_stk_no')
+            .first()
+        )
+        logger.debug("LookLikeModel object: %s", look_like_obj)
 
-    if look_like_items:
-        target_ids = [item['model_master_id'] for item in look_like_items]
+        if look_like_obj:
+            for related_master in look_like_obj.plating_stk_no.all():
+                add_model(related_master, similar_items)
+
+    if similar_items:
+        target_ids = [item['model_master_id'] for item in similar_items]
         creation_ids = set(
             creation_model.objects
             .filter(model_stock_no_id__in=target_ids)
             .values_list('model_stock_no_id', flat=True)
         )
-        for item in look_like_items:
+        for item in similar_items:
             item['has_creation'] = item['model_master_id'] in creation_ids
-        return look_like_items
+        return similar_items
+
+    if target_model_digits:
+        return [{
+            'model_no': target_model_digits,
+            'plating_stk_no': '',
+            'model_master_id': None,
+            'has_creation': False,
+            'has_model_master': False,
+            'version': '',
+            'polish_finish': None,
+        }]
 
     return []
 
@@ -1212,34 +1239,55 @@ def _get_images_for_stock(
 
 
 def _build_image_payload(request, images):
+    """
+    Build the image payload used by hover preview and Visual Aid.
+
+    Real model images and the configured NO_IMAGE placeholder are both
+    returned. The placeholder must not be filtered out, otherwise templates
+    receive an empty image list and display "No image available".
+    """
     payload = []
 
     for img in images:
-        if is_no_image_model_image(img):
-            continue
-
         try:
             emit_media_read(
                 request,
-                img.master_image,
+                getattr(img, 'master_image', None),
                 lookup_source='image_payload',
             )
+
             image_url = get_image_url(img)
             if not image_url:
                 continue
-            image_url = request.build_absolute_uri(image_url)
-        except Exception:
-            continue
 
-        view_code, view_label = _detect_image_view(img)
+            absolute_url = request.build_absolute_uri(image_url)
 
-        payload.append({
-            'id': img.id,
-            'url': image_url,
-            'view_code': view_code,
-            'view': view_label,
-            'is_placeholder': False,
-        })
+            if is_no_image_model_image(img):
+                payload.append({
+                    'id': img.id,
+                    'url': absolute_url,
+                    'view_code': 'NO_IMAGE',
+                    'view': 'No Image',
+                    'is_placeholder': True,
+                })
+                continue
+
+            view_code, view_label = _detect_image_view(img)
+
+            payload.append({
+                'id': img.id,
+                'url': absolute_url,
+                'view_code': view_code,
+                'view': view_label,
+                'is_placeholder': False,
+            })
+
+        except Exception as exc:
+            logger.warning(
+                'Unable to build image payload for image id=%s: %s',
+                getattr(img, 'id', None),
+                exc,
+            )
 
     return payload
 
@@ -1405,6 +1453,28 @@ class ModelHoverPreviewAPIView(APIView):
         return response
 
 
+
+def _canonical_version_label(version):
+    """
+    Return the project-wide version label, for example:
+    A -> Version A
+    version a -> Version A
+    Version A -> Version A
+    """
+    raw_version = str(version or '').strip()
+    if not raw_version:
+        return ''
+
+    suffix = re.sub(
+        r'^VERSION\s*',
+        '',
+        raw_version,
+        flags=re.IGNORECASE,
+    ).strip().upper()
+
+    return f'Version {suffix}' if suffix else ''
+
+
 @method_decorator(login_required(login_url='login-api'), name='dispatch')
 class ModelVersionComparisonAPIView(APIView):
     renderer_classes = [JSONRenderer]
@@ -1412,7 +1482,7 @@ class ModelVersionComparisonAPIView(APIView):
 
     def get(self, request, format=None):
         requested_model_number = request.GET.get('model_number', '')
-        requested_version = request.GET.get('version', '').strip().upper()
+        requested_version = _canonical_version_label(request.GET.get('version', ''))
         if not requested_model_number or not requested_model_number.strip():
             return Response({
                 'success': False,
@@ -1458,7 +1528,7 @@ class ModelVersionComparisonAPIView(APIView):
         return Response({
             'success': True,
             'model_number': comparison.model_number,
-            'version': comparison.version or comparison.title or '',
+            'version': _canonical_version_label(comparison.version or comparison.title),
             'title': comparison.title or f'Difference between different variants of {comparison.model_number}',
             'description': comparison.description or '',
             'info': _build_version_info_payload(comparison),
@@ -1480,9 +1550,9 @@ _VERSION_COMPARISON_ALLOWED_EXT = frozenset({
 })
 _VERSION_COMPARISON_MAX_SIZE = 10 * 1024 * 1024
 ALLOWED_MODEL_VERSIONS = {
-    '2617': {'A', 'B', 'C', 'D'},
-    '2648': {'A', 'B', 'D', 'E'},
-    '1805': {'D', 'K'},
+    '2617': {'Version A', 'Version B', 'Version C', 'Version D'},
+    '2648': {'Version A', 'Version B', 'Version D', 'Version E'},
+    '1805': {'Version D', 'Version K'},
 }
 _VERSION_INFO_DECIMAL_FIELDS = (
     ('thickness', 'Thickness'),
@@ -1528,8 +1598,8 @@ VERSION_INFO_O_RING_OPTIONS = {
 
 
 def validate_model_version(model_number, version):
-    normalized_model = (model_number or '').strip().upper()
-    normalized_version = (version or '').strip().upper()
+    normalized_model = str(model_number or '').strip().upper()
+    normalized_version = _canonical_version_label(version)
     allowed_versions = ALLOWED_MODEL_VERSIONS.get(normalized_model)
 
     if not allowed_versions:
@@ -1539,7 +1609,7 @@ def validate_model_version(model_number, version):
         allowed_text = ', '.join(sorted(allowed_versions))
         return (
             False,
-            f'Version {normalized_version} is not allowed for model '
+            f'{normalized_version or "Version"} is not allowed for model '
             f'{normalized_model}. Allowed versions: {allowed_text}.'
         )
 
@@ -1770,7 +1840,7 @@ def model_version_comparison_list(request):
 @require_POST
 def model_version_comparison_upload(request):
     raw_model_number = request.POST.get('model_number', '').strip().upper()
-    version = request.POST.get('version', '').strip().upper()
+    version = _canonical_version_label(request.POST.get('version', ''))
     uploaded_files = request.FILES.getlist('comparison_images')
     if not uploaded_files:
         uploaded_files = request.FILES.getlist('comparison_image')
@@ -1856,12 +1926,20 @@ def model_version_comparison_upload(request):
                 skipped_duplicate_count += 1
                 continue
 
-            ModelVersionComparisonImage.objects.create(
+            created_image = ModelVersionComparisonImage.objects.create(
                 comparison=comparison,
                 image=uploaded_file,
                 original_filename=original_filename,
                 display_order=start_order + created_image_count,
             )
+
+            # Keep the legacy single-image field synchronized with the first
+            # related image. Older server code and fallback lookups still read
+            # comparison_image, while newer code reads comparison.images.
+            if not comparison.comparison_image and created_image.image:
+                comparison.comparison_image.name = created_image.image.name
+                comparison.save(update_fields=['comparison_image', 'updated_at'])
+
             if original_filename:
                 seen_request_filenames.add(original_filename)
             created_image_count += 1
@@ -2192,36 +2270,11 @@ class Other_Visual_AidView(APIView):
                 version_labels = [str(v) for v in version_list]
                 context['modelmaster_versions'] = version_labels
 
-                # Find similar models through LookLikeModel
-                look_like_obj = LookLikeModel.objects.filter(same_plating_stk_no=model_master_instance).first()
-                print(f"LookLikeModel object: {look_like_obj}")
-
-                if look_like_obj:
-                    # Get all related ModelMaster objects
-                    related_model_masters = look_like_obj.plating_stk_no.all()
-                    same_model_list = []
-                    
-                    for related_master in related_model_masters:
-                        # Check if this ModelMaster has a corresponding ModelMasterCreation
-                        has_creation = ModelMasterCreation.objects.filter(
-                            model_stock_no=related_master
-                        ).exists()
-                        
-                        model_info = {
-                            'plating_stk_no': related_master.plating_stk_no,
-                            'model_master_id': related_master.id,
-                            'has_creation': has_creation,
-                            'has_model_master': True,  # Always true since we're iterating ModelMaster objects
-                            'version': related_master.version,
-                            'polish_finish': str(related_master.polish_finish) if related_master.polish_finish else None,
-                        }
-                        
-                        same_model_list.append(model_info)
-                    
-                    context['same_model_list'] = same_model_list
-                    print(f"Same model list with ModelMaster details: {same_model_list}")
-                else:
-                    context['same_model_list'] = []
+                context['same_model_list'] = _build_similar_model_list(
+                    model_master_instance,
+                    creation_model=ModelMasterCreation,
+                )
+                print(f"Same model list with ModelMaster details: {context['same_model_list']}")
             else:
                 context['same_model_list'] = []
                 context['modelmaster_versions'] = []

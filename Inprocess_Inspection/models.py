@@ -11,9 +11,10 @@ class InprocessInspectionTrayCapacity(models.Model):
     This allows overriding the default ModelMaster tray capacities
     """
     tray_type = models.ForeignKey(
-        TrayType, 
-        on_delete=models.CASCADE, 
-        help_text="Reference to tray type from ModelMaster"
+        TrayType,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     custom_capacity = models.IntegerField(
         help_text="Custom capacity for this tray type in Inprocess Inspection"

@@ -202,11 +202,15 @@ tr.hold-row td:nth-child(3) {
                   <td>{{ forloop.counter }}</td>
                   <td>{{ item.date_time|date:"d M Y H:i" }}</td>
                   <td>
-                    {{ item.plating_stk_no }}
+                    
                     {% if item.images %}
-                    <span class="model-image-trigger" style="cursor:pointer;color:#028084;">
-                      <i class="fa fa-image"></i>
-                    </span>
+                    <span
+                      class="model-hover-trigger"
+                      data-plating-stk-no="{{ item.plating_stk_no }}"
+                      style="cursor:pointer;"
+                  >
+                      {{ item.plating_stk_no }}
+                  </span>
                     <div class="model-image-tooltip">
                       {% for img in item.images %}
                       <img src="{{ img }}" alt="Model" style="max-width:100px;max-height:80px;margin:4px;border-radius:4px;" />

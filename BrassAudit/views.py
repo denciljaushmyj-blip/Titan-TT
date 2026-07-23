@@ -70,6 +70,33 @@ def _get_sorted_model_images(model_master):
 # ═══════════════════════════════════════════════════════════════
 # Brass Audit Pick Table View
 # ═══════════════════════════════════════════════════════════════
+def _get_pick_table_hover_preview_url(model_master):
+    """Resolve the Brass Audit Pick Table's one-image hover preview.
+
+    This intentionally does not alter the ordered image lists used by Visual
+    Aid or the other Brass Audit tables. The Pick Table preview alone uses
+    IV -> TV -> FV -> RSV, then the uploaded global NO_IMAGE placeholder.
+    """
+    try:
+        from modelmasterapp.image_utils import (
+            get_global_no_image,
+            get_image_by_view,
+            get_image_url,
+        )
+    except ImportError:
+        logger.exception("Model image helpers are unavailable for Brass Audit hover preview")
+        return None
+
+    images = model_master.images.all() if model_master else []
+    for view_code in ("IV", "TV", "FV", "RSV"):
+        image = get_image_by_view(images, view_code)
+        if image:
+            return get_image_url(image)
+
+    placeholder = get_global_no_image()
+    return get_image_url(placeholder) if placeholder else None
+
+
 @method_decorator(login_required, name='dispatch')
 class BrassAuditPickTableView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
@@ -240,6 +267,9 @@ class BrassAuditPickTableView(APIView):
             if not images:
                 images = [static('assets/images/imagePlaceholder.jpg')]
             data['model_images'] = images
+            data['model_preview_image'] = _get_pick_table_hover_preview_url(
+                batch_obj.model_stock_no if batch_obj else None
+            )
 
             data['available_qty'] = data.get('brass_audit_accepted_qty') if data.get('brass_audit_accepted_qty') and data.get('brass_audit_accepted_qty') > 0 else (data.get('brass_audit_physical_qty') if data.get('brass_audit_physical_qty') and data.get('brass_audit_physical_qty') > 0 else data.get('brass_qc_accepted_qty', 0))
 
