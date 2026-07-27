@@ -17,7 +17,7 @@
 .model-image-tooltip{
   transform: translateX(-25%) !important;
   top: 45% !important;
-  z-index: 500000 !important; /* high so it sits above table & scrollbar */
+  z-index: 10010 !important; /* high so it sits above table & scrollbar */
 
 }
 
@@ -668,69 +668,13 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 }
 
 /* ================================================================
-   NICKEL WIPING ZONE 1 — DYNAMIC MODEL PREVIEW FINAL OVERRIDE
-   Compact desktop/tablet popup with uncropped IV/NO_IMAGE preview.
+   NICKEL WIPING ZONE 1 — model hover trigger positioning context
+   (Trigger must stay position:relative so the tooltip's position:
+   absolute anchors correctly. Appearance now matches Day Planning
+   via inline styles on the tooltip markup itself — see below.)
    ================================================================ */
 .content-wrapper .model-hover-trigger {
   position: relative !important;
-}
-
-.content-wrapper .model-image-tooltip {
-  width: 230px !important;
-  min-width: 230px !important;
-  max-width: 230px !important;
-  min-height: 185px !important;
-  height: auto !important;
-  padding: 12px !important;
-  gap: 8px !important;
-  box-sizing: border-box !important;
-  background: #fff !important;
-  border: 1px solid #cfd8dc !important;
-  border-radius: 8px !important;
-  box-shadow: 0 6px 18px rgba(0,0,0,.18) !important;
-  overflow: hidden !important;
-  z-index: 500000 !important;
-  font-size: 12px !important;
-  line-height: 1.3 !important;
-}
-
-.content-wrapper .model-image-tooltip,
-.content-wrapper .model-image-tooltip * {
-  font-size: 12px !important;
-}
-
-.content-wrapper .model-image-tooltip .info-btn,
-.content-wrapper .model-image-tooltip .close-btn {
-  min-width: 48px !important;
-  height: 28px !important;
-  padding: 4px 9px !important;
-  line-height: 18px !important;
-}
-
-.content-wrapper .model-image-tooltip .img-gallery,
-.content-wrapper .model-image-tooltip .nickel-preview-frame {
-  width: 204px !important;
-  height: 135px !important;
-  min-height: 135px !important;
-  max-height: 135px !important;
-  margin: 0 auto !important;
-  overflow: hidden !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: #fff !important;
-}
-
-.content-wrapper .model-image-tooltip .img-gallery img,
-.content-wrapper .model-image-tooltip .nickel-preview-img {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 204px !important;
-  max-height: 135px !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  display: block !important;
-  background: #fff !important;
 }
 
 </style>
@@ -900,23 +844,23 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                     <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
                       <span class="model-hover-trigger" data-plating-stk-no="{{ data.plating_stk_no }}" style="cursor: pointer; word-break: break-all;">
                         {{ data.plating_stk_no|highlight_plating_color|safe_html }}
-                        <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s; min-width: 220px;">
-                          
-                          <!-- Header with Info and Close buttons -->
-                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <button class="info-btn" style="background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
-                               Info
-                            </button>
-                            <button class="close-btn" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
-                               Close
-                            </button>
+                        <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 48px 18px 18px; z-index: 10010; display: flex; justify-content:center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; box-sizing:border-box;">
+
+                          <button class="close-btn" type="button" style="position:absolute; top:14px; right:16px; z-index:2; background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                             Close
+                          </button>
+
+                          <button type="button" class="info-btn" style="position:absolute; top:14px; left:16px; z-index:2; background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                             Info
+                          </button>
+
+                          <button class="img-scroll-left" style="display:none; background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
+
+                          <div class="img-gallery" style="display: flex; justify-content: center; align-items: center; overflow: hidden; width: 260px; height: 210px; min-height: 210px; box-sizing:border-box;">
+                            <span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>
                           </div>
-                          
-                          <!-- Image gallery section -->
-                          <div style="display: flex; align-items: center; gap: 8px;">
-                            <!-- Hide scroll buttons since only one image is shown -->
-                            <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;"></div>
-                          </div>
+
+                          <button class="img-scroll-right" style="display:none; background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
                         </div>
                       </span>
                     </td>
@@ -1778,6 +1722,10 @@ document.addEventListener("DOMContentLoaded", function () {
     ).trim();
   }
 
+  function getStockCacheKey(stockNo) {
+    return String(stockNo || "").trim().toUpperCase();
+  }
+
   function getTooltip(trigger) {
     return trigger
       ? trigger.querySelector(".model-image-tooltip")
@@ -1790,42 +1738,78 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       const parsed = new URL(value, window.location.origin);
-
-      // Application media/static files must always use the host currently
-      // opened in the browser. This fixes localhost, 127.0.0.1, internal-IP,
-      // wrong-domain and HTTP/HTTPS mismatches returned by older API code.
-      if (
+      const hostname = String(parsed.hostname || "").toLowerCase();
+      const isLoopbackHost =
+        hostname === "127.0.0.1" ||
+        hostname === "localhost" ||
+        hostname === "::1" ||
+        hostname === "[::1]";
+      const isApplicationAsset =
         parsed.pathname.startsWith("/media/") ||
-        parsed.pathname.startsWith("/static/")
+        parsed.pathname.startsWith("/static/");
+
+      if (
+        parsed.origin === window.location.origin ||
+        (isLoopbackHost && isApplicationAsset)
       ) {
         return parsed.pathname + parsed.search + parsed.hash;
       }
 
       return parsed.href;
     } catch (error) {
-      if (value.startsWith("media/") || value.startsWith("static/")) {
-        return "/" + value;
-      }
       return value;
     }
   }
 
+  function normalizePreviewPayload(payload) {
+    if (!payload) return null;
+    payload.preview_image = normalizeImageUrl(payload.preview_image);
+    if (Array.isArray(payload.images)) {
+      payload.images = payload.images.map(function (image) {
+        if (!image) return image;
+        return Object.assign({}, image, {
+          url: normalizeImageUrl(image.url || image.image_url || image.src || image.image || "")
+        });
+      });
+    }
+    return payload;
+  }
+
+  function getPlaceholderImageUrl(payload) {
+    const images = Array.isArray(payload && payload.images) ? payload.images : [];
+    const placeholder = images.find(function (image) {
+      const viewCode = String(image && image.view_code || "").toUpperCase();
+      return viewCode === "NO_IMAGE" || image && image.is_placeholder === true;
+    });
+    return normalizeImageUrl(placeholder && (placeholder.url || placeholder.image_url || placeholder.src || placeholder.image));
+  }
+
+  window.normalizeStockImageUrl = normalizeImageUrl;
   window.NickelNormalizeImageUrl = normalizeImageUrl;
+
+  function getDefaultVisualAidUrl(stockNo) {
+    return "/adminportal/dp_visualaid/?plating_stk_no=" + encodeURIComponent(stockNo);
+  }
+
+  function setTriggerVisualAidUrl(trigger, stockNo, payload) {
+    if (!trigger || !stockNo) return;
+    trigger.dataset.visualAidUrl = payload && payload.visual_aid_url
+      ? payload.visual_aid_url
+      : getDefaultVisualAidUrl(stockNo);
+  }
 
   function prepareTooltip(tooltip) {
     if (!tooltip || tooltip.dataset.dynamicPreviewReady === "1") return;
 
     tooltip.dataset.dynamicPreviewReady = "1";
     tooltip.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;">' +
-        '<button type="button" class="info-btn" style="background:#007bff;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Info</button>' +
-        '<button type="button" class="close-btn" style="background:#dc3545;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Close</button>' +
+      '<button class="close-btn" type="button" style="position:absolute;top:14px;right:16px;z-index:2;background:#dc3545;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Close</button>' +
+      '<button type="button" class="info-btn" style="position:absolute;top:14px;left:16px;z-index:2;background:#007bff;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Info</button>' +
+      '<button class="img-scroll-left" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;">&#8592;</button>' +
+      '<div class="img-gallery" style="display:flex;justify-content:center;align-items:center;overflow:hidden;width:260px;height:210px;min-height:210px;box-sizing:border-box;">' +
+        '<span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>' +
       '</div>' +
-      '<div class="nickel-preview-frame">' +
-        '<div class="img-gallery" style="width:204px;height:135px;display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
-          '<span style="font-size:12px;color:#777;text-align:center;">Loading...</span>' +
-        '</div>' +
-      '</div>';
+      '<button class="img-scroll-right" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;">&#8594;</button>';
   }
 
   function getGallery(trigger) {
@@ -1838,7 +1822,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!gallery) return;
 
     gallery.innerHTML =
-      '<span style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
+      '<span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
   }
 
   function renderMessage(trigger, message) {
@@ -1877,11 +1861,17 @@ document.addEventListener("DOMContentLoaded", function () {
     image.loading = "eager";
     image.decoding = "async";
     image.style.cssText =
-      "width:100%;height:100%;max-width:204px;max-height:135px;" +
-      "object-fit:contain;object-position:center;" +
-      "border-radius:6px;background:#fff;display:block;";
+      "display:block;width:auto;height:auto;max-width:240px;max-height:190px;" +
+      "object-fit:contain;object-position:center;margin:auto;" +
+      "border-radius:6px;background:#fff;";
 
     image.addEventListener("error", function () {
+      const placeholderUrl = getPlaceholderImageUrl(payload);
+      if (placeholderUrl && image.src !== placeholderUrl) {
+        image.src = placeholderUrl;
+        image.alt = "No image available";
+        return;
+      }
       console.error(
         "[Nickel Wiping Z1] Preview image failed:",
         rawUrl,
@@ -1895,13 +1885,13 @@ document.addEventListener("DOMContentLoaded", function () {
     image.src = imageUrl;
   }
 
-  function requestPreview(stockNo) {
-    if (previewCache.has(stockNo)) {
-      return Promise.resolve(previewCache.get(stockNo));
+  function requestPreview(stockNo, cacheKey) {
+    if (previewCache.has(cacheKey)) {
+      return Promise.resolve(previewCache.get(cacheKey));
     }
 
-    if (requestCache.has(stockNo)) {
-      return requestCache.get(stockNo);
+    if (requestCache.has(cacheKey)) {
+      return requestCache.get(cacheKey);
     }
 
     const controller = new AbortController();
@@ -1911,7 +1901,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const request = fetch(
       "/adminportal/api/model-hover-preview/?stock_no=" +
-        encodeURIComponent(stockNo),
+        encodeURIComponent(stockNo) +
+        "&_ts=" +
+        Date.now(),
       {
         method: "GET",
         credentials: "same-origin",
@@ -1930,37 +1922,44 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(function (payload) {
-        previewCache.set(stockNo, payload || null);
-        return payload || null;
+        const normalizedPayload = normalizePreviewPayload(payload);
+        previewCache.set(cacheKey, normalizedPayload);
+        return normalizedPayload;
       })
       .finally(function () {
         window.clearTimeout(timeoutId);
-        requestCache.delete(stockNo);
+        requestCache.delete(cacheKey);
       });
 
-    requestCache.set(stockNo, request);
+    requestCache.set(cacheKey, request);
     return request;
   }
 
   function loadPreview(trigger) {
     const stockNo = getStockNo(trigger);
+    const cacheKey = getStockCacheKey(stockNo);
 
     if (!stockNo) {
       renderMessage(trigger, "Stock number unavailable");
       return;
     }
 
-    if (previewCache.has(stockNo)) {
-      renderPreview(trigger, previewCache.get(stockNo));
+    setTriggerVisualAidUrl(trigger, stockNo);
+
+    if (previewCache.has(cacheKey)) {
+      const cached = previewCache.get(cacheKey);
+      setTriggerVisualAidUrl(trigger, stockNo, cached);
+      renderPreview(trigger, cached);
       return;
     }
 
     renderLoading(trigger);
 
-    requestPreview(stockNo)
+    requestPreview(stockNo, cacheKey)
       .then(function (payload) {
         // Always complete the tooltip that initiated this request. This avoids
         // a permanent Loading state if the pointer briefly leaves the cell.
+        setTriggerVisualAidUrl(trigger, stockNo, payload);
         renderPreview(trigger, payload);
       })
       .catch(function (error) {
@@ -2146,9 +2145,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const stockNo = getStockNo(trigger);
         if (!stockNo) return;
 
-        window.location.href =
-          "/adminportal/dp_visualaid/?plating_stk_no=" +
-          encodeURIComponent(stockNo);
+        window.location.href = trigger.dataset.visualAidUrl || getDefaultVisualAidUrl(stockNo);
       });
     }
 

@@ -3048,6 +3048,87 @@ document.addEventListener("DOMContentLoaded", function () {
 <!-- Enhanced Script for dynamic model image gallery view with navigation -->
 <script nonce="{{ csp_nonce }}">
    // Global color palette and model-to-color mapping
+   const ipPreviewImageCache = {};
+
+   function normalizeIpModelImageUrl(rawUrl) {
+     const value = String(rawUrl || '').trim();
+     if (!value) return '';
+     try {
+       const parsed = new URL(value, window.location.origin);
+       const hostname = String(parsed.hostname || '').toLowerCase();
+       const isLoopbackHost =
+         hostname === '127.0.0.1' ||
+         hostname === 'localhost' ||
+         hostname === '::1' ||
+         hostname === '[::1]';
+       const isApplicationAsset =
+         parsed.pathname.startsWith('/media/') ||
+         parsed.pathname.startsWith('/static/');
+       if (parsed.origin === window.location.origin || (isLoopbackHost && isApplicationAsset)) {
+         return parsed.pathname + parsed.search + parsed.hash;
+       }
+       return parsed.href;
+     } catch (error) {
+       return value;
+     }
+   }
+
+   function getIpImageUrlFromEntry(entry) {
+     if (!entry) return '';
+     return normalizeIpModelImageUrl(entry.preview_image || entry.image_url || entry.url || entry.src || entry.image || '');
+   }
+
+   function resolveIpPreviewImage(payload) {
+     const previewImage = normalizeIpModelImageUrl(payload && payload.preview_image);
+     if (previewImage) return previewImage;
+     const images = Array.isArray(payload && payload.images) ? payload.images : [];
+     const insideView = images.find(function(entry) {
+       return String(entry && entry.view_code || '').toUpperCase() === 'IV';
+     });
+     const insideViewUrl = getIpImageUrlFromEntry(insideView);
+     if (insideViewUrl) return insideViewUrl;
+     const noImage = images.find(function(entry) {
+       const viewCode = String(entry && entry.view_code || '').toUpperCase();
+       return viewCode === 'NO_IMAGE' || entry && entry.is_placeholder === true;
+     });
+     return getIpImageUrlFromEntry(noImage);
+   }
+
+   function fetchIpPreviewImage(modelNo) {
+     const cacheKey = String(modelNo || '').trim().toUpperCase();
+     if (!cacheKey) return Promise.resolve('');
+     if (Object.prototype.hasOwnProperty.call(ipPreviewImageCache, cacheKey)) {
+       return Promise.resolve(ipPreviewImageCache[cacheKey]);
+     }
+     return fetch('/adminportal/api/model-hover-preview/?stock_no=' + encodeURIComponent(modelNo) + '&_ts=' + Date.now(), {
+       credentials: 'same-origin',
+       cache: 'no-store',
+       headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+     })
+       .then(function(response) {
+         if (!response.ok) return '';
+         return response.json();
+       })
+       .then(function(payload) {
+         const imageUrl = resolveIpPreviewImage(payload);
+         ipPreviewImageCache[cacheKey] = imageUrl || '';
+         return imageUrl || '';
+       })
+       .catch(function() {
+         ipPreviewImageCache[cacheKey] = '';
+         return '';
+       });
+   }
+
+   function hydrateIpPreviewImageElement(img, modelNo, fallbackImages) {
+     if (!img || !modelNo) return;
+     const fallbackUrl = normalizeIpModelImageUrl((fallbackImages || [])[0]) || '/static/assets/images/imagePlaceholder.png';
+     img.src = fallbackUrl;
+     fetchIpPreviewImage(modelNo).then(function(previewUrl) {
+       if (previewUrl) img.src = previewUrl;
+     });
+   }
+
    const GLOBAL_COLOR_PALETTE = [
      "#e74c3c", "#f1c40f", "#2ecc71", "#3498db", "#9b59b6",
      "#e67e22", "#1abc9c", "#34495e", "#f39c12", "#d35400",
@@ -3270,7 +3351,7 @@ document.addEventListener("DOMContentLoaded", function () {
                  
                  images.slice(0, 3).forEach(function(imageUrl, imgIndex) {
                    const img = document.createElement('img');
-                   img.src = imageUrl;
+                   img.src = normalizeIpModelImageUrl(imageUrl) || '/static/assets/images/imagePlaceholder.png';
                    img.alt = `${modelNo} - Image ${imgIndex + 1}`;
                    img.style.cssText = `
                      width: 200px;
@@ -3302,6 +3383,9 @@ document.addEventListener("DOMContentLoaded", function () {
                      this.src = '/static/assets/images/imagePlaceholder.png';
                      this.style.opacity = '0.5';
                    });
+                   if (imgIndex === 0) {
+                     hydrateIpPreviewImageElement(img, modelNo, images);
+                   }
                    
                    imagesContainer.appendChild(img);
                  });

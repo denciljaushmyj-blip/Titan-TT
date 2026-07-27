@@ -111,6 +111,95 @@ def _jul_enrich_tray_data_with_sources(tray_data, source_metadata):
     return enriched
 
 
+def _jul_rebuild_tray_slots_z1(total_qty, tray_capacity, old_slots=None):
+    """Recompute a single fresh tray-slot list for total_qty at tray_capacity.
+
+    Add/Remove Model must always redistribute the COMBINED quantity from
+    scratch so there is never more than one partial (top) tray — appending a
+    separate slot batch per merge (the previous approach) produced one
+    partial tray per merge instead of one overall.
+
+    Tray IDs already scanned onto the old slots are preserved at their exact
+    original slot INDEX (not compacted to the front) — a tray physically
+    scanned into slot 5 must stay displayed in slot 5, never jump to slot 2,
+    so the user can still find it where they left it. Only genuinely new
+    slots (beyond the old slot count) start blank for scanning.
+    """
+    cap = tray_capacity if tray_capacity and tray_capacity > 0 else 20
+    num_trays = math.ceil(total_qty / cap) if total_qty > 0 else 1
+    remainder = total_qty % cap if total_qty % cap != 0 else cap
+
+    old_slots = old_slots or []
+
+    slots = []
+    for i in range(num_trays):
+        is_top = (i == 0)
+        is_pre_existing_slot = i < len(old_slots)
+        tray_id = old_slots[i].get('tray_id', '') if is_pre_existing_slot else ''
+        slots.append({
+            'slot': i + 1,
+            'tray_id': tray_id,
+            'qty': remainder if is_top else cap,
+            'is_top_tray': is_top,
+            'editable_qty': is_top,
+            'is_newly_added_slot': not is_pre_existing_slot,
+        })
+    return slots
+
+
+def _jul_prepend_new_lot_tray_slots_z1(new_qty, combined_total_qty, tray_capacity, existing_slots):
+    """Combine an Add-Model lot's quantity into an existing model's tray slots
+    WITHOUT mingling tray IDs across lots.
+
+    Placement: the newly added lot's trays are fresh/blank and placed FIRST
+    (top of the combined list); the existing lot's trays — with their
+    tray_id preserved — are pushed down after them, matching the frontend's
+    stated contract (Jig_Unloading_Main.html openTrayScan): "new lot's trays
+    first, old lot's trays pushed down".
+
+    Quantity: only the overall TOP tray (slot 1) may hold a partial/leftover
+    qty — every other slot always shows full capacity, even an existing slot
+    that used to be its own lot's top (partial) tray before this merge. The
+    partial amount it used to carry is absorbed into the single combined
+    remainder instead, since two separate partial trays would violate the
+    "one partial tray only" rule. Tray count is therefore recomputed from
+    the combined total (not each lot's own independent split); if pooling
+    the leftovers needs fewer trays than the sum of both lots' own splits,
+    trailing NEVER-SCANNED (no tray_id) slots from the existing lot are
+    trimmed to match — a slot that already holds a real tray_id is never
+    dropped, even if that means keeping one tray beyond the strict minimum.
+    """
+    cap = tray_capacity if tray_capacity and tray_capacity > 0 else 20
+    existing_slots = existing_slots or []
+
+    new_num_trays = math.ceil(new_qty / cap) if new_qty > 0 else 0
+    num_trays_total = math.ceil(combined_total_qty / cap) if combined_total_qty > 0 else 1
+    remainder = combined_total_qty % cap if combined_total_qty % cap != 0 else cap
+
+    old_slots = list(existing_slots)
+    max_old = max(num_trays_total - new_num_trays, 0)
+    while len(old_slots) > max_old and old_slots and not old_slots[-1].get('tray_id'):
+        old_slots.pop()
+
+    combined = []
+    for _ in range(new_num_trays):
+        combined.append({'tray_id': '', 'is_newly_added_slot': True})
+    for slot in old_slots:
+        combined.append({
+            'tray_id': slot.get('tray_id', ''),
+            'is_newly_added_slot': slot.get('is_newly_added_slot', False),
+        })
+
+    for idx, slot in enumerate(combined):
+        is_top = idx == 0
+        slot['slot'] = idx + 1
+        slot['qty'] = remainder if is_top else cap
+        slot['is_top_tray'] = is_top
+        slot['editable_qty'] = is_top
+
+    return combined
+
+
 def _jul_find_after_table_by_source_lot_id(lot_id):
     """Find a JigUnloadAfterTable row whose combine_lot_ids contains lot_id.
 
@@ -398,8 +487,24 @@ class Jig_Unloading_MainTable(LoginRequiredMixin, TemplateView):
         all_lot_ids = set()
         all_batch_ids = set()  # For Jig Loading batch_id → images fallback
         for jig_detail in jig_unload:
-            if jig_detail.no_of_model_cases:
+            # Prefer draft_data['no_of_model_cases'] over the raw DB field, matching
+            # the priority used later when building the actual rendered
+            # jig_detail.no_of_model_cases (see `model_cases = draft_data.get(...)`
+            # below). Without this, an Add Model merge that updates draft_data's
+            # model list (but not the raw DB field yet) means the newly-added
+            # model's key is never added to the global color palette here, so its
+            # circle falls back to the default gray "no color assigned" style
+            # instead of getting its own distinct color.
+            _dd_early = getattr(jig_detail, 'draft_data', None) or {}
+            if isinstance(_dd_early, str):
+                try:
+                    _dd_early = json.loads(_dd_early)
+                except Exception:
+                    _dd_early = {}
+            _raw_mc = _dd_early.get('no_of_model_cases') if isinstance(_dd_early, dict) else None
+            if not _raw_mc:
                 _raw_mc = jig_detail.no_of_model_cases
+            if _raw_mc:
                 if isinstance(_raw_mc, str):
                     try:
                         import json
@@ -408,7 +513,7 @@ class Jig_Unloading_MainTable(LoginRequiredMixin, TemplateView):
                             _raw_mc = _parsed
                     except Exception:
                         pass
-                
+
                 if isinstance(_raw_mc, list):
                     all_model_numbers.update([str(m) for m in _raw_mc])
                 elif isinstance(_raw_mc, str):
@@ -1370,7 +1475,22 @@ class Jig_Unloading_MainTable(LoginRequiredMixin, TemplateView):
             if (_has_draft_z1 or _has_partial_submitted_z1) and not jig_detail.all_models_submitted_z1:
                 jig_detail.jig_unload_draft = True
                 jig_detail.has_unload_draft = True
-            
+
+            # Already Loaded: ALL of this jig's own lots were consumed into
+            # ANOTHER jig's unload via Add Model — nothing left here to unload,
+            # so it must not be offered again as an Add Model candidate.
+            # Must check ALL lots, not ANY: a multi-model jig where only one
+            # of its lots was merged elsewhere still has its other, un-merged
+            # lot pending — that leftover must keep appearing as a normal
+            # candidate in other jigs' Add Model lists instead of being
+            # hidden by a single merged lot dragging the whole row along.
+            _merged_lot_ids_z1 = set(
+                JUSubmittedZ1.objects.filter(
+                    jig_completed_id=jig_detail.id, is_merged_additional=True
+                ).values_list('lot_id', flat=True)
+            )
+            jig_detail.is_already_loaded_z1 = bool(_all_lids_z1) and _all_lids_z1.issubset(_merged_lot_ids_z1)
+
             # Parse draft_data if needed
             draft_data = {}
             if hasattr(jig_detail, 'draft_data') and jig_detail.draft_data:
@@ -2959,6 +3079,7 @@ class GetUnloadModelsZ1View(APIView):
                     'qty': slot_qty,
                     'is_top_tray': is_top,
                     'editable_qty': is_top,
+                    'is_newly_added_slot': False,
                 })
 
             num_trays = len(tray_slots)
@@ -2974,6 +3095,9 @@ class GetUnloadModelsZ1View(APIView):
             sub = JUSubmittedZ1.objects.filter(
                 jig_completed_id=jig_completed_id, lot_id=lot_id
             ).order_by('-submitted_at').first()
+            # This lot's own record was created as a side-effect of an Add Model
+            # merge into a DIFFERENT jig — it has no trays of its own to scan.
+            is_already_loaded = bool(sub and sub.is_merged_additional)
             source_metadata = _jul_source_metadata_from_tray_data(sub.tray_data if sub else None)
             source_mappings = source_metadata.get('source_mappings', []) if isinstance(source_metadata, dict) else []
             restored_merged_lots = []
@@ -3041,6 +3165,7 @@ class GetUnloadModelsZ1View(APIView):
                 'tray_slots': tray_slots,
                 'is_unloaded': is_unloaded,
                 'is_draft': has_draft,
+                'is_already_loaded': is_already_loaded,
                 'is_submitted_lot': is_submitted_lot,
                 'submitted_data': submitted_data,
                 'images': images,
@@ -3077,24 +3202,18 @@ class GetUnloadModelsZ1View(APIView):
                     _info = f"+{m['qty']} from {m['lot_id']}"
                     primary['merged_info'] = (primary.get('merged_info', '') + '; ' + _info) if primary.get('merged_info') else _info
                     primary['qty'] += m['qty']
+                    # Recalculate the combined quantity from scratch so there is
+                    # never more than one partial (top) tray. Tray IDs already
+                    # scanned onto the existing slots are preserved in order.
                     _cap = primary['tray_capacity'] if primary['tray_capacity'] > 0 else 20
-                    _new_total = primary['qty']
-                    _num = math.ceil(_new_total / _cap) if _new_total > 0 else 1
-                    _rem = _new_total % _cap if _new_total % _cap != 0 else _cap
-                    primary['tray_slots'] = [
-                        {
-                            'slot': i + 1,
-                            'tray_id': '',
-                            'qty': _rem if i == 0 else _cap,
-                            'is_top_tray': i == 0,
-                            'editable_qty': i == 0,
-                        }
-                        for i in range(_num)
-                    ]
+                    primary['tray_slots'] = _jul_rebuild_tray_slots_z1(
+                        primary['qty'], _cap, primary['tray_slots']
+                    )
                     primary['num_trays'] = len(primary['tray_slots'])
                     # Combined entry counts as unloaded only once every merged lot is unloaded.
                     primary['is_unloaded'] = primary['is_unloaded'] and m['is_unloaded']
                     primary['is_draft'] = primary['is_draft'] or m['is_draft']
+                    primary['is_already_loaded'] = primary.get('is_already_loaded') or m.get('is_already_loaded', False)
                 else:
                     if _key:
                         _by_model_no[_key] = m
@@ -3156,9 +3275,20 @@ class GetUnloadModelsZ1View(APIView):
                 merged = False
                 for m in models_list:
                     if m['model_no'] == a_plating and a_plating:
-                        # MERGE: same plating_stk_no — ADD qty and recompute tray slots
-                        if add_jig_id and add_jig_id not in m['jig_id']:
-                            m['jig_id'] = m['jig_id'] + ', ' + add_jig_id
+                        # MERGE: same plating_stk_no — ADD qty and APPEND new tray slots.
+                        # Existing slots (in particular the already-scanned top tray) keep
+                        # their tray_id/qty exactly as-is — never rebuilt or rewritten,
+                        # since a scanned tray's recorded qty reflects real physical
+                        # contents, not a recomputed share of the new combined total.
+                        # The newly-added qty gets its own fresh slots placed AHEAD of the
+                        # existing ones (new lot on top, old lot pushed down); existing
+                        # slots are renumbered and demoted from "top" accordingly.
+                        # NOTE: m['jig_id'] itself is intentionally left untouched here —
+                        # the newly-added jig is tracked only in merged_lots (below), so
+                        # that if this merge is later undone via Remove, the base jig_id
+                        # display reverts correctly without needing to be un-concatenated.
+                        # The frontend renders the combined "JIG: X, Y" label by joining
+                        # m.jig_id with merged_lots entries flagged is_newly_added.
                         info = f'+{a_qty} from {add_jig_id}'
                         m.setdefault('merged_info', '')
                         m['merged_info'] = (m['merged_info'] + '; ' + info) if m['merged_info'] else info
@@ -3168,33 +3298,28 @@ class GetUnloadModelsZ1View(APIView):
                             'lot_id': a_lot_id,
                             'qty': a_qty,
                             'jig_id': add_jig_id,
+                            'is_newly_added': True,  # added in this Add Model action — safe to remove before save
                         })
-                        # ADD qty and recompute tray slots for the combined total
                         m['qty'] += a_qty
-                        _new_total = m['qty']
-                        _cap = m['tray_capacity'] if m['tray_capacity'] > 0 else 20
-                        _num = math.ceil(_new_total / _cap) if _new_total > 0 else 1
-                        _rem = _new_total % _cap if _new_total % _cap != 0 else _cap
-                        m['tray_slots'] = [
-                            {
-                                'slot': i + 1,
-                                'tray_id': '',
-                                'qty': _rem if i == 0 else _cap,
-                                'is_top_tray': i == 0,
-                                'editable_qty': i == 0,
-                            }
-                            for i in range(_num)
-                        ]
-                        m['num_trays'] = len(m['tray_slots'])
-                        # Preserve existing draft tray IDs — reuse for slots already scanned;
-                        # new slots (from merged qty) start empty.
+
+                        # Backfill tray_id onto the existing slots from submitted_data
+                        # (unchanged behaviour) before recalculating quantities.
                         _existing_tray_ids = {}
                         if m.get('submitted_data') and m['submitted_data'].get('tray_data'):
                             for _td in m['submitted_data']['tray_data']:
                                 _existing_tray_ids[_td['slot']] = _td.get('tray_id', '')
                         if _existing_tray_ids:
                             for _slot in m['tray_slots']:
-                                _slot['tray_id'] = _existing_tray_ids.get(_slot['slot'], '')
+                                if not _slot.get('tray_id'):
+                                    _slot['tray_id'] = _existing_tray_ids.get(_slot['slot'], '')
+
+                        # Give the newly-added lot its own fresh, blank tray slots
+                        # placed ahead of the existing ones (new lot on top, old lot
+                        # pushed down). Tray IDs never mingle between the two lots —
+                        # each lot's qty maps only to its own slots.
+                        _cap = m['tray_capacity'] if m['tray_capacity'] > 0 else 20
+                        m['tray_slots'] = _jul_prepend_new_lot_tray_slots_z1(a_qty, m['qty'], _cap, m['tray_slots'])
+                        m['num_trays'] = len(m['tray_slots'])
                         # Keep is_draft and submitted_data — openTrayScan will pre-fill from them
                         merged = True
                         break
@@ -3222,7 +3347,7 @@ class GetUnloadModelsZ1View(APIView):
                     a_rem = a_qty % a_cap if a_qty % a_cap != 0 else a_cap
                     a_tslots = [
                         {'slot': i + 1, 'tray_id': '', 'qty': a_rem if i == 0 else a_cap,
-                         'is_top_tray': i == 0, 'editable_qty': i == 0}
+                         'is_top_tray': i == 0, 'editable_qty': i == 0, 'is_newly_added_slot': True}
                         for i in range(a_ntrays)
                     ]
 
@@ -3239,14 +3364,22 @@ class GetUnloadModelsZ1View(APIView):
                         'tray_slots': a_tslots,
                         'is_unloaded': False,
                         'is_draft': False,
+                        'is_already_loaded': False,
                         'submitted_data': None,
                         'images': a_images,
                         'jig_id': add_jig_id,
                         'added_jig_completed_id': int(add_id),
                     })
 
-        # Sort: Draft first (0), Pending (1), Done/Unloaded (2) — ensures Add Model selection shows draft models first
-        models_list.sort(key=lambda m: (2 if m['is_unloaded'] else (0 if m['is_draft'] else 1)))
+        # Sort: models newly appended via this Add Model request always float to the
+        # top (regardless of status), so the user immediately sees what they just
+        # added above the existing/already-scanned rows. Within each of those two
+        # groups: Draft first (0), Pending (1), Done/Unloaded (2).
+        def _z1_model_sort_key(m):
+            is_newly_added = 0 if m.get('added_jig_completed_id') else 1
+            status_rank = 2 if m['is_unloaded'] else (0 if m['is_draft'] else 1)
+            return (is_newly_added, status_rank)
+        models_list.sort(key=_z1_model_sort_key)
 
         is_multi_model = len(models_list) > 1
         all_unloaded = all(m['is_unloaded'] for m in models_list) if models_list else False
@@ -3258,6 +3391,32 @@ class GetUnloadModelsZ1View(APIView):
             'is_multi_model': is_multi_model,
             'all_unloaded': all_unloaded,
         })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class RemoveMergedModelZ1View(APIView):
+    """
+    POST /api/remove_merged_model_z1/
+    Undo an Add Model merge before it is finalised. Deletes the JUSubmittedZ1
+    record created for the merged-in lot (jig_completed_id/lot_id) so that lot
+    stops showing as "Already Loaded" and becomes available again as an Add
+    Model candidate. Only ever deletes records explicitly flagged
+    is_merged_additional=True, so this can never touch a lot's own primary
+    unload record.
+    """
+    def post(self, request):
+        removed_jig_completed_id = request.data.get('removed_jig_completed_id')
+        removed_lot_id = request.data.get('removed_lot_id')
+        if not removed_jig_completed_id or not removed_lot_id:
+            return Response({'error': 'removed_jig_completed_id and removed_lot_id are required'}, status=400)
+
+        deleted_count, _ = JUSubmittedZ1.objects.filter(
+            jig_completed_id=removed_jig_completed_id,
+            lot_id=removed_lot_id,
+            is_merged_additional=True,
+        ).delete()
+
+        return Response({'success': True, 'removed': deleted_count})
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -3344,6 +3503,27 @@ class SaveModelUnloadZ1View(APIView):
                     'linked_lot': tray_conflict.get('linked_lot', ''),
                     'source': tray_conflict.get('source', ''),
                 }, status=400)
+
+            # Top tray ID is the primary identifier for a model's tray batch.
+            # find_jig_unload_tray_conflict() above exempts records that belong to the
+            # same lot family (allowed_lot_ids_for_trays), which is correct for cross-lot
+            # occupancy but leaves a gap when an "Add Model" merge places several models
+            # under the same jig_completed_id: a top tray already claimed by a sibling
+            # model in that same lot family would silently pass. Enforce uniqueness of the
+            # top tray explicitly across sibling models here.
+            if tray.get('is_top_tray'):
+                sibling_rows = JUSubmittedZ1.objects.filter(
+                    jig_completed_id=jig_completed_id
+                ).exclude(model_no=model_no).only('id', 'model_no', 'tray_data')
+                for sibling in sibling_rows:
+                    for s_tray in (sibling.tray_data or []):
+                        if not s_tray.get('is_top_tray'):
+                            continue
+                        if normalize_jig_unload_tray_id(s_tray.get('tray_id', '')) == tray_id:
+                            return Response({
+                                'error': f'Top tray ID "{tray_id}" is already the primary/top tray for '
+                                         f'model "{sibling.model_no}". Each model\'s top tray ID must be unique.'
+                            }, status=400)
 
         # Validate completed tray IDs against tray master (only for final save)
         if not is_draft:
@@ -3434,11 +3614,20 @@ class SaveModelUnloadZ1View(APIView):
                 'missing_qty': missing_qty,
                 'top_tray_remark': top_tray_remark,
                 'is_draft': is_draft,
+                'is_merged_additional': False,
                 'submitted_by': request.user if request.user.is_authenticated else None,
             }
         )
 
-        # Save records for merged lots (Add Model with same plating_stk_no)
+        # Save records for merged lots (Add Model with same plating_stk_no).
+        # These are NOT given the full combined tray_data — the physical trays
+        # were scanned against the primary model above, and belong there. Saving
+        # the same tray_data onto the merged lot's own record would leak those
+        # tray IDs into that lot's own unload screen if it is ever opened
+        # standalone (tray IDs would appear pre-filled for an unrelated lot).
+        # `is_merged_additional=True` marks this lot as already consumed via
+        # Add Model so it displays as "Already Loaded" and is hidden from future
+        # Add Model candidate lists.
         for ml in merged_lots:
             ml_jc_id = ml.get('jig_completed_id')
             ml_lot_id = ml.get('lot_id')
@@ -3456,11 +3645,12 @@ class SaveModelUnloadZ1View(APIView):
                         'tray_capacity': tray_capacity,
                         'tray_code': tray_code,
                         'tray_color': tray_color,
-                        'num_trays': len(tray_data),
-                        'tray_data': tray_data_with_sources,
-                        'missing_qty': missing_qty,
-                        'top_tray_remark': top_tray_remark,
+                        'num_trays': 0,
+                        'tray_data': [],
+                        'missing_qty': 0,
+                        'top_tray_remark': '',
                         'is_draft': is_draft,
+                        'is_merged_additional': True,
                         'submitted_by': request.user if request.user.is_authenticated else None,
                     }
                 )

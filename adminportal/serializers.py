@@ -125,10 +125,10 @@ class ModelImageSerializer(serializers.ModelSerializer):
     # This is now the canonical validation layer; the view-level check is left in
     # place as a defense-in-depth duplicate, not the source of truth.
     _ALLOWED_IMAGE_MIME = frozenset({
-        'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp',
+        'image/jpeg', 'image/png', 'image/gif',
     })
     _ALLOWED_IMAGE_EXT = frozenset({
-        '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp',
+        '.jpg', '.jpeg', '.png', '.gif',
     })
     # Dangerous intermediate extensions that must not appear anywhere in the filename
     _DANGEROUS_EXT = frozenset({
@@ -146,9 +146,6 @@ class ModelImageSerializer(serializers.ModelSerializer):
         'PNG': [b'\x89PNG\r\n\x1a\n'],
         'JPEG': [b'\xff\xd8\xff'],
         'GIF': [b'GIF87a', b'GIF89a'],
-        # WEBP: 'RIFF' at offset 0, 'WEBP' at offset 8. Checked separately below.
-        'WEBP': [b'RIFF'],
-        'BMP': [b'BM'],
     }
 
     # Maps each detected signature format to the extension(s) and MIME type
@@ -160,15 +157,11 @@ class ModelImageSerializer(serializers.ModelSerializer):
         'PNG': {'.png'},
         'JPEG': {'.jpg', '.jpeg'},
         'GIF': {'.gif'},
-        'WEBP': {'.webp'},
-        'BMP': {'.bmp'},
     }
     _FORMAT_TO_MIME = {
         'PNG': 'image/png',
         'JPEG': 'image/jpeg',
         'GIF': 'image/gif',
-        'WEBP': 'image/webp',
-        'BMP': 'image/bmp',
     }
 
     class Meta:
@@ -201,24 +194,16 @@ class ModelImageSerializer(serializers.ModelSerializer):
         is_png = header.startswith(cls._IMAGE_SIGNATURES['PNG'][0])
         is_jpeg = header.startswith(cls._IMAGE_SIGNATURES['JPEG'][0])
         is_gif = any(header.startswith(sig) for sig in cls._IMAGE_SIGNATURES['GIF'])
-        is_bmp = header.startswith(cls._IMAGE_SIGNATURES['BMP'][0])
-        # WEBP container: 'RIFF' at offset 0, then a 4-byte size field, then 'WEBP' at offset 8.
-        is_webp = header.startswith(cls._IMAGE_SIGNATURES['WEBP'][0]) and header[8:12] == b'WEBP'
-
         if is_png:
             return 'PNG', None
         if is_jpeg:
             return 'JPEG', None
         if is_gif:
             return 'GIF', None
-        if is_webp:
-            return 'WEBP', None
-        if is_bmp:
-            return 'BMP', None
 
         return None, (
             'File content does not match a recognized image format '
-            '(PNG, JPEG, GIF, WEBP, BMP). The file may be corrupted or '
+            '(PNG, JPEG, GIF). The file may be corrupted or '
             'not a genuine image.'
         )
 
@@ -282,7 +267,7 @@ class ModelImageSerializer(serializers.ModelSerializer):
 
         if ext not in self._ALLOWED_IMAGE_EXT:
             raise serializers.ValidationError(
-                f'File extension "{ext}" is not allowed. Allowed: jpg, jpeg, png, gif, webp, bmp.'
+                f'File extension "{ext}" is not allowed. Allowed: jpg, jpeg, png, gif.'
             )
 
         content_type = getattr(value, 'content_type', '') or ''

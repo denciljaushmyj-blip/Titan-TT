@@ -128,6 +128,52 @@ def is_tray_rejected_in_input_screening(tray_id):
     return False
 
 
+def _snapshot_has_tray(snapshot_data, tid):
+    if not snapshot_data:
+        return False
+    for tray in snapshot_data.get("trays") or []:
+        if _norm_tray_id(tray.get("tray_id")) == tid and _safe_int(tray.get("qty")) > 0:
+            return True
+    return False
+
+
+def is_tray_rejected_in_brass_qc(tray_id):
+    """
+    Return True when this tray was rejected during Brass QC processing and has
+    not since been released/delinked for reuse.
+
+    Brass QC does not flag rejected trays on a live tray table (rejected trays
+    are recorded only inside Brass_QC_Submission's reject snapshots and the
+    BrassQC_PartialRejectLot snapshot), so those snapshots are the source of
+    truth here — a downstream module like Brass Audit must check them before
+    letting a scanned tray_id be accepted.
+    """
+    from ..models import Brass_QC_Submission, BrassQC_PartialRejectLot
+
+    tid = _norm_tray_id(tray_id)
+    if not tid:
+        return False
+    if is_tray_released_for_reuse(tid):
+        return False
+
+    for submission in Brass_QC_Submission.objects.exclude(
+        full_reject_data__isnull=True, partial_reject_data__isnull=True
+    ).only("full_reject_data", "partial_reject_data"):
+        if _snapshot_has_tray(submission.full_reject_data, tid):
+            return True
+        if _snapshot_has_tray(submission.partial_reject_data, tid):
+            return True
+
+    for reject_lot in BrassQC_PartialRejectLot.objects.exclude(
+        trays_snapshot__isnull=True
+    ).only("trays_snapshot"):
+        for tray in reject_lot.trays_snapshot or []:
+            if _norm_tray_id(tray.get("tray_id")) == tid and _safe_int(tray.get("qty")) > 0:
+                return True
+
+    return False
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Submission validators
 # ─────────────────────────────────────────────────────────────────────────────
@@ -287,6 +333,21 @@ def validate_tray_not_rejected_in_is(tray_id):
     if is_tray_rejected_in_input_screening(tray_id):
         return (
             "Tray was rejected in Input Screening - permanently ineligible for reuse"
+        )
+    return None
+
+
+def validate_tray_not_rejected_in_brass_qc(tray_id):
+    """
+    Returns error string if tray was rejected in Brass QC.
+    Returns None if tray is eligible.
+
+    Covers Brass_QC_Submission reject snapshots and BrassQC_PartialRejectLot
+    snapshots — the only places Brass QC records a rejected tray_id.
+    """
+    if is_tray_rejected_in_brass_qc(tray_id):
+        return (
+            "Tray was rejected in Brass QC - permanently ineligible for reuse"
         )
     return None
 

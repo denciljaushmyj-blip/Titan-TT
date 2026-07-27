@@ -11,6 +11,7 @@ import logging
 import math
 
 from django.db.models import OuterRef, Subquery, Exists, F, Q
+from django.db.models.functions import Coalesce
 from django.templatetags.static import static
 
 from modelmasterapp.models import TotalStockModel, ModelMasterCreation
@@ -143,10 +144,14 @@ def get_completed_base_queryset(from_datetime, to_datetime):
         )
     )
 
-    # Dynamic stage: for PARTIAL split parents, follow the accepted child lot's live stage
+    # Dynamic stage: for PARTIAL split parents, follow the accepted child lot's live stage.
+    # Prefer the child's current_stage SSOT (kept up to date by every downstream module),
+    # falling back to next_process_module/last_process_module for legacy rows that predate it.
     child_accept_stage_subquery = TotalStockModel.objects.filter(
         lot_id=OuterRef('brass_qc_transition_accept_lot_id')
-    ).values('next_process_module')[:1]
+    ).annotate(
+        _live_stage=Coalesce('current_stage', 'next_process_module', 'last_process_module')
+    ).values('_live_stage')[:1]
 
     # Has the child accept lot (PARTIAL) actually been worked on in Brass Audit?
     child_brass_audit_active_subquery = Exists(

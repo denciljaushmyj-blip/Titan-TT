@@ -1382,7 +1382,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     // Find the "Lot Status" td — it contains the Yet to Start / Draft pill
                     var tds = row.querySelectorAll("td");
                     for (var i = 0; i < tds.length; i++) {
-                      if (tds[i].textContent.trim().match(/Yet to Start|Draft|On Hold/)) return tds[i];
+                      if (tds[i].textContent.trim().match(/Yet to Start|Draft|In Progress|On Hold/)) return tds[i];
                     }
                     return null;
                   })();
@@ -1471,9 +1471,16 @@ document.addEventListener("DOMContentLoaded", function () {
       cell.innerHTML = "";
       cell.appendChild(pill);
     }
-    pill.style.fontSize = label === "Draft" ? "12px" : "13px";
+    pill.style.fontSize = label === "Yet to Start" ? "13px" : "12px";
     pill.style.whiteSpace = "nowrap";
     pill.style.padding = "5px";
+    if (label === "In Progress") {
+      pill.style.border = "1px solid #0c8249";
+      pill.style.backgroundColor = "#d7f2e3";
+      pill.style.color = "#0c5c33";
+      pill.textContent = "In Progress";
+      return;
+    }
     if (label === "Draft") {
       pill.style.border = "1px solid #4997ac";
       pill.style.backgroundColor = "#d1f2f3";
@@ -1502,7 +1509,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var partial = state === "partial_verified";
     var actionsEnabled = rowUi.actions_enabled !== undefined ? !!rowUi.actions_enabled : complete;
     var qState = rowUi.process_q_state || (complete ? "complete" : partial ? "partial" : "pending");
-    var lotStatusLabel = rowUi.lot_status_label || (partial ? "Draft" : "Yet to Start");
+    var lotStatusLabel = rowUi.lot_status_label || (complete ? "In Progress" : partial ? "Draft" : "Yet to Start");
     var currentStageLabel = rowUi.current_stage_label || (complete ? "Input Screening" : "");
 
     tvmFindPickTableRows(lotId).forEach(function (row) {
@@ -1530,7 +1537,7 @@ document.addEventListener("DOMContentLoaded", function () {
       row_ui: {
         verification_state: enable ? "all_verified" : "not_started",
         process_q_state: enable ? "complete" : "pending",
-        lot_status_label: "Yet to Start",
+        lot_status_label: enable ? "In Progress" : "Yet to Start",
         current_stage_label: enable ? "Input Screening" : "",
         actions_enabled: !!enable,
       },
@@ -1915,6 +1922,11 @@ document.addEventListener("DOMContentLoaded", function () {
             document.dispatchEvent(new CustomEvent("inputScreening:globalScanVerification", {
               detail: { status: "already_verified", tray_id: trayId, lot_id: lotId }
             }));
+            // Pick-table row may not have been repainted yet (e.g. modal
+            // reopened without a full page reload) - sync it from backend now.
+            if (data.all_verified) {
+              isEnableActionButtons(window._tvmCurrentLotId, true);
+            }
             // Auto-select input for already verified trays
             setTimeout(function () {
               tvmFocusScanInput(true);

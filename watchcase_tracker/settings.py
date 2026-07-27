@@ -276,7 +276,22 @@ CACHES = {
         'OPTIONS': {
             'MAX_ENTRIES': 2000,
         },
-    }
+    },
+    # Permission-critical cache (is_admin / user groups / allowed modules —
+    # adminportal.services). LocMemCache is per-worker-process: under the
+    # IIS deployment (multiple worker processes, no shared memory) a cache
+    # invalidation performed by the worker handling an admin's group/role
+    # edit never reaches the OTHER worker processes, which keep serving a
+    # stale is_admin value to the affected user for up to USER_MODULE_CACHE_TTL
+    # (5 min) — surfacing as the header Settings icon disappearing until the
+    # user fully logs out and back in. DatabaseCache is shared by every
+    # worker process (backed by Postgres, the existing DB), so an
+    # invalidation from any process is immediately visible to all others.
+    'permissions': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'ttt_permissions_cache',
+        'TIMEOUT': 300,
+    },
 }
 
 # cached_db reads the session from the in-process cache on warm hits,

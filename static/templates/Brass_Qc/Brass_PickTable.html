@@ -2,6 +2,27 @@
 {% load stock_filters %} 
 
 <style nonce="{{ csp_nonce }}">
+.model-image-tooltip .img-gallery img,
+.model-preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.model-image-loading,
+.model-image-unavailable {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+  background: #fff;
+  border-radius: 6px;
+}
 /* ========== Tablet override â€” paste at file end (after other table styles) ========== */
 /* --- Tablet: freeze first 3 columns consistently with desktop --- */
 @media (pointer: coarse) and (min-width: 680px) and (max-width: 1400px) {
@@ -1056,7 +1077,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                           <button class="info-btn" style="position:absolute; top:8px; left:8px;">Info</button>
                           <button class="img-scroll-left" style="display:none; background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
                           <div class="img-gallery" style="display: flex; justify-content:center; align-items:center; gap: 6px; overflow: hidden; width: 180px; min-height: 130px;">
-  <span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>
+  <div class="model-image-loading">Loading...</div>
 </div>
                           <button class="img-scroll-right" style="display:none; background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
                         </div>
@@ -2332,7 +2353,27 @@ document.addEventListener('DOMContentLoaded', function() {
       if (modalModelNo) modalModelNo.textContent = modelNo || '—';
       if (modalLotQty) modalLotQty.textContent = totalBatchQty;
       if (modalMissingQty) modalMissingQty.textContent = brassMissingQty;
-      if (modelImg && modelImage) modelImg.src = modelImage;
+
+      // Clear any previously-loaded row's image before showing this row's image,
+      // and normalize IIS/loopback URLs (127.0.0.1/localhost/::1) to relative paths.
+      if (modelImg) {
+        if (!modelImg.dataset.defaultSrc) {
+          modelImg.dataset.defaultSrc = modelImg.getAttribute('src') || '';
+        }
+        modelImg.onerror = null;
+        modelImg.src = modelImg.dataset.defaultSrc;
+
+        const normalize = window.normalizeStockImageUrl || function (u) { return u || ''; };
+        const normalizedImageUrl = normalize(modelImage);
+
+        if (normalizedImageUrl) {
+          modelImg.onerror = function () {
+            modelImg.onerror = null;
+            modelImg.src = modelImg.dataset.defaultSrc;
+          };
+          modelImg.src = normalizedImageUrl;
+        }
+      }
 
       // Hide validate/redo buttons (view-only mode)
       const validateBtn = document.getElementById('trayValidateBtn');
@@ -3974,28 +4015,15 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- bfcache + shortcut handlers moved to brass_qc_shortcuts.js -->
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
-  const triggers = Array.from(
-    document.querySelectorAll(
-      ".model-hover-trigger[data-plating-stk-no]"
-    )
-  );
+  const stockPreviewCache = Object.create(null);
+  const stockPreviewPending = Object.create(null);
+  const hoverTimers = new WeakMap();
+  const HOVER_DELAY_MS = 150;
+  const HIDE_DELAY_MS = 180;
+  const PREVIEW_TIMEOUT_MS = 8000;
 
-  if (!triggers.length) return;
-
-  const previewCache = new Map();
-  const requestCache = new Map();
-
-  let activeTrigger = null;
+  let openTooltip = null;
   let pinnedTrigger = null;
-  let hideTimer = null;
-
-  function getStockNo(trigger) {
-    return String(
-      trigger && trigger.dataset
-        ? trigger.dataset.platingStkNo || ""
-        : ""
-    ).trim();
-  }
 
   function getTooltip(trigger) {
     return trigger
@@ -4008,51 +4036,61 @@ document.addEventListener("DOMContentLoaded", function () {
     return tooltip ? tooltip.querySelector(".img-gallery") : null;
   }
 
-  function normalizeImageUrl(rawUrl) {
+  function getStockNo(trigger) {
+    return String(trigger && trigger.dataset ? trigger.dataset.platingStkNo || "" : "").trim();
+  }
+
+  function normalizeStockImageUrl(rawUrl) {
     const value = String(rawUrl || "").trim();
     if (!value) return "";
 
     try {
       const parsed = new URL(value, window.location.origin);
+      const hostname = String(parsed.hostname || "").toLowerCase();
+      const isLoopbackHost = hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1" || hostname === "[::1]";
+      const isApplicationAsset = parsed.pathname.startsWith("/media/") || parsed.pathname.startsWith("/static/");
 
-      // Force application media/static files to use the server currently
-      // opened in the browser. This fixes localhost, internal-IP,
-      // wrong-host and HTTP/HTTPS URL mismatches.
-      if (
-        parsed.pathname.startsWith("/media/") ||
-        parsed.pathname.startsWith("/static/")
-      ) {
+      if (parsed.origin === window.location.origin || (isLoopbackHost && isApplicationAsset)) {
         return parsed.pathname + parsed.search + parsed.hash;
       }
 
       return parsed.href;
     } catch (error) {
-      if (value.startsWith("media/") || value.startsWith("static/")) {
-        return "/" + value;
-      }
       return value;
     }
+  }
+
+  window.normalizeStockImageUrl = normalizeStockImageUrl;
+
+  function getDefaultVisualAidUrl(stockNo) {
+    return "/adminportal/dp_visualaid/?plating_stk_no=" + encodeURIComponent(stockNo);
+  }
+
+  function setTriggerVisualAidUrl(trigger, stockNo, payload) {
+    if (!trigger || !stockNo) return;
+    trigger.dataset.visualAidUrl = payload && payload.visual_aid_url
+      ? payload.visual_aid_url
+      : getDefaultVisualAidUrl(stockNo);
   }
 
   function renderLoading(trigger) {
     const gallery = getGallery(trigger);
     if (!gallery) return;
-
-    gallery.innerHTML =
-      '<span style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
+    gallery.replaceChildren();
+    const loading = document.createElement("div");
+    loading.className = "model-image-loading";
+    loading.textContent = "Loading...";
+    gallery.appendChild(loading);
   }
 
-  function renderMessage(trigger, message) {
+  function renderUnavailable(trigger, message) {
     const gallery = getGallery(trigger);
     if (!gallery) return;
-
-    gallery.textContent = "";
-
-    const messageElement = document.createElement("span");
-    messageElement.textContent = message;
-    messageElement.style.cssText =
-      "font-size:12px;color:#777;text-align:center;padding:12px;";
-    gallery.appendChild(messageElement);
+    gallery.replaceChildren();
+    const unavailable = document.createElement("div");
+    unavailable.className = "model-image-unavailable";
+    unavailable.textContent = message || "Image unavailable";
+    gallery.appendChild(unavailable);
   }
 
   function renderPreview(trigger, payload) {
@@ -4060,17 +4098,18 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!gallery) return;
 
     const rawUrl = payload && payload.preview_image;
-    const imageUrl = normalizeImageUrl(rawUrl);
+    const imageUrl = normalizeStockImageUrl(rawUrl);
 
     if (!imageUrl) {
-      renderMessage(trigger, "Image unavailable");
+      renderUnavailable(trigger, "Image unavailable");
       return;
     }
 
-    gallery.textContent = "";
+    gallery.replaceChildren();
 
     const image = document.createElement("img");
-    image.alt = "Model IV preview";
+    image.className = "model-preview-image";
+    image.alt = payload && payload.preview_view ? payload.preview_view : "Model image preview";
     image.loading = "eager";
     image.decoding = "async";
     image.style.cssText =
@@ -4078,61 +4117,66 @@ document.addEventListener("DOMContentLoaded", function () {
       "border-radius:6px;background:#fff;display:block;";
 
     image.addEventListener("error", function () {
-      console.error(
-        "[Brass QC] Preview image failed:",
-        rawUrl,
-        "Normalized URL:",
-        imageUrl
-      );
-      renderMessage(trigger, "Image could not be loaded");
+      renderUnavailable(trigger, "Image unavailable");
     });
 
     gallery.appendChild(image);
     image.src = imageUrl;
   }
 
-  function requestPreview(stockNo) {
-    if (previewCache.has(stockNo)) {
-      return Promise.resolve(previewCache.get(stockNo));
-    }
-
-    if (requestCache.has(stockNo)) {
-      return requestCache.get(stockNo);
-    }
-
+  function fetchWithTimeout(url, options, timeoutMs) {
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(function () {
+    const timer = window.setTimeout(function () {
       controller.abort();
-    }, 10000);
+    }, timeoutMs);
 
-    const request = fetch(
+    return fetch(url, Object.assign({}, options, { signal: controller.signal }))
+      .finally(function () {
+        window.clearTimeout(timer);
+      });
+  }
+
+  function requestPreview(stockNo) {
+    if (stockPreviewCache[stockNo]) {
+      return Promise.resolve(stockPreviewCache[stockNo]);
+    }
+
+    if (stockPreviewPending[stockNo]) {
+      return stockPreviewPending[stockNo];
+    }
+
+    const request = fetchWithTimeout(
       "/adminportal/api/model-hover-preview/?stock_no=" +
-        encodeURIComponent(stockNo),
+        encodeURIComponent(stockNo) +
+        "&_ts=" +
+        Date.now(),
       {
+        method: "GET",
+        credentials: "same-origin",
         headers: {
           "Accept": "application/json",
           "X-Requested-With": "XMLHttpRequest"
         },
-        credentials: "same-origin",
-        signal: controller.signal
-      }
+        cache: "no-store"
+      },
+      PREVIEW_TIMEOUT_MS
     )
       .then(function (response) {
         if (!response.ok) {
-          throw new Error("HTTP " + response.status);
+          throw new Error("Preview request failed");
         }
         return response.json();
       })
       .then(function (payload) {
-        previewCache.set(stockNo, payload);
+        payload.preview_image = normalizeStockImageUrl(payload.preview_image);
+        stockPreviewCache[stockNo] = payload;
         return payload;
       })
       .finally(function () {
-        window.clearTimeout(timeoutId);
-        requestCache.delete(stockNo);
+        delete stockPreviewPending[stockNo];
       });
 
-    requestCache.set(stockNo, request);
+    stockPreviewPending[stockNo] = request;
     return request;
   }
 
@@ -4140,35 +4184,32 @@ document.addEventListener("DOMContentLoaded", function () {
     const stockNo = getStockNo(trigger);
 
     if (!stockNo) {
-      renderMessage(trigger, "Stock number unavailable");
+      renderUnavailable(trigger, "Stock number unavailable");
       return;
     }
 
-    if (previewCache.has(stockNo)) {
-      renderPreview(trigger, previewCache.get(stockNo));
+    setTriggerVisualAidUrl(trigger, stockNo);
+
+    if (stockPreviewCache[stockNo]) {
+      const cached = stockPreviewCache[stockNo];
+      setTriggerVisualAidUrl(trigger, stockNo, cached);
+      renderPreview(trigger, cached);
       return;
     }
 
+    const requestId = String(Date.now()) + Math.random().toString(36).slice(2);
+    trigger.dataset.stockPreviewRequestId = requestId;
     renderLoading(trigger);
 
     requestPreview(stockNo)
       .then(function (payload) {
-        // Always finish the tooltip that initiated the request. This avoids
-        // leaving it permanently on Loading when the pointer moves away.
+        if (trigger.dataset.stockPreviewRequestId !== requestId) return;
+        setTriggerVisualAidUrl(trigger, stockNo, payload);
         renderPreview(trigger, payload);
       })
-      .catch(function (error) {
-        console.error(
-          "[Brass QC] Model preview request failed:",
-          stockNo,
-          error
-        );
-
-        if (error && error.name === "AbortError") {
-          renderMessage(trigger, "Image request timed out");
-        } else {
-          renderMessage(trigger, "Image unavailable");
-        }
+      .catch(function () {
+        if (trigger.dataset.stockPreviewRequestId !== requestId) return;
+        renderUnavailable(trigger, "Image unavailable");
       });
   }
 
@@ -4196,9 +4237,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function clearHoverTimer(trigger) {
+    const timer = hoverTimers.get(trigger);
+    if (timer) {
+      window.clearTimeout(timer);
+      hoverTimers.delete(trigger);
+    }
+  }
+
   function closeTrigger(trigger, force) {
     if (!trigger) return;
     if (!force && pinnedTrigger === trigger) return;
+
+    clearHoverTimer(trigger);
 
     const tooltip = getTooltip(trigger);
 
@@ -4218,26 +4269,32 @@ document.addEventListener("DOMContentLoaded", function () {
     trigger.style.backgroundColor = "";
     trigger.style.borderRadius = "";
 
-    if (activeTrigger === trigger) activeTrigger = null;
+    if (openTooltip === tooltip) openTooltip = null;
     if (force && pinnedTrigger === trigger) pinnedTrigger = null;
   }
 
-  function closeOthers(currentTrigger) {
-    triggers.forEach(function (trigger) {
+  function closeOthers(currentTrigger, force) {
+    document.querySelectorAll(".model-hover-trigger[data-plating-stk-no]").forEach(function (trigger) {
       if (trigger !== currentTrigger) {
-        closeTrigger(trigger, true);
+        closeTrigger(trigger, force !== false);
       }
     });
   }
 
-  function openTrigger(trigger) {
-    window.clearTimeout(hideTimer);
-    closeOthers(trigger);
+  function openTrigger(trigger, pinned) {
+    clearHoverTimer(trigger);
+    closeOthers(trigger, true);
 
     const tooltip = getTooltip(trigger);
     if (!tooltip) return;
 
-    activeTrigger = trigger;
+    openTooltip = tooltip;
+    if (pinned) {
+      pinnedTrigger = trigger;
+      trigger.style.backgroundColor = "#e3f2fd";
+      trigger.style.borderRadius = "4px";
+      tooltip.classList.add("pinned");
+    }
 
     tooltip.classList.add("is-visible");
     tooltip.style.display = "flex";
@@ -4254,108 +4311,81 @@ document.addEventListener("DOMContentLoaded", function () {
     loadPreview(trigger);
   }
 
-  triggers.forEach(function (trigger) {
-    const tooltip = getTooltip(trigger);
+  function scheduleOpen(trigger) {
+    if (!trigger || pinnedTrigger === trigger) return;
+    clearHoverTimer(trigger);
+    hoverTimers.set(trigger, window.setTimeout(function () {
+      openTrigger(trigger, false);
+    }, HOVER_DELAY_MS));
+  }
 
-    if (!tooltip || trigger.dataset.brassHoverBound === "1") {
+  function scheduleClose(trigger) {
+    if (!trigger || pinnedTrigger === trigger) return;
+    clearHoverTimer(trigger);
+    hoverTimers.set(trigger, window.setTimeout(function () {
+      if (pinnedTrigger !== trigger && !trigger.matches(":hover")) {
+        closeTrigger(trigger, false);
+      }
+    }, HIDE_DELAY_MS));
+  }
+
+  function getTriggerFromEvent(event) {
+    if (!event.target || typeof event.target.closest !== "function") return null;
+    return event.target.closest(".model-hover-trigger[data-plating-stk-no]");
+  }
+
+  document.addEventListener("mouseover", function (event) {
+    const trigger = getTriggerFromEvent(event);
+    if (!trigger) return;
+    const related = event.relatedTarget;
+    if (related && trigger.contains(related)) return;
+    scheduleOpen(trigger);
+  });
+
+  document.addEventListener("mouseout", function (event) {
+    const trigger = getTriggerFromEvent(event);
+    if (!trigger) return;
+    const related = event.relatedTarget;
+    if (related && trigger.contains(related)) return;
+    scheduleClose(trigger);
+  });
+
+  document.addEventListener("click", function (event) {
+    const clickTarget = event.target && typeof event.target.closest === "function" ? event.target : null;
+    if (!clickTarget) return;
+
+    const closeButton = clickTarget.closest(".model-image-tooltip .close-btn");
+    if (closeButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeTrigger(closeButton.closest(".model-hover-trigger"), true);
       return;
     }
 
-    trigger.dataset.brassHoverBound = "1";
-
-    const infoButton = tooltip.querySelector(".info-btn");
-    const closeButton = tooltip.querySelector(".close-btn");
-
-    if (infoButton) infoButton.style.display = "none";
-    if (closeButton) closeButton.style.display = "none";
-
-    trigger.addEventListener("mouseenter", function () {
-      if (pinnedTrigger !== trigger) {
-        openTrigger(trigger);
-      }
-    });
-
-    trigger.addEventListener("mouseleave", function () {
-      hideTimer = window.setTimeout(function () {
-        if (
-          pinnedTrigger !== trigger &&
-          !trigger.matches(":hover") &&
-          !tooltip.matches(":hover")
-        ) {
-          closeTrigger(trigger, false);
-        }
-      }, 180);
-    });
-
-    tooltip.addEventListener("mouseenter", function () {
-      window.clearTimeout(hideTimer);
-    });
-
-    tooltip.addEventListener("mouseleave", function () {
-      hideTimer = window.setTimeout(function () {
-        if (
-          pinnedTrigger !== trigger &&
-          !trigger.matches(":hover") &&
-          !tooltip.matches(":hover")
-        ) {
-          closeTrigger(trigger, false);
-        }
-      }, 180);
-    });
-
-    trigger.addEventListener("click", function (event) {
-      if (
-        event.target.closest(".info-btn") ||
-        event.target.closest(".close-btn")
-      ) {
-        return;
-      }
-
+    const infoButton = clickTarget.closest(".model-image-tooltip .info-btn");
+    if (infoButton) {
       event.preventDefault();
       event.stopPropagation();
+      const trigger = infoButton.closest(".model-hover-trigger");
+      const stockNo = getStockNo(trigger);
+      if (!stockNo) return;
+      window.location.href = trigger.dataset.visualAidUrl || getDefaultVisualAidUrl(stockNo);
+      return;
+    }
 
+    const trigger = getTriggerFromEvent(event);
+    if (trigger) {
+      event.preventDefault();
+      event.stopPropagation();
       if (pinnedTrigger === trigger) {
         closeTrigger(trigger, true);
         return;
       }
-
-      closeOthers(trigger);
-      pinnedTrigger = trigger;
-      trigger.style.backgroundColor = "#e3f2fd";
-      trigger.style.borderRadius = "4px";
-      tooltip.classList.add("pinned");
-      openTrigger(trigger);
-    });
-
-    if (infoButton) {
-      infoButton.addEventListener("click", function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const stockNo = getStockNo(trigger);
-        if (!stockNo) return;
-
-        window.location.href =
-          "/adminportal/dp_visualaid/?plating_stk_no=" +
-          encodeURIComponent(stockNo);
-      });
+      openTrigger(trigger, true);
+      return;
     }
 
-    if (closeButton) {
-      closeButton.addEventListener("click", function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        closeTrigger(trigger, true);
-      });
-    }
-  });
-
-  document.addEventListener("click", function (event) {
-    if (
-      pinnedTrigger &&
-      !event.target.closest(".model-image-tooltip") &&
-      !event.target.closest(".model-hover-trigger")
-    ) {
+    if (pinnedTrigger && !clickTarget.closest(".model-image-tooltip")) {
       closeTrigger(pinnedTrigger, true);
     }
   });

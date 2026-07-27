@@ -960,6 +960,28 @@ html.ttt-viewport-tablet #trayScanModal #trayScanDetails input::placeholder {
   opacity: 1 !important;
 }
 
+.model-image-tooltip .img-gallery img,
+.model-preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.model-image-loading,
+.model-image-unavailable {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+  background: #fff;
+  border-radius: 6px;
+}
+
 html.ttt-viewport-tablet #trayScanModal,
 html.ttt-viewport-tablet #trayScanModal .tray-scan-modal-content,
 html.ttt-viewport-tablet #trayScanModal .tray-scan-modal-content :is(h1, h2, h3, h4, h5, h6, p, span, div, label, button, input, textarea, select, .btn, .form-control) {
@@ -1215,8 +1237,7 @@ html.ttt-viewport-tablet #trayScanModal .tray-scan-modal-content :is(h1, h2, h3,
             <button class="info-btn" style="position:absolute; top:8px; left:8px;">Info</button>
             <button class="img-scroll-left" style="display:none; background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
             <div class="img-gallery" style="display: flex; justify-content:center; gap: 6px; overflow: hidden; width: 180px;">
-              <img src="{{ data.model_images.0|default:'/static/assets/images/imagePlaceholder.jpg' }}" 
-              style="width: 120px; height: 120px; object-fit: contain; object-position: center; border-radius: 6px; background:#fff;" />
+              <div class="model-image-loading">Loading...</div>
             </div>
 
             <button class="img-scroll-right" style="display:none; background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
@@ -1265,7 +1286,6 @@ html.ttt-viewport-tablet #trayScanModal .tray-scan-modal-content :is(h1, h2, h3,
              data-top-tray-qty-verified="{{ data.top_tray_qty_verified }}" 
              data-draft-saved="{{data.Draft_Saved}}"
              data-total-batch-quantity="{{ data.total_batch_quantity|default:'0' }}"
-             data-model-image="{{ data.model_images.0|default:'' }}"
              data-needs-top-tray-scan="{{ data.needs_top_tray_scan|yesno:'true,false' }}"
              data-tray-scan-status="{{ data.tray_scan_status|yesno:'true,false' }}"
              data-tray-type="{{ data.tray_type }}">
@@ -1473,7 +1493,8 @@ html.ttt-viewport-tablet #trayScanModal .tray-scan-modal-content :is(h1, h2, h3,
 <!-- New top header container: title + user profile aligned left -->
 <!-- Header Section -->
     <div class="modal-top-header" style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-      <img src="/static/assets/images/imagePlaceholder.jpg" alt="User Profile" style="border-radius: 50%; width: 44px; height: 44px; object-fit: cover;" />
+      <div class="model-image-unavailable model-preview-state" style="width:44px;height:44px;border-radius:50%;font-size:10px;display:none;">Image unavailable</div>
+      <img class="model-preview-image" alt="Model preview" style="border-radius: 50%; width: 44px; height: 44px; object-fit: contain; display:none; background:#fff;" />
       
       <div style="font-weight: 600; color: #222; font-size: 14px; display: flex; gap: 8px; align-items: center;">
         <span>Plating Stk No:</span>
@@ -3801,6 +3822,38 @@ const table = document.getElementById("order-listing");
     });
 </script>
 
+<script nonce="{{ csp_nonce }}">
+function normalizeStockImageUrl(rawUrl) {
+  const value = String(rawUrl || "").trim();
+  if (!value) return "";
+
+  try {
+    const parsed = new URL(value, window.location.origin);
+    const hostname = String(parsed.hostname || "").toLowerCase();
+    const isLoopbackHost =
+      hostname === "127.0.0.1" ||
+      hostname === "localhost" ||
+      hostname === "::1" ||
+      hostname === "[::1]";
+    const isApplicationAsset =
+      parsed.pathname.startsWith("/media/") ||
+      parsed.pathname.startsWith("/static/");
+
+    // Application media/static URLs are safer as relative paths behind IIS/reverse proxy.
+    if (
+      parsed.origin === window.location.origin ||
+      (isLoopbackHost && isApplicationAsset)
+    ) {
+      return parsed.pathname + parsed.search + parsed.hash;
+    }
+
+    return parsed.href;
+  } catch (error) {
+    return value;
+  }
+}
+</script>
+
   <!-- Script for Tray Scan - Modal Popup -->
 <script nonce="{{ csp_nonce }}">
 // ===== CROSS-BROWSER AUTO-SAVE FUNCTIONALITY =====
@@ -4843,14 +4896,57 @@ document.addEventListener("click", async function(event) {
 </span>
   `;
 })();
-        // Update model image
+        // Update model image from the shared dynamic resolver only.
         const modalUserImg = modal.querySelector('.modal-top-header img');
-        const modelImage = link.getAttribute('data-model-image');
+        const modalImageState = modal.querySelector('.modal-top-header .model-preview-state');
         if (modalUserImg) {
-            if (modelImage) {
-                modalUserImg.src = modelImage;
-            } else {
-                modalUserImg.src = "/static/assets/images/imagePlaceholder.jpg";
+            modalUserImg.removeAttribute('src');
+            modalUserImg.style.display = 'none';
+        }
+        if (modalImageState) {
+            modalImageState.textContent = 'Loading...';
+            modalImageState.style.display = 'flex';
+        }
+        if (modalUserImg && platingStkNo) {
+            try {
+                const imageResp = await fetch(
+                    `/adminportal/api/model-hover-preview/?stock_no=${encodeURIComponent(platingStkNo)}`,
+                    {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    }
+                );
+                if (!imageResp.ok) {
+                    throw new Error('Image preview request failed');
+                }
+                const imagePayload = await imageResp.json();
+                const imageUrl = normalizeStockImageUrl(
+                    imagePayload && imagePayload.preview_image
+                );
+                if (!imageUrl) {
+                    throw new Error('No preview image returned');
+                }
+
+                modalUserImg.src = imageUrl;
+                modalUserImg.style.display = 'block';
+                if (modalImageState) modalImageState.style.display = 'none';
+                modalUserImg.addEventListener('error', function () {
+                    modalUserImg.removeAttribute('src');
+                    modalUserImg.style.display = 'none';
+                    if (modalImageState) {
+                        modalImageState.textContent = 'Image unavailable';
+                        modalImageState.style.display = 'flex';
+                    }
+                }, { once: true });
+            } catch (error) {
+                modalUserImg.removeAttribute('src');
+                modalUserImg.style.display = 'none';
+                if (modalImageState) {
+                    modalImageState.textContent = 'Image unavailable';
+                    modalImageState.style.display = 'flex';
+                }
             }
         }
 
@@ -6412,25 +6508,24 @@ console.log('✅ Enhanced tray scan modal with dynamic row management loaded');
    document.addEventListener("DOMContentLoaded", function () {
      let openTooltip = null;
      const stockPreviewCache = {};
-     const stockPreviewPlaceholder = "{% static 'assets/images/imagePlaceholder.jpg' %}";
 
 
-     function normalizeStockImageUrl(rawUrl) {
-       const value = String(rawUrl || "").trim();
-       if (!value) return "";
+     function renderImageUnavailableState(gallery) {
+       if (!gallery) return;
+       gallery.replaceChildren();
+       const unavailableText = document.createElement("div");
+       unavailableText.className = "model-image-unavailable";
+       unavailableText.textContent = "Image unavailable";
+       gallery.appendChild(unavailableText);
+     }
 
-       try {
-         const parsed = new URL(value, window.location.origin);
-
-         // Same-origin media is safer as a relative URL behind IIS/reverse proxy.
-         if (parsed.origin === window.location.origin) {
-           return parsed.pathname + parsed.search + parsed.hash;
-         }
-
-         return parsed.href;
-       } catch (error) {
-         return value;
-       }
+     function renderImageLoadingState(gallery) {
+       if (!gallery) return;
+       gallery.replaceChildren();
+       const loadingText = document.createElement("div");
+       loadingText.className = "model-image-loading";
+       loadingText.textContent = "Loading...";
+       gallery.appendChild(loadingText);
      }
 
      function setTooltipPreview(trigger, imageUrl, viewText) {
@@ -6438,101 +6533,72 @@ console.log('✅ Enhanced tray scan modal with dynamic row management loaded');
        const gallery = tooltip ? tooltip.querySelector(".img-gallery") : null;
        if (!gallery) return;
 
-       const normalizedImageUrl = normalizeStockImageUrl(
-         imageUrl || stockPreviewPlaceholder
-       );
-       const normalizedPlaceholder = normalizeStockImageUrl(
-         stockPreviewPlaceholder
-       );
+       const normalizedImageUrl = normalizeStockImageUrl(imageUrl);
        const altText = String(viewText || "No Image");
 
-       gallery.replaceChildren();
-
-       if (altText === "Loading" && !normalizedImageUrl) {
-         const loadingText = document.createElement("span");
-         loadingText.textContent = "Loading...";
-         loadingText.style.cssText =
-           "font-size:12px;color:#777;text-align:center;display:block;width:100%;";
-         gallery.appendChild(loadingText);
+       if (altText === "Loading") {
+         renderImageLoadingState(gallery);
          return;
        }
 
+       if (!normalizedImageUrl) {
+         renderImageUnavailableState(gallery);
+         return;
+       }
+
+       gallery.replaceChildren();
        const image = document.createElement("img");
-       image.src = normalizedImageUrl || normalizedPlaceholder;
+       image.src = normalizedImageUrl;
        image.alt = altText;
        image.decoding = "async";
        image.style.cssText =
          "width:120px;height:120px;object-fit:contain;object-position:center;" +
          "border-radius:6px;background:#fff;display:block;";
 
-       image.addEventListener("error", function handlePreviewError() {
-         image.removeEventListener("error", handlePreviewError);
-
-         if (
-           normalizedPlaceholder &&
-           image.getAttribute("src") !== normalizedPlaceholder
-         ) {
-           image.src = normalizedPlaceholder;
-         }
-       });
+       image.addEventListener("error", function () {
+         renderImageUnavailableState(gallery);
+       }, { once: true });
 
        gallery.appendChild(image);
      }
-
-  function getRowFallbackImage(trigger) {
-    const row = trigger.closest("tr");
-    if (!row) return "";
-
-    const trayScanBtn = row.querySelector(".tray-scan-btn");
-    if (trayScanBtn) {
-      const modelImage = (trayScanBtn.getAttribute("data-model-image") || "").trim();
-      if (modelImage) return modelImage;
-  }
-
-    const tooltipImg = trigger.querySelector(".model-image-tooltip .img-gallery img");
-    if (tooltipImg) {
-      const src = (tooltipImg.getAttribute("src") || "").trim();
-      if (src && !src.includes("imagePlaceholder")) return src;
-  }
-
-  return "";
-}
 
 function loadStockPreview(trigger) {
   const stockNo = (trigger.getAttribute("data-plating-stk-no") || "").trim();
   if (!stockNo) return;
 
-  const fallbackImage = getRowFallbackImage(trigger);
-
   if (stockPreviewCache[stockNo]) {
     const cached = stockPreviewCache[stockNo];
-    setTooltipPreview(trigger, cached.preview_image || fallbackImage, cached.preview_view);
+    setTooltipPreview(trigger, cached.preview_image, cached.preview_view);
     return;
   }
 
-  if (fallbackImage) {
-    setTooltipPreview(trigger, fallbackImage, "Model image");
-  } else {
-    setTooltipPreview(trigger, stockPreviewPlaceholder, "Loading");
-  }
+  setTooltipPreview(trigger, "", "Loading");
+  const requestId = String(Date.now()) + Math.random().toString(36).slice(2);
+  trigger.dataset.stockPreviewRequestId = requestId;
 
   const xhr = new XMLHttpRequest();
-  xhr.open("GET", "/adminportal/api/model-hover-preview/?stock_no=" + encodeURIComponent(stockNo), true);
+  xhr.open(
+    "GET",
+    "/adminportal/api/model-hover-preview/?stock_no=" +
+      encodeURIComponent(stockNo) +
+      "&_ts=" +
+      Date.now(),
+    true
+  );
   xhr.setRequestHeader("Accept", "application/json");
   xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
   xhr.onreadystatechange = function () {
     if (xhr.readyState !== 4) return;
+    if (trigger.dataset.stockPreviewRequestId !== requestId) return;
 
     if (xhr.status < 200 || xhr.status >= 300) {
-      setTooltipPreview(trigger, fallbackImage || stockPreviewPlaceholder, fallbackImage ? "Model image" : "No Image");
+      setTooltipPreview(trigger, "", "Image unavailable");
       return;
     }
 
     try {
       const data = JSON.parse(xhr.responseText || "{}");
-      data.preview_image = normalizeStockImageUrl(
-        data.preview_image || fallbackImage || stockPreviewPlaceholder
-      );
+      data.preview_image = normalizeStockImageUrl(data.preview_image);
       stockPreviewCache[stockNo] = data;
       setTooltipPreview(
         trigger,
@@ -6540,7 +6606,7 @@ function loadStockPreview(trigger) {
         data.preview_view || "Model image"
       );
     } catch (err) {
-      setTooltipPreview(trigger, fallbackImage || stockPreviewPlaceholder, fallbackImage ? "Model image" : "No Image");
+      setTooltipPreview(trigger, "", "Image unavailable");
     }
   };
   xhr.send();

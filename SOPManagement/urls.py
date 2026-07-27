@@ -10,6 +10,7 @@ urlpatterns = [
 
     # User-facing read APIs
     path('api/sop/modules/', views.SOPModuleListAPIView.as_view(), name='sop_modules'),
+    path('api/sop/file/<int:pk>/', views.SOPFileServeAPIView.as_view(), name='sop_file_serve'),
     path('api/sop/<int:module_id>/', views.SOPActiveByModuleAPIView.as_view(), name='sop_active_by_module'),
 
     # Admin CRUD APIs

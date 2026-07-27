@@ -521,6 +521,12 @@ class JUSubmittedZ1(models.Model):
     missing_qty = models.IntegerField(default=0)
     top_tray_remark = models.TextField(null=True, blank=True)
     is_draft = models.BooleanField(default=False, help_text="True if this is a draft save, False if final save")
+    is_merged_additional = models.BooleanField(
+        default=False,
+        help_text="True if this record represents a lot that was added to ANOTHER jig's "
+                   "unload via the Add Model flow (not its own primary unload). Such lots "
+                   "should display as 'Already Loaded' and be excluded from Add Model candidates."
+    )
     submitted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

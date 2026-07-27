@@ -1,6 +1,9 @@
 import logging
 
 from django.core.paginator import Paginator
+from django.http import FileResponse, Http404
+from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import TemplateHTMLRenderer
@@ -64,6 +67,49 @@ class SOPActiveByModuleAPIView(APIView):
         logger.info('[SOP_VIEW] module_id=%s user=%s sop_id=%s', module_id, request.user, sop.id)
         data = SOPMasterDetailSerializer(sop, context={'request': request}).data
         return Response({'found': True, 'sop': data}, status=200)
+
+
+class SOPFileServeAPIView(APIView):
+    """
+    GET /sop_management/api/sop/file/<pk>/ — stream the stored SOP PDF to any
+    authenticated user (default IsAuthenticated permission applies).
+
+    SOP files are stored under MEDIA_ROOT, but Django only registers a
+    /media/ route when DEBUG or 'runserver' (watchcase_tracker/urls.py). Under
+    the IIS production deployment neither is true, so the raw MEDIA_URL is not
+    routed and the previously returned absolute media URI was unreachable
+    ("connection refused"). Serving through this always-registered, relative
+    endpoint makes the file reachable regardless of deployment and enforces
+    authentication instead of exposing the file for direct object access.
+    """
+    http_method_names = ['get', 'head', 'options']
+
+    @method_decorator(xframe_options_sameorigin)
+    def dispatch(self, *args, **kwargs):
+        # Project-wide X_FRAME_OPTIONS is DENY (clickjacking hardening), which
+        # blocks this endpoint's PDF from rendering inside the header SOP
+        # viewer's <iframe> (sop_viewer.js) even though the request itself
+        # succeeds. Relax to SAMEORIGIN only here so our own same-origin
+        # viewer can embed it; cross-origin framing remains blocked.
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request, pk):
+        sop = selectors.get_sop_by_id(pk)
+        if sop is None or not sop.file:
+            logger.info('[SOP_FILE] pk=%s user=%s result=NOT_FOUND', pk, request.user)
+            raise Http404('SOP document not found.')
+
+        try:
+            file_handle = sop.file.open('rb')
+        except (FileNotFoundError, OSError):
+            logger.warning('[SOP_FILE] pk=%s user=%s result=FILE_MISSING_ON_DISK', pk, request.user)
+            raise Http404('SOP document file is missing.')
+
+        logger.info('[SOP_FILE] pk=%s user=%s result=SERVED', pk, request.user)
+        response = FileResponse(file_handle, content_type='application/pdf')
+        display_name = (sop.file_name or 'sop.pdf').replace('"', '')
+        response['Content-Disposition'] = f'inline; filename="{display_name}"'
+        return response
 
 
 class SOPAdminListAPIView(APIView):

@@ -1,3 +1,4 @@
+from django.urls import reverse
 from rest_framework import serializers
 
 from .models import SOPMaster, SOPModule
@@ -25,11 +26,17 @@ class SOPMasterListSerializer(serializers.ModelSerializer):
         ]
 
     def get_file_url(self, obj):
-        request = self.context.get('request')
+        """
+        Relative URL to the authenticated SOP file-serve endpoint.
+
+        Returns a same-origin relative path (not an absolute MEDIA_URL) so the
+        browser resolves it against the current host — the raw /media/ path is
+        not routed under the IIS production deployment (DEBUG/runserver only),
+        which caused the "connection refused" error when opening the link.
+        """
         if not obj.file:
             return None
-        url = obj.file.url
-        return request.build_absolute_uri(url) if request else url
+        return reverse('sop_management:sop_file_serve', kwargs={'pk': obj.pk})
 
 
 class SOPMasterDetailSerializer(SOPMasterListSerializer):

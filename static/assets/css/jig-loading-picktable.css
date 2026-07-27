@@ -692,12 +692,266 @@
     background: #f0fff4 !important;
   }
 
+  /* Row 1 / Row 2 re-skin: ancestor-scoped overrides so these inputs blend flush into
+     the new compact field-box / stat-card containers instead of showing a nested border. */
+  .jig-field-box-active #jigIdInput {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0;
+    padding: 0 !important;
+    font-size: 13px;
+    cursor: text;
+  }
+  .jig-field-box-active #jigIdInput:focus {
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+  .jig-stat-card #brokenBuildupHooksInput {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0;
+    padding: 0 !important;
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .jig-stat-card #brokenBuildupHooksInput:focus {
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
   /* Tray ID inputs */
   .tray-id-input {
     background: #f0fffe !important;
     border: 1.5px solid #b2dfdb !important;
     border-radius: 8px !important;
   }
+
+/* ============================================================
+   HEADER v2 — light subtle card header (icon + title + cycle pill)
+   ============================================================ */
+  .jig-modal-header-v2 {
+    background: #fbfcfd !important;
+    padding: 14px 60px 14px 28px !important;
+    border-bottom: 1px solid #eef1f4;
+    box-shadow: none !important;
+    position: relative;
+  }
+
+  .jig-header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .jig-header-title-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .jig-header-icon {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
+    color: #028084;
+    font-size: 14px;
+    box-shadow: 0 1px 3px rgba(2,128,132,0.12);
+  }
+
+  /* Title + subtitle on a single line */
+  .jig-header-title {
+    margin: 0 !important;
+    color: #1e293b !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.2px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .jig-header-subtitle {
+    font-size: 11.5px;
+    color: #90a4ae;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Cycle badge pinned to the top-right corner of the header */
+  .jig-header-cycle-pill {
+    position: absolute;
+    top: 12px;
+    right: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+  }
+
+  .jig-header-cycle-pill #modalNoOfCycle {
+    color: #028084;
+    font-weight: 800;
+    margin-left: 4px;
+  }
+
+/* ============================================================
+   ROW 1 — compact single-line field strip (Jig ID … Empty Hooks)
+   ============================================================ */
+  .jig-field-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .jig-field-box {
+    position: relative;
+    flex: 1 1 120px;
+    min-width: 108px;
+    background: #ffffff;
+    border: 1px solid #e6ebf1;
+    border-radius: 10px;
+    padding: 7px 10px 8px;
+  }
+
+  .jig-field-box label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #8a97a6;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 3px;
+  }
+
+  .jig-field-box input {
+    width: 100%;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  .jig-field-box input:focus { outline: none; box-shadow: none !important; }
+
+  .jig-field-box-active {
+    border: 1.5px solid #028084;
+  }
+
+  .jig-field-box-green {
+    background: #eef9f2;
+    border-color: #cdeadb;
+  }
+  .jig-field-box-green input { color: #1f7a4d; }
+
+  .jig-field-box-amber {
+    background: #fdf6ea;
+    border-color: #f2e2bd;
+  }
+  .jig-field-box-amber input { color: #a9720d; }
+
+  .jig-field-static-value {
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #1e293b;
+  }
+
+  /* ============================================================
+     ROW 2 — light stat cards (Trays Allocated / Total Delink Qty / Broken Hooks)
+     ============================================================ */
+  .jig-stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .jig-stat-card {
+    position: relative;
+    flex: 1 1 150px;
+    min-width: 140px;
+    border-radius: 12px;
+    padding: 12px 16px;
+    overflow: hidden;
+  }
+
+  .jig-stat-card::after {
+    content: '';
+    position: absolute;
+    top: -18px;
+    right: -18px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+  }
+
+  .jig-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .jig-stat-value {
+    font-size: 14px;
+    font-weight: 800;
+    position: relative;
+    z-index: 1;
+  }
+
+  .jig-stat-suffix {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.75;
+    margin-left: 2px;
+  }
+
+  .jig-stat-teal {
+    background: linear-gradient(135deg, #e3f6f6 0%, #d7f0f0 100%);
+    color: #016b6e;
+  }
+  .jig-stat-coral {
+    background: linear-gradient(135deg, #fdeae7 0%, #fbdcd6 100%);
+    color: #b8461f;
+  }
+  .jig-stat-blue {
+    background: linear-gradient(135deg, #e7f0fc 0%, #dbe8fa 100%);
+    color: #1e5fa8;
+  }
+
+  .jig-stat-select {
+    border: none !important;
+    background: transparent !important;
+    color: inherit;
+    font-size: 18px;
+    font-weight: 800;
+    padding: 0 !important;
+    cursor: pointer;
+  }
+  .jig-stat-select:focus { outline: none; box-shadow: none !important; }
 
 /* ============================================================
    DELINK / SECTION HEADERS
@@ -2477,18 +2731,13 @@ tr.row-inactive td:first-child {
 }
 
 /* Error 3: Visual indicators for Loaded Cases Qty and Empty Hooks */
-.metric-success {
-  background: #e6f7ee !important;
-  color: #28a745 !important;
-  border-color: #28a745 !important;
-}
+
 .metric-warning {
   background: #fff4e5 !important;
   color: #ff9800 !important;
   border-color: #ff9800 !important;
 }
 .metric-neutral {
-  background: linear-gradient(135deg,#f8fafc,#f1f5f9) !important;
   color: #1e293b !important;
 }
 .empty-hooks-warning {
@@ -2602,28 +2851,144 @@ tr.row-inactive td:first-child {
    ============================================================ */
 .split-panel-container {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   min-height: 200px;
 }
 .split-panel-left {
   flex: 1;
   min-width: 0;
-  border-right: 2px solid #e8edf2;
-  padding-right: 10px;
+  border-right: none;
+  border-bottom: 2px solid #e8edf2;
+  padding-right: 0;
+  padding-bottom: 10px;
 }
 .split-panel-right {
-  flex: 0 0 340px;
-  min-width: 280px;
+  flex: 1;
+  min-width: 100%;
 }
-@media (max-width: 860px) {
-  .split-panel-container { flex-direction: column; }
-  .split-panel-left { border-right: none; border-bottom: 2px solid #e8edf2; padding-right: 0; padding-bottom: 10px; }
-  .split-panel-right { flex: 1; min-width: 100%; }
+/* Delink table wrapper: cancel the site-wide .table-responsive max-height/scroll
+   (used by the main listing tables) — this one should grow with the modal's own
+   scroll instead of nesting a second scrollbar. Scoped to #splitPanelLeft only so
+   no other .table-responsive usage elsewhere in the app is affected. */
+#splitPanelLeft .table-responsive {
+  max-height: none !important;
+  overflow-y: visible !important;
 }
+
+/* Delink panel — rounded card wrapper + plain, clearly-differentiated header row
+   (was a rainbow gradient which made columns hard to read at a glance) */
+.split-panel-title-v2 {
+  font-size: 12px;
+  font-weight: 700;
+  color: #028084;
+  margin-bottom: 8px;
+  padding: 7px 12px;
+  background: rgba(2,128,132,0.06);
+  border-radius: 8px;
+  letter-spacing: 0.3px;
+}
+#splitPanelLeft .table-responsive {
+  border: 1px solid #e8edf2;
+  border-radius: 10px;
+  background: #ffffff;
+}
+#delinkPanelTable thead .delink-thead-row {
+  background: #f8fafc;
+  color: #64748b;
+}
+#delinkPanelTable thead th {
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.4px;
+  color: #64748b;
+}
+/* Delink Qty rendered as a small pill so it reads distinctly from plain numeric columns */
+/* Light pill badges per column — all very light tints, no saturated colors */
+.delink-sno-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f1edfb;
+  color: #6b5dd3;
+  font-weight: 700;
+  font-size: 11px;
+}
+.delink-model-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: #fdf3e2;
+  color: #a9720d;
+  font-weight: 600;
+  font-size: 11.5px;
+}
+.delink-orig-qty-pill {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #eef1f4;
+  color: #607080;
+  font-weight: 600;
+}
+.delink-qty-pill {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #e3f6ec;
+  color: #2f8f5b;
+  font-weight: 700;
+}
+.delink-excess-qty-pill {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #fdf1e3;
+  color: #c07d1f;
+  font-weight: 600;
+}
+
+/* Default "Pending scan" indicator for rows not yet scanned — the JS leaves the
+   Status cell empty until a scan resolves it, so this is a pure display default,
+   not a decision: it disappears the instant the cell gets real content. */
+#delinkPanelTable tbody td:last-child:empty::before {
+  content: 'Pending scan';
+  color: #94a3b8;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 11.5px;
+}
+
+/* ===== Interactive scanning feedback ===== */
+@keyframes delinkScanFocusPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(2,128,132,0.10); }
+  50% { box-shadow: 0 0 0 5px rgba(2,128,132,0.16); }
+}
+.split-scan-input:focus {
+  animation: delinkScanFocusPulse 1.4s ease-in-out infinite;
+}
+@keyframes delinkScanConfirmPop {
+  0% { transform: scale(0.94); }
+  55% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+.split-scan-input.validated {
+  animation: delinkScanConfirmPop 0.28s ease-out;
+}
+#delinkPanelTable tbody tr.delink-row-scanned {
+  transition: background 0.35s ease;
+}
+
 /* Delink panel table */
 #delinkPanelTable { border-collapse: collapse; width: 100%; }
-#delinkPanelTable thead th { font-size: 11px; font-weight: 500; padding: 6px 8px; border-bottom: 2px solid #028084; white-space: nowrap; }
-#delinkPanelTable tbody td { padding: 6px 8px; vertical-align: middle; border-bottom: 1px solid #e8edf2; }
+#delinkPanelTable thead th { font-size: 11px; font-weight: 500; padding: 8px 10px; border-bottom: 2px solid #028084; white-space: nowrap; }
+#delinkPanelTable tbody td { padding: 8px 10px; vertical-align: middle; border-bottom: 1px solid #eef1f4; transition: background 0.12s ease; }
 #delinkPanelTable tbody tr:hover { background: #f0fffe; }
 #delinkPanelTable tbody tr.delink-row-scanned { background: #d4edda; }
 #delinkPanelTable tbody tr.delink-row-disabled { background: #f1f3f5; opacity: 0.7; }
@@ -2638,6 +3003,12 @@ tr.row-inactive td:first-child {
 #delinkPanelTable tbody tr.model-bg-3.delink-row-scanned { background: linear-gradient(135deg, #d4edda, #eef6f0); }
 #delinkPanelTable tbody tr.model-bg-4.delink-row-scanned { background: linear-gradient(135deg, #d4edda, #f3edf4); }
 #delinkPanelTable tbody tr.model-bg-5.delink-row-scanned { background: linear-gradient(135deg, #d4edda, #f4f1e8); }
+.excess-top-tray-row { background: #fffef7; }
+#excessPanelTable tbody tr.model-bg-1 { background: #e8f3f4; }
+#excessPanelTable tbody tr.model-bg-2 { background: #edf1fb; }
+#excessPanelTable tbody tr.model-bg-3 { background: #eef6f0; }
+#excessPanelTable tbody tr.model-bg-4 { background: #f3edf4; }
+#excessPanelTable tbody tr.model-bg-5 { background: #f4f1e8; }
 /* Allocation status badge styles */
 .unified-status-badge.status-delinked { background: #d4edda; color: #155724; border: 1px solid #28a745; }
 .unified-status-badge.status-top-tray { background: #d0f0f2; color: #014d4e; border: 1px solid #028084; }
@@ -2650,17 +3021,17 @@ tr.row-inactive td:first-child {
 /* Scan inputs inside split panels */
 .split-scan-input {
   width: 100%;
-  max-width: 120px;
-  padding: 4px 7px;
+  max-width: 140px;
+  padding: 6px 9px;
   border: 1.5px solid #b2dfdb;
-  border-radius: 6px;
+  border-radius: 7px;
   font-size: 12px;
   font-weight: 500;
   background: #f0fffe;
   color: #1e293b;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.split-scan-input:focus { border-color: #028084; background: #fff; outline: none; }
+.split-scan-input:focus { border-color: #028084; background: #fff; outline: none; box-shadow: 0 0 0 3px rgba(2,128,132,0.1); }
 .split-scan-input.validated { background: #d4edda !important; border-color: #28a745 !important; color: #155724; }
 .split-scan-input.error-input { background: #fce4ec !important; border-color: #dc3545 !important; color: #c62828; }
 .split-scan-input:disabled { background: #f1f3f5 !important; color: #999; cursor: not-allowed; }

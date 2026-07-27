@@ -1795,6 +1795,90 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
   console.log("🚀 Modal script loaded");
   
+  function normalizeUnloadModalImageUrl(rawUrl) {
+    const value = String(rawUrl || "").trim();
+    if (!value) return "";
+    try {
+      const parsed = new URL(value, window.location.origin);
+      const hostname = String(parsed.hostname || "").toLowerCase();
+      const isLoopbackHost =
+        hostname === "127.0.0.1" ||
+        hostname === "localhost" ||
+        hostname === "::1" ||
+        hostname === "[::1]";
+      const isApplicationAsset =
+        parsed.pathname.startsWith("/media/") ||
+        parsed.pathname.startsWith("/static/");
+      if (parsed.origin === window.location.origin || (isLoopbackHost && isApplicationAsset)) {
+        return parsed.pathname + parsed.search + parsed.hash;
+      }
+      return parsed.href;
+    } catch (error) {
+      return value;
+    }
+  }
+
+  function getUnloadPreviewEntryUrl(entry) {
+    if (!entry) return "";
+    return normalizeUnloadModalImageUrl(entry.preview_image || entry.image_url || entry.url || entry.src || entry.image || "");
+  }
+
+  function resolveUnloadPreviewImage(payload) {
+    const previewImage = normalizeUnloadModalImageUrl(payload && payload.preview_image);
+    if (previewImage) {
+      return {
+        url: previewImage,
+        alt: payload && (payload.is_placeholder || payload.is_fallback) ? "No image available" : "Model IV preview"
+      };
+    }
+    const images = Array.isArray(payload && payload.images) ? payload.images : [];
+    const insideView = images.find(function(entry) {
+      return String(entry && entry.view_code || "").toUpperCase() === "IV";
+    });
+    const insideViewUrl = getUnloadPreviewEntryUrl(insideView);
+    if (insideViewUrl) return { url: insideViewUrl, alt: "Model IV preview" };
+    const noImage = images.find(function(entry) {
+      const viewCode = String(entry && entry.view_code || "").toUpperCase();
+      return viewCode === "NO_IMAGE" || entry && entry.is_placeholder === true;
+    });
+    const noImageUrl = getUnloadPreviewEntryUrl(noImage);
+    if (noImageUrl) return { url: noImageUrl, alt: "No image available" };
+    return null;
+  }
+
+  async function renderUnloadModalPreviewImage(imagesDiv, stockNo, legacyImagesJson) {
+    if (!imagesDiv) return;
+    imagesDiv.innerHTML = '<img src="/static/assets/images/imagePlaceholder.jpg" alt="Loading model image" style="border-radius:50%;width:50px;height:50px;object-fit:contain;" />';
+    let legacyImages = [];
+    try {
+      const parsed = JSON.parse(legacyImagesJson || "[]");
+      legacyImages = Array.isArray(parsed) ? parsed : Object.values(parsed || {}).flat();
+    } catch (error) {
+      legacyImages = [];
+    }
+    const legacyUrl = normalizeUnloadModalImageUrl(legacyImages[0]);
+    if (legacyUrl) {
+      imagesDiv.innerHTML = `<img src="${legacyUrl}" alt="Model image" style="border-radius:50%;width:50px;height:50px;object-fit:contain;border:1px solid #eee;margin-right:2px;" />`;
+    }
+    const previewStockNo = String(stockNo || "").trim();
+    if (!previewStockNo) return;
+    try {
+      const previewResp = await fetch("/adminportal/api/model-hover-preview/?stock_no=" + encodeURIComponent(previewStockNo) + "&_ts=" + Date.now(), {
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: { "Accept": "application/json", "X-Requested-With": "XMLHttpRequest" }
+      });
+      if (!previewResp.ok) return;
+      const previewPayload = await previewResp.json();
+      const resolvedImage = resolveUnloadPreviewImage(previewPayload);
+      if (resolvedImage) {
+        imagesDiv.innerHTML = `<img src="${resolvedImage.url}" alt="${resolvedImage.alt}" style="border-radius:50%;width:50px;height:50px;object-fit:contain;border:1px solid #eee;margin-right:2px;" />`;
+      }
+    } catch (error) {
+      console.error("[Jig Unloading] Eye modal image failed:", error);
+    }
+  }
+
   document.querySelectorAll('.tray-scan-btn-Jig').forEach(function(link, index) {
     console.log(`🔌 Found tray scan button ${index + 1}`);
     
@@ -1844,33 +1928,8 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("🏷️ Modal header set to:", displayText);
       }
       
-      // Fetch model images using platingStkNo (extract model_no before 'X')
-      let images = [];
-      if (lotId && lotId !== 'N/A') {
-        try {
-          const resp = await fetch(`/jig_unloading/get_model_images/?lot_id=${encodeURIComponent(lotId)}`);
-          const result = await resp.json();
-          if (result.success && result.image) {
-            images = [result.image]; // Use the single image from backend
-          }
-        } catch (err) {
-          console.error('Error fetching model images:', err);
-        }
-      }
-      
-      // Show images in modal
       const imagesDiv = document.getElementById("modalModelImages_DayPlanning");
-      if (imagesDiv) {
-        imagesDiv.innerHTML = ""; // Clear previous images
-        if (images.length > 0) {
-          images.forEach((imgUrl, idx) => {
-            imagesDiv.innerHTML += `<img src="${imgUrl}" alt="Model Image ${idx+1}" style="border-radius:50%;width:50px;height:50px;object-fit:cover;border:1px solid #eee;margin-right:2px;" />`;
-          });
-        } else {
-          // Fallback to placeholder
-          imagesDiv.innerHTML = `<img src="/static/assets/images/imagePlaceholder.jpg" alt="Model Image" style="border-radius:50%;width:50px;height:50px;object-fit:cover;" />`;
-        }
-      }
+      renderUnloadModalPreviewImage(imagesDiv, platingStkNo || modelNo, modelImage);
 
       // Set Lot Qty with improved error handling
       const totalCaseQty = link.getAttribute('data-total-case-qty');

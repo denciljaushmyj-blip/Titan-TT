@@ -1104,8 +1104,8 @@ input[type="number"].form-control::-webkit-outer-spin-button { opacity: .5; }
                   {% csrf_token %}
                   <div>
                     <label for="model_images_upload" class="form-label">Select Images</label>
-                    <input type="file" class="form-control" id="model_images_upload" name="images" multiple accept="image/*" required />
-                    <small class="text-muted" style="font-size:.78rem;">JPG, PNG, GIF &mdash; hold Ctrl to select multiple.</small>
+                    <input type="file" class="form-control" id="model_images_upload" name="images" multiple accept="image/jpeg,image/png,image/gif,.jpg,.jpeg,.png,.gif" required />
+                    <small class="text-muted" style="font-size:.78rem;">JPG, JPEG, PNG, GIF &mdash; hold Ctrl to select multiple.</small>
                   </div>
                   <div class="submit-section">
                     <button type="submit" class="btn btn-elegant-primary">Upload Images</button>
@@ -1661,8 +1661,47 @@ const TrayTypeAPI = {
 };
 
 // Model Image API Functions
+let modelImageUploadInProgress = false;
+
+function formatModelImageUploadResult(result) {
+    const uploadedCount = Number(result?.uploaded_count || 0);
+    const failed = Array.isArray(result?.failed) ? result.failed : [];
+    const failedCount = Number(result?.failed_count ?? failed.length);
+    const lines = [];
+
+    if (uploadedCount) {
+        lines.push(`${uploadedCount} image${uploadedCount === 1 ? '' : 's'} uploaded successfully.`);
+    }
+
+    if (failedCount) {
+        lines.push(`${failedCount} image${failedCount === 1 ? '' : 's'} failed:`);
+        failed.forEach(item => {
+            const filename = item && item.filename ? item.filename : 'Unknown file';
+            const reason = item && item.reason ? item.reason : 'Invalid image file';
+            lines.push(`&bull; ${escapeHtml(filename)} &mdash; ${escapeHtml(reason)}`);
+        });
+    }
+
+    return lines.join('<br>');
+}
+
 const ModelImageAPI = {
     upload: async function(filesInput) {
+        if (modelImageUploadInProgress) {
+            return { success: false, message: 'Upload already in progress.' };
+        }
+
+        const form = document.getElementById('images-form');
+        const uploadButton = form ? form.querySelector('button[type="submit"]') : null;
+        modelImageUploadInProgress = true;
+        if (uploadButton) {
+            uploadButton.disabled = true;
+            uploadButton.textContent = 'Uploading...';
+        }
+        if (filesInput) {
+            filesInput.disabled = true;
+        }
+
         try {
             const formData = new FormData();
             const files = filesInput.files;
@@ -1688,17 +1727,19 @@ const ModelImageAPI = {
                 throw new Error(`Upload failed with HTTP ${response.status}. Server returned a non-JSON response.`);
             }
 
-            if (!response.ok) {
+            if (!response.ok && !(result.uploaded_count > 0)) {
                 throw new Error(result.error || result.message || 'Image upload failed.');
             }
             
-            if (result.success) {
-                showInlineMessage('images-message-area', result.message || 'Images uploaded successfully!', true);
+            if (result.success || result.uploaded_count > 0) {
+                showInlineMessage('images-message-area', formatModelImageUploadResult(result) || result.message || 'Images uploaded successfully!', true);
                 filesInput.value = '';
-                this.refreshDropdown();
-                refreshImageGallery();
+                await this.refreshDropdown();
+                await refreshImageGallery();
             } else {
-                const errorMsg = result.errors ? formatValidationErrors(result.errors) : (result.message || 'Error uploading images');
+                const errorMsg = result.failed_count
+                    ? formatModelImageUploadResult(result)
+                    : (result.errors ? formatValidationErrors(result.errors) : (result.message || 'Error uploading images'));
                 showInlineMessage('images-message-area', errorMsg, false);
                 console.error('Validation errors:', result.errors);
             }
@@ -1707,6 +1748,15 @@ const ModelImageAPI = {
         } catch (error) {
             showInlineMessage('images-message-area', 'Error uploading images: ' + error.message, false);
             console.error('Error:', error);
+        } finally {
+            modelImageUploadInProgress = false;
+            if (uploadButton) {
+                uploadButton.disabled = false;
+                uploadButton.textContent = 'Upload Images';
+            }
+            if (filesInput) {
+                filesInput.disabled = false;
+            }
         }
     },
     
@@ -2636,15 +2686,19 @@ function setupFormHandlers() {
     });
     
     // Model Images Form
-    document.getElementById('images-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const filesInput = document.getElementById('model_images_upload');
-        if (filesInput.files.length > 0) {
-            await ModelImageAPI.upload(filesInput);
-        } else {
-            showInlineMessage('images-message-area', 'Please select at least one image to upload', false);
-        }
-    });
+    const imagesForm = document.getElementById('images-form');
+    if (imagesForm && imagesForm.dataset.bound !== 'true') {
+        imagesForm.dataset.bound = 'true';
+        imagesForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const filesInput = document.getElementById('model_images_upload');
+            if (filesInput && filesInput.files.length > 0) {
+                await ModelImageAPI.upload(filesInput);
+            } else {
+                showInlineMessage('images-message-area', 'Please select at least one image to upload', false);
+            }
+        });
+    }
 
     const versionUploadForm = document.getElementById('versionComparisonUploadForm');
     if (versionUploadForm && versionUploadForm.dataset.bound !== 'true') {

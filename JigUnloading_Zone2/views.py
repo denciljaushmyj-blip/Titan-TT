@@ -996,8 +996,24 @@ class JU_Zone_MainTable(LoginRequiredMixin, TemplateView):
         all_lot_ids = set()
         all_batch_ids = set()  # For Jig Loading batch_id → images fallback
         for jig_detail in jig_unload:
-            if jig_detail.no_of_model_cases:
+            # Prefer draft_data['no_of_model_cases'] over the raw DB field, matching
+            # the priority used later when building the actual rendered
+            # jig_detail.no_of_model_cases (see `model_cases = draft_data.get(...)`
+            # below). Without this, an Add Model merge that updates draft_data's
+            # model list (but not the raw DB field yet) means the newly-added
+            # model's key is never added to the global color palette here, so its
+            # circle falls back to the default gray "no color assigned" style
+            # instead of getting its own distinct color.
+            _dd_early = getattr(jig_detail, 'draft_data', None) or {}
+            if isinstance(_dd_early, str):
+                try:
+                    _dd_early = json.loads(_dd_early)
+                except Exception:
+                    _dd_early = {}
+            _raw_mc = _dd_early.get('no_of_model_cases') if isinstance(_dd_early, dict) else None
+            if not _raw_mc:
                 _raw_mc = jig_detail.no_of_model_cases
+            if _raw_mc:
                 if isinstance(_raw_mc, str):
                     try:
                         import json
@@ -1937,6 +1953,21 @@ class JU_Zone_MainTable(LoginRequiredMixin, TemplateView):
                 .values_list('lot_id', flat=True)
             )
             jig_detail.all_models_submitted_z1 = _all_lids_z1.issubset(_submitted_z1) and len(_submitted_z1) > 0
+
+            # Already Loaded: ALL of this jig's own lots were consumed into
+            # ANOTHER jig's unload via Add Model — nothing left here to unload,
+            # so it must not be offered again as an Add Model candidate.
+            # Must check ALL lots, not ANY: a multi-model jig where only one
+            # of its lots was merged elsewhere still has its other, un-merged
+            # lot pending — that leftover must keep appearing as a normal
+            # candidate in other jigs' Add Model lists instead of being
+            # hidden by a single merged lot dragging the whole row along.
+            _merged_lot_ids_z1 = set(
+                JUSubmittedZ1.objects.filter(
+                    jig_completed_id=jig_detail.id, is_merged_additional=True
+                ).values_list('lot_id', flat=True)
+            )
+            jig_detail.is_already_loaded_z1 = bool(_all_lids_z1) and _all_lids_z1.issubset(_merged_lot_ids_z1)
 
             # Also mark as draft when some (but not all) models have been finally submitted
             if not jig_detail.jig_unload_draft and not jig_detail.all_models_submitted_z1:

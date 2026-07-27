@@ -17,7 +17,7 @@
 .model-image-tooltip{
   transform: translateX(-25%) !important;
   top: 45% !important;
-  z-index: 500000 !important; /* high so it sits above table & scrollbar */
+  z-index: 10010 !important; /* high so it sits above table & scrollbar */
 
 }
 
@@ -634,7 +634,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 .model-image-tooltip .nickel-preview-img,
 .model-image-tooltip .model-preview-image{
     border:none !important;
-    border-radius:0 !important;
+    border-radius:6px !important;
     box-shadow:none !important;
     background:transparent !important;
     outline:none !important;
@@ -659,20 +659,19 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 }
 
 .model-image-tooltip {
-  width: 230px !important;
-  min-width: 230px !important;
-  max-width: 230px !important;
-  min-height: 185px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
   height: auto !important;
-  padding: 12px !important;
-  gap: 8px !important;
+  padding: 48px 18px 18px !important;
   box-sizing: border-box !important;
   background: #fff !important;
   border: 1px solid #cfd8dc !important;
-  border-radius: 8px !important;
-  box-shadow: 0 6px 18px rgba(0,0,0,.18) !important;
-  overflow: hidden !important;
-  z-index: 500000 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  overflow: visible !important;
+  z-index: 10010 !important;
   font-size: 12px !important;
   line-height: 1.3 !important;
 }
@@ -692,10 +691,10 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 
 .model-image-tooltip .img-gallery,
 .model-image-tooltip .nickel-preview-frame {
-  width: 204px !important;
-  height: 135px !important;
-  min-height: 135px !important;
-  max-height: 135px !important;
+  width: 260px !important;
+  height: 210px !important;
+  min-height: 210px !important;
+  max-height: 210px !important;
   margin: 0 auto !important;
   overflow: hidden !important;
   display: flex !important;
@@ -706,12 +705,14 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 
 .model-image-tooltip .img-gallery img,
 .model-image-tooltip .nickel-preview-img {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 204px !important;
-  max-height: 135px !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: 240px !important;
+  max-height: 190px !important;
   object-fit: contain !important;
   object-position: center !important;
+  margin: auto !important;
+  border-radius: 6px !important;
   display: block !important;
   background: #fff !important;
 }
@@ -896,14 +897,14 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
         <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
                       <span class="model-hover-trigger" data-plating-stk-no="{{ data.plating_stk_no }}" style="cursor: pointer; word-break: break-all;">
                         {{ data.plating_stk_no|highlight_plating_color|safe_html }}
-                        <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s; min-width: 220px;">
+                        <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 48px 18px 18px; z-index: 10010; display: flex; justify-content:center; align-items:center; opacity: 0; pointer-events: none; transition: opacity 0.2s; box-sizing:border-box;">
                           
                           <!-- Header with Info and Close buttons -->
                           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <button class="info-btn" style="background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                            <button class="info-btn" style="position:absolute; top:14px; left:16px; z-index:2; background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
                                Info
                             </button>
-                            <button class="close-btn" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                            <button class="close-btn" style="position:absolute; top:14px; right:16px; z-index:2; background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
                                Close
                             </button>
                           </div>
@@ -911,7 +912,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                           <!-- Image gallery section -->
                           <div style="display: flex; align-items: center; gap: 8px;">
                             <!-- Hide scroll buttons since only one image is shown -->
-                            <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;"></div>
+                            <div class="img-gallery" style="display:flex;justify-content:center;align-items:center;overflow:hidden;width:260px;height:210px;min-height:210px;box-sizing:border-box;"></div>
                           </div>
                         </div>
                       </span>
@@ -1437,27 +1438,83 @@ document.addEventListener("DOMContentLoaded", function () {
         const modalUserImg = modal.querySelector('.user-profile img');
         const stockNo = (link.dataset.platingStkNo || '').trim();
         if (!modalUserImg || !stockNo) return;
+        const cacheKey = String(stockNo || '').trim().toUpperCase();
         const previewCache = window.NickelModelPreviewCache || new Map();
         window.NickelModelPreviewCache = previewCache;
+        const normalizeModalImageUrl = function (rawUrl) {
+          if (window.normalizeStockImageUrl) {
+            return window.normalizeStockImageUrl(rawUrl);
+          }
+          if (window.NickelNormalizeModelImageUrl) {
+            return window.NickelNormalizeModelImageUrl(rawUrl);
+          }
+          return rawUrl || "";
+        };
+        const getImageUrlFromEntry = function (image) {
+          if (!image) return "";
+          return normalizeModalImageUrl(image.url || image.image_url || image.src || image.image || "");
+        };
+        const resolveModalImage = function (payload) {
+          if (!payload) return null;
+          const previewImage = normalizeModalImageUrl(payload.preview_image);
+          if (previewImage) {
+            return {
+              url: previewImage,
+              alt: payload.is_placeholder || payload.is_fallback ? "No image available" : "Model IV preview"
+            };
+          }
+          const images = Array.isArray(payload.images) ? payload.images : [];
+          const ivImage = images.find(function (image) {
+            return String(image && image.view_code || "").toUpperCase() === "IV";
+          });
+          const ivUrl = getImageUrlFromEntry(ivImage);
+          if (ivUrl) {
+            return { url: ivUrl, alt: "Model IV preview" };
+          }
+          const placeholder = images.find(function (image) {
+            const viewCode = String(image && image.view_code || "").toUpperCase();
+            return viewCode === "NO_IMAGE" || image && image.is_placeholder === true;
+          });
+          const placeholderUrl = getImageUrlFromEntry(placeholder);
+          if (placeholderUrl) {
+            return { url: placeholderUrl, alt: "No image available" };
+          }
+          return null;
+        };
         const renderPayload = function (payload) {
-          if (payload && payload.preview_image && modal.dataset.activePlatingStkNo === stockNo) {
-            modalUserImg.src = window.NickelNormalizeModelImageUrl ? window.NickelNormalizeModelImageUrl(payload.preview_image) : payload.preview_image;
+          if (modal.dataset.activePlatingStkNo !== stockNo) return;
+          const resolvedImage = resolveModalImage(payload);
+          if (resolvedImage) {
+            modalUserImg.src = resolvedImage.url;
+            modalUserImg.alt = resolvedImage.alt;
+          } else {
+            modalUserImg.removeAttribute('src');
+            modalUserImg.alt = "Image unavailable";
           }
         };
-        modalUserImg.src = "";
-        if (previewCache.has(stockNo)) {
-          renderPayload(previewCache.get(stockNo));
+        modalUserImg.removeAttribute('src');
+        modalUserImg.alt = "Loading model image";
+        if (previewCache.has(cacheKey)) {
+          renderPayload(previewCache.get(cacheKey));
           return;
         }
-        fetch("/adminportal/api/model-hover-preview/?stock_no=" + encodeURIComponent(stockNo), {
+        fetch("/adminportal/api/model-hover-preview/?stock_no=" + encodeURIComponent(stockNo) + "&_ts=" + Date.now(), {
+          credentials: "same-origin",
+          cache: "no-store",
           headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" }
         })
           .then(function (response) { return response.ok ? response.json() : null; })
           .then(function (payload) {
-            previewCache.set(stockNo, payload);
+            if (payload) {
+              payload.preview_image = normalizeModalImageUrl(payload.preview_image);
+            }
+            previewCache.set(cacheKey, payload);
             renderPayload(payload);
           })
-          .catch(function () {});
+          .catch(function () {
+            modalUserImg.removeAttribute('src');
+            modalUserImg.alt = "Image unavailable";
+          });
       }
 
       modal.dataset.activePlatingStkNo = (link.dataset.platingStkNo || '').trim();
@@ -2065,30 +2122,75 @@ document.addEventListener("DOMContentLoaded", function () {
   let pinnedTrigger = null;
   let hideTimer = null;
 
+  function getStockCacheKey(stockNo) {
+    return String(stockNo || "").trim().toUpperCase();
+  }
+
   function normalizeImageUrl(rawUrl) {
     const value = String(rawUrl || "").trim();
     if (!value) return "";
 
     try {
       const parsed = new URL(value, window.location.origin);
-
-      if (
+      const hostname = String(parsed.hostname || "").toLowerCase();
+      const isLoopbackHost =
+        hostname === "127.0.0.1" ||
+        hostname === "localhost" ||
+        hostname === "::1" ||
+        hostname === "[::1]";
+      const isApplicationAsset =
         parsed.pathname.startsWith("/media/") ||
-        parsed.pathname.startsWith("/static/")
-      ) {
+        parsed.pathname.startsWith("/static/");
+
+      if (parsed.origin === window.location.origin || (isLoopbackHost && isApplicationAsset)) {
         return parsed.pathname + parsed.search + parsed.hash;
       }
 
       return parsed.href;
     } catch (error) {
-      if (value.startsWith("media/") || value.startsWith("static/")) {
-        return "/" + value;
-      }
       return value;
     }
   }
 
   window.NickelNormalizeModelImageUrl = normalizeImageUrl;
+  window.normalizeStockImageUrl = normalizeImageUrl;
+
+  function normalizePreviewPayload(payload) {
+    if (!payload) return null;
+    payload.preview_image = normalizeImageUrl(payload.preview_image);
+    if (Array.isArray(payload.images)) {
+      payload.images = payload.images.map(function (image) {
+        if (!image) return image;
+        return Object.assign({}, image, {
+          url: normalizeImageUrl(image.url || image.image_url || image.src || image.image || "")
+        });
+      });
+    }
+    return payload;
+  }
+
+  function getPlaceholderImageUrl(payload) {
+    const images = Array.isArray(payload && payload.images) ? payload.images : [];
+    const placeholder = images.find(function (image) {
+      const viewCode = String(image && image.view_code || "").toUpperCase();
+      return viewCode === "NO_IMAGE" || image && image.is_placeholder === true;
+    });
+    return normalizeImageUrl(
+      placeholder && (placeholder.url || placeholder.image_url || placeholder.src || placeholder.image)
+    );
+  }
+
+  function getDefaultVisualAidUrl(stockNo) {
+    return "/adminportal/dp_visualaid/?plating_stk_no=" + encodeURIComponent(stockNo);
+  }
+
+  function setTriggerVisualAidUrl(trigger, stockNo, payload) {
+    if (!trigger || !stockNo) return;
+    trigger.dataset.visualAidUrl =
+      payload && payload.visual_aid_url
+        ? payload.visual_aid_url
+        : getDefaultVisualAidUrl(stockNo);
+  }
 
   function getStockNo(trigger) {
     return String(
@@ -2110,15 +2212,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     tooltip.dataset.dynamicPreviewReady = "1";
     tooltip.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;">' +
-        '<button type="button" class="info-btn" style="background:#007bff;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Info</button>' +
-        '<button type="button" class="close-btn" style="background:#dc3545;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Close</button>' +
-      '</div>' +
       '<div class="nickel-preview-frame">' +
         '<div class="img-gallery">' +
           '<span style="font-size:12px;color:#777;text-align:center;">Loading...</span>' +
         '</div>' +
-      '</div>';
+      '</div>' +
+      '<button type="button" class="info-btn" style="position:absolute;top:14px;left:16px;z-index:2;background:#007bff;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Info</button>' +
+      '<button type="button" class="close-btn" style="position:absolute;top:14px;right:16px;z-index:2;background:#dc3545;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Close</button>';
   }
 
   function getGallery(trigger) {
@@ -2169,11 +2269,18 @@ document.addEventListener("DOMContentLoaded", function () {
     image.loading = "eager";
     image.decoding = "async";
     image.style.cssText =
-      "width:100%;height:100%;max-width:204px;max-height:135px;" +
-      "object-fit:contain;object-position:center;" +
-      "border-radius:6px;background:#fff;display:block;";
+      "display:block;width:auto;height:auto;max-width:240px;max-height:190px;" +
+      "object-fit:contain;object-position:center;margin:auto;" +
+      "border-radius:6px;background:#fff;";
 
     image.addEventListener("error", function () {
+      const placeholderUrl = getPlaceholderImageUrl(payload);
+      if (placeholderUrl && image.src !== placeholderUrl) {
+        image.src = placeholderUrl;
+        image.alt = "No image available";
+        return;
+      }
+
       console.error(
         "[Nickel Wiping Z2] Preview image failed:",
         rawUrl,
@@ -2187,13 +2294,13 @@ document.addEventListener("DOMContentLoaded", function () {
     image.src = imageUrl;
   }
 
-  function requestPreview(stockNo) {
-    if (previewCache.has(stockNo)) {
-      return Promise.resolve(previewCache.get(stockNo));
+  function requestPreview(stockNo, cacheKey) {
+    if (previewCache.has(cacheKey)) {
+      return Promise.resolve(previewCache.get(cacheKey));
     }
 
-    if (requestCache.has(stockNo)) {
-      return requestCache.get(stockNo);
+    if (requestCache.has(cacheKey)) {
+      return requestCache.get(cacheKey);
     }
 
     const controller = new AbortController();
@@ -2203,7 +2310,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const request = fetch(
       "/adminportal/api/model-hover-preview/?stock_no=" +
-        encodeURIComponent(stockNo),
+        encodeURIComponent(stockNo) +
+        "&_ts=" +
+        Date.now(),
       {
         headers: {
           "Accept": "application/json",
@@ -2221,15 +2330,16 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(function (payload) {
-        previewCache.set(stockNo, payload || null);
-        return payload || null;
+        const normalizedPayload = normalizePreviewPayload(payload);
+        previewCache.set(cacheKey, normalizedPayload);
+        return normalizedPayload;
       })
       .finally(function () {
         window.clearTimeout(timeoutId);
-        requestCache.delete(stockNo);
+        requestCache.delete(cacheKey);
       });
 
-    requestCache.set(stockNo, request);
+    requestCache.set(cacheKey, request);
     return request;
   }
 
@@ -2241,15 +2351,21 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    if (previewCache.has(stockNo)) {
-      renderPreview(trigger, previewCache.get(stockNo));
+    const cacheKey = getStockCacheKey(stockNo);
+    setTriggerVisualAidUrl(trigger, stockNo);
+
+    if (previewCache.has(cacheKey)) {
+      const cachedPayload = previewCache.get(cacheKey);
+      setTriggerVisualAidUrl(trigger, stockNo, cachedPayload);
+      renderPreview(trigger, cachedPayload);
       return;
     }
 
     renderLoading(trigger);
 
-    requestPreview(stockNo)
+    requestPreview(stockNo, cacheKey)
       .then(function (payload) {
+        setTriggerVisualAidUrl(trigger, stockNo, payload);
         renderPreview(trigger, payload);
       })
       .catch(function (error) {
@@ -2419,8 +2535,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!stockNo) return;
 
         window.location.href =
-          "/adminportal/dp_visualaid/?plating_stk_no=" +
-          encodeURIComponent(stockNo);
+          trigger.dataset.visualAidUrl || getDefaultVisualAidUrl(stockNo);
       });
     }
 

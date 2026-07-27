@@ -1170,7 +1170,7 @@
                   (function () {
                     var tds = row.querySelectorAll("td");
                     for (var i = 0; i < tds.length; i++) {
-                      if (tds[i].textContent.trim().match(/Yet to Start|Draft|On Hold/)) return tds[i];
+                      if (tds[i].textContent.trim().match(/Yet to Start|Draft|In Progress|On Hold/)) return tds[i];
                     }
                     return null;
                   })();

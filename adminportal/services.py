@@ -3,7 +3,7 @@ Dashboard stats caching service with TIMING INSTRUMENTATION.
 Handles cache layer for fast login redirect.
 Cache TTL: 5 minutes (configurable).
 """
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.conf import settings
 from django.db import close_old_connections, transaction
 from django.contrib.auth.models import Group
@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 
 USER_MODULE_CACHE_TTL = 300
 USER_GROUP_NAMES_CACHE_TTL = 300
+
+# is_admin / user groups / allowed modules are shared across every IIS worker
+# process via DatabaseCache (see CACHES['permissions'] in settings.py) — the
+# 'default' LocMemCache is per-process and would let one worker's
+# invalidate_user_modules_cache() call go unseen by the others.
+_permissions_cache = caches['permissions']
 MODULE_REGISTRY_CACHE_KEY = 'adminportal_module_registry_seeded_v4'
 MODULE_REGISTRY_NAMES = [entry['name'] for entry in MODULE_REGISTRY]
 
@@ -100,12 +106,12 @@ def is_admin_user(user):
         return False
 
     cache_key = f'user_is_admin_{user.id}'
-    cached_value = cache.get(cache_key)
+    cached_value = _permissions_cache.get(cache_key)
     if cached_value is not None:
         return cached_value
 
     if user.is_superuser:
-        cache.set(cache_key, True, timeout=USER_MODULE_CACHE_TTL)
+        _permissions_cache.set(cache_key, True, timeout=USER_MODULE_CACHE_TTL)
         return True
 
     group_names = _get_cached_user_group_names(user)
@@ -120,7 +126,7 @@ def is_admin_user(user):
         department_name = ''
 
     is_admin = is_admin_group or department_name.lower() == 'admin'
-    cache.set(cache_key, is_admin, timeout=USER_MODULE_CACHE_TTL)
+    _permissions_cache.set(cache_key, is_admin, timeout=USER_MODULE_CACHE_TTL)
     return is_admin
 
 
@@ -130,12 +136,12 @@ def _get_cached_user_group_names(user):
         return []
 
     cache_key = f'user_group_names_{user.id}'
-    cached_group_names = cache.get(cache_key)
+    cached_group_names = _permissions_cache.get(cache_key)
     if cached_group_names is not None:
         return cached_group_names
 
     group_names = list(user.groups.values_list('name', flat=True))
-    cache.set(cache_key, group_names, timeout=USER_GROUP_NAMES_CACHE_TTL)
+    _permissions_cache.set(cache_key, group_names, timeout=USER_GROUP_NAMES_CACHE_TTL)
     return group_names
 
 
@@ -193,7 +199,7 @@ def get_user_allowed_module_names(user):
         return []
 
     cache_key = f'user_modules_{user.id}'
-    cached_modules = cache.get(cache_key)
+    cached_modules = _permissions_cache.get(cache_key)
     if cached_modules is not None:
         return cached_modules
 
@@ -222,7 +228,7 @@ def get_user_allowed_module_names(user):
                 )
                 modules = _expand_legacy_module_names(provisioned_modules) if provisioned_modules else []
 
-        cache.set(cache_key, modules, timeout=USER_MODULE_CACHE_TTL)
+        _permissions_cache.set(cache_key, modules, timeout=USER_MODULE_CACHE_TTL)
         return modules
     except Exception:
         logger.exception('Error resolving user module access for user_id=%s', getattr(user, 'id', None))
@@ -568,7 +574,7 @@ def invalidate_user_modules_cache(user_id=None):
         user_id: Specific user ID to invalidate. If None, invalidates all users.
     """
     if user_id:
-        cache.delete_many([
+        _permissions_cache.delete_many([
             f'user_modules_{user_id}',
             f'user_group_names_{user_id}',
             f'user_is_admin_{user_id}',

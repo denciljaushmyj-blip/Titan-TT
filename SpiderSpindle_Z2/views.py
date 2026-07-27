@@ -364,8 +364,14 @@ class SSZ2AddSpiderAPIView(APIView):
             # Real processing activity — advance the shared current_stage SSOT
             # so the previous module (Jig Unloading) shows "Spider Spindle" as
             # the Current Location instead of a stale value.
-            from modelmasterapp.stage_service import update_juat_stage
+            # jig_obj.lot_id is this JigUnloadAfterTable row's own ID, which never
+            # exists in TotalStockModel — the original lot IDs tracked by Day
+            # Planning/Brass QC/Brass Audit completed tables are in combine_lot_ids
+            # (a jig can combine multiple original lots).
+            from modelmasterapp.stage_service import update_juat_stage, update_stock_stage
             update_juat_stage(lot_id, 'Spider Spindle')
+            for original_lot_id in (jig_obj.combine_lot_ids or []):
+                update_stock_stage(original_lot_id, 'Spider Spindle')
 
         return Response({
             'success': True,

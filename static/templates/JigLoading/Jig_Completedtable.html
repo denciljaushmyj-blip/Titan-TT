@@ -1675,34 +1675,154 @@
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
   let openTooltip = null;
+  const stockPreviewCache = Object.create(null);
 
-  // Function to load images for plating stock numbers
+  function normalizeJigStockImageUrl(rawUrl) {
+    const value = String(rawUrl || "").trim();
+    if (!value) return "";
+    try {
+      const parsed = new URL(value, window.location.origin);
+      const hostname = String(parsed.hostname || "").toLowerCase();
+      const isLoopbackHost =
+        hostname === "127.0.0.1" ||
+        hostname === "localhost" ||
+        hostname === "::1" ||
+        hostname === "[::1]";
+      const isApplicationAsset =
+        parsed.pathname.startsWith("/media/") ||
+        parsed.pathname.startsWith("/static/");
+      if (parsed.origin === window.location.origin || (isLoopbackHost && isApplicationAsset)) {
+        return parsed.pathname + parsed.search + parsed.hash;
+      }
+      return parsed.href;
+    } catch (error) {
+      return value;
+    }
+  }
+
+  window.normalizeStockImageUrl = window.normalizeStockImageUrl || normalizeJigStockImageUrl;
+
+  function getStockCacheKey(stockNo) {
+    return String(stockNo || "").trim().toUpperCase();
+  }
+
+  function getDefaultVisualAidUrl(stockNo) {
+    return "/adminportal/dp_visualaid/?plating_stk_no=" + encodeURIComponent(stockNo);
+  }
+
+  function setTriggerVisualAidUrl(trigger, stockNo, payload) {
+    if (!trigger || !stockNo) return;
+    trigger.dataset.visualAidUrl =
+      payload && payload.visual_aid_url ? payload.visual_aid_url : getDefaultVisualAidUrl(stockNo);
+  }
+
+  function getImageUrlFromEntry(entry) {
+    if (!entry) return "";
+    return normalizeJigStockImageUrl(entry.preview_image || entry.image_url || entry.url || entry.src || entry.image || "");
+  }
+
+  function resolveJigCompletedPreviewImage(payload) {
+    const previewImage = normalizeJigStockImageUrl(payload && payload.preview_image);
+    if (previewImage) {
+      return { url: previewImage, view: payload && payload.preview_view ? payload.preview_view : "Inside View" };
+    }
+    const images = Array.isArray(payload && payload.images) ? payload.images : [];
+    const insideView = images.find(function(entry) {
+      return String(entry && entry.view_code || "").toUpperCase() === "IV";
+    });
+    const insideViewUrl = getImageUrlFromEntry(insideView);
+    if (insideViewUrl) return { url: insideViewUrl, view: "Inside View" };
+    const noImage = images.find(function(entry) {
+      const viewCode = String(entry && entry.view_code || "").toUpperCase();
+      return viewCode === "NO_IMAGE" || entry && entry.is_placeholder === true;
+    });
+    const noImageUrl = getImageUrlFromEntry(noImage);
+    if (noImageUrl) return { url: noImageUrl, view: "No Image" };
+    return null;
+  }
+
+  function ensureTooltip(trigger) {
+    let tooltip = trigger.querySelector(".model-image-tooltip");
+    if (tooltip) return tooltip;
+    tooltip = document.createElement("div");
+    tooltip.className = "model-image-tooltip";
+    tooltip.style.cssText =
+      "position:absolute;left:80%;top:110%;transform:translateX(-50%);background:#fff;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:48px 18px 18px;z-index:10010;display:flex;align-items:center;gap:8px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 0.2s;";
+    tooltip.innerHTML =
+      '<button type="button" class="info-btn" style="position:absolute;top:8px;left:8px;background:#007bff;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;display:none;">Info</button>' +
+      '<button type="button" class="close-btn" style="position:absolute;top:8px;right:8px;background:#dc3545;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;display:none;">Close</button>' +
+      '<div class="img-gallery" style="display:flex;justify-content:center;align-items:center;overflow:hidden;width:180px;height:130px;"><span style="font-size:12px;color:#777;text-align:center;">Loading...</span></div>';
+    trigger.appendChild(tooltip);
+    return tooltip;
+  }
+
+  function setTooltipMessage(trigger, message) {
+    const tooltip = ensureTooltip(trigger);
+    const gallery = tooltip ? tooltip.querySelector(".img-gallery") : null;
+    if (!gallery) return;
+    gallery.textContent = "";
+    const span = document.createElement("span");
+    span.textContent = message;
+    span.style.cssText = "font-size:12px;color:#777;text-align:center;padding:12px;";
+    gallery.appendChild(span);
+  }
+
+  function setTooltipPreview(trigger, imageUrl, viewText) {
+    const tooltip = ensureTooltip(trigger);
+    const gallery = tooltip ? tooltip.querySelector(".img-gallery") : null;
+    const normalizedImageUrl = normalizeJigStockImageUrl(imageUrl);
+    if (!gallery) return;
+    if (!normalizedImageUrl) {
+      setTooltipMessage(trigger, "Image unavailable");
+      return;
+    }
+    gallery.textContent = "";
+    const image = document.createElement("img");
+    image.src = normalizedImageUrl;
+    image.alt = viewText || "Model IV preview";
+    image.decoding = "async";
+    image.style.cssText = "width:120px;height:120px;object-fit:contain;object-position:center;display:block;";
+    image.addEventListener("error", function() {
+      setTooltipMessage(trigger, "Image unavailable");
+    }, { once: true });
+    gallery.appendChild(image);
+  }
+
   function loadPlatingImages(trigger) {
     const platingStk = (trigger.getAttribute('data-plating-stk-no') || '').trim();
-    const tooltip = trigger.querySelector('.model-image-tooltip');
-    
-    if (!platingStk || !tooltip) return;
-    
-    fetch(`/get-plating-images/?plating_stk_no=${encodeURIComponent(platingStk)}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.images && data.images.length > 0) {
-          const gallery = tooltip.querySelector('.img-gallery');
-          gallery.innerHTML = '';
-          
-          data.images.forEach(imageUrl => {
-            const img = document.createElement('img');
-            img.src = imageUrl;
-            img.style.cssText = 'width: 55px; height: 55px; object-fit: cover; border-radius: 6px; cursor: pointer; margin: 2px;';
-            img.onclick = (e) => {
-              e.stopPropagation();
-              window.open(imageUrl, '_blank');
-            };
-            gallery.appendChild(img);
-          });
-        }
+    if (!platingStk) return;
+    const cacheKey = getStockCacheKey(platingStk);
+    setTriggerVisualAidUrl(trigger, platingStk);
+    if (stockPreviewCache[cacheKey]) {
+      const cached = stockPreviewCache[cacheKey];
+      setTriggerVisualAidUrl(trigger, platingStk, cached);
+      setTooltipPreview(trigger, cached.preview_image, cached.preview_view);
+      return;
+    }
+
+    setTooltipMessage(trigger, "Loading...");
+    fetch('/adminportal/api/model-hover-preview/?stock_no=' + encodeURIComponent(platingStk) + '&_ts=' + Date.now(), {
+      method: 'GET',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Preview request failed');
+        return response.json();
       })
-      .catch(error => console.error('Error loading images:', error));
+      .then(function(payload) {
+        const resolvedImage = resolveJigCompletedPreviewImage(payload);
+        payload.preview_image = resolvedImage ? resolvedImage.url : "";
+        payload.preview_view = resolvedImage ? resolvedImage.view : payload.preview_view;
+        stockPreviewCache[cacheKey] = payload;
+        setTriggerVisualAidUrl(trigger, platingStk, payload);
+        setTooltipPreview(trigger, payload.preview_image, payload.preview_view || "Model image");
+      })
+      .catch(function(error) {
+        console.error('[Jig Loading Completed] Model preview failed:', error);
+        setTooltipMessage(trigger, "Image unavailable");
+      });
   }
 
   // Your existing tooltip logic (from the better script)
@@ -1731,6 +1851,12 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".model-image-tooltip .info-btn").forEach(function(btn) {
     btn.addEventListener("click", function(e) {
       e.stopPropagation();
+      const trigger = btn.closest('.model-hover-trigger');
+      const stockNo = trigger ? (trigger.getAttribute('data-plating-stk-no') || '').trim() : '';
+      if (trigger && stockNo) {
+        window.location.href = trigger.dataset.visualAidUrl || getDefaultVisualAidUrl(stockNo);
+        return;
+      }
       // Find the closest row
       const row = btn.closest('tr');
       let lotId = null; 
@@ -1771,7 +1897,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
 
   document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
-    const tooltip = trigger.querySelector(".model-image-tooltip");
+    const tooltip = ensureTooltip(trigger);
     let imagesLoaded = false;
 
     trigger.addEventListener("mouseenter", function () {

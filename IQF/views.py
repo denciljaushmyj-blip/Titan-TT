@@ -299,7 +299,7 @@ class IQFPickTableView(APIView):
                 ).values_list('lot_id', flat=True)
             )
             consumed_lot_ids = completed_partial_ids | split_lot_ids
-            print(f"🛡️ [IQF RE-ENTRY GUARD] Consumed/split lot_ids excluded: {consumed_lot_ids}")
+            logger.info("[IQF RE-ENTRY GUARD] Consumed/split lot_ids excluded: %s", consumed_lot_ids)
 
             # Case 1: Batch rejection from Brass Audit
             batch_reentry = TotalStockModel.objects.filter(
@@ -331,7 +331,7 @@ class IQFPickTableView(APIView):
                     IQF_Rejection_ReasonStore.objects.filter(lot_id=lid).delete()
                     IQFTrayId.objects.filter(lot_id=lid).delete()
                     IQF_OptimalDistribution_Draft.objects.filter(lot_id=lid).delete()
-                print(f"🔄 [IQF RE-ENTRY BATCH] Reset {len(batch_ids)} lot(s) for IQF reprocessing: {batch_ids}")
+                logger.info("[IQF RE-ENTRY BATCH] Reset %s lot(s) for IQF reprocessing: %s", len(batch_ids), batch_ids)
 
             # Case 2: Partial rejection from Brass Audit (lot accepted with rejections)
             partial_rej_lot_ids = set(
@@ -369,7 +369,7 @@ class IQFPickTableView(APIView):
                         IQF_Rejection_ReasonStore.objects.filter(lot_id=lid).delete()
                         IQFTrayId.objects.filter(lot_id=lid).delete()
                         IQF_OptimalDistribution_Draft.objects.filter(lot_id=lid).delete()
-                    print(f"🔄 [IQF RE-ENTRY PARTIAL] Reset {len(partial_ids)} lot(s) for IQF reprocessing: {partial_ids}")
+                    logger.info("[IQF RE-ENTRY PARTIAL] Reset %s lot(s) for IQF reprocessing: %s", len(partial_ids), partial_ids)
 
         # ✅ CHANGED: Query TotalStockModel directly instead of ModelMasterCreation
         brass_rejection_qty_subquery = Brass_QC_Rejection_ReasonStore.objects.filter(
@@ -415,8 +415,8 @@ class IQFPickTableView(APIView):
             Q(is_split=True) | Q(remove_lot=True)
         ).order_by('-bq_last_process_date_time', '-lot_id')
 
-        print(f"📊 Found {queryset.count()} IQF pick records")
-        print("All lot_ids in IQF pick queryset:", list(queryset.values_list('lot_id', flat=True)))
+        logger.info("[IQF PICK] Found %s IQF pick records", queryset.count())
+        logger.info("[IQF PICK] All lot_ids in IQF pick queryset: %s", list(queryset.values_list('lot_id', flat=True)))
 
         # Pagination
         page_number = request.GET.get('page', 1)

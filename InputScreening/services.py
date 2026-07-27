@@ -44,7 +44,7 @@ def _verification_row_ui(verified: int, total: int) -> Dict[str, Any]:
     if all_verified:
         verification_state = "all_verified"
         process_q_state = "complete"
-        lot_status_label = "Yet to Start"
+        lot_status_label = "In Progress"
     elif partial_verified:
         verification_state = "partial_verified"
         process_q_state = "partial"
@@ -70,11 +70,21 @@ def _sync_total_stock_verification_flags(lot_id: str, verified: int, total: int)
     row_ui = _verification_row_ui(verified, total)
     all_verified = row_ui["verification_state"] == "all_verified"
     partial_verified = row_ui["verification_state"] == "partial_verified"
-    TotalStockModel.objects.filter(lot_id=lot_id).update(
-        ip_person_qty_verified=all_verified,
-        tray_verify=all_verified,
-        draft_tray_verify=partial_verified,
-    )
+    update_data = {
+        "ip_person_qty_verified": all_verified,
+        "tray_verify": all_verified,
+        "draft_tray_verify": partial_verified,
+    }
+
+    if all_verified:
+        update_data.update({
+            "last_process_module": "Input Screening",
+            "current_stage": "Input Screening",
+        })
+
+    TotalStockModel.objects.filter(
+        lot_id=lot_id
+    ).update(**update_data)
     if all_verified or partial_verified:
         # Draft (partial verification) is real processing activity at the Input
         # Screening stage — current_stage must move off "Day Planning" as soon as

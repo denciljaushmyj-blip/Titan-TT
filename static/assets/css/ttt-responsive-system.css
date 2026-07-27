@@ -635,6 +635,15 @@ html body .content-wrapper:not(.is-pick-table-page):not(.is-completed-table-page
   z-index: 20 !important;
 }
 
+/* Fix: header cells for column 4 onward (Action, No of Trays, etc.) must stay
+   pinned to the top like the rest of the header row, otherwise scrolling
+   rows show through them. Body cells for these columns are left untouched. */
+html body .content-wrapper:not(.is-pick-table-page):not(.is-completed-table-page) #order-listing thead th:nth-child(n+4) {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 20 !important;
+}
+
 html body .content-wrapper:not(.is-pick-table-page):not(.is-completed-table-page) #order-listing th:nth-child(-n+3),
 html body .content-wrapper:not(.is-pick-table-page):not(.is-completed-table-page) #order-listing td:nth-child(-n+3) {
   position: sticky !important;
@@ -1042,4 +1051,16 @@ html.ttt-viewport-tablet .is-completed-table-page #order-listing td:nth-child(4)
   height: auto !important;
   padding: 4px 10px !important;
   line-height: 1.15 !important;
+}
+
+/* Brass QC Completed Table ONLY: smaller status badge size (Accepted / Partially Accepted / Rejected).
+   Does not affect DP Completed Table or any other module. */
+.brass-completed-table-page.is-completed-table-page #order-listing .status-badge {
+  font-size: 11px !important;
+  padding: 3px 8px !important;
+  line-height: 1.1 !important;
+}
+
+.brass-completed-table-page.is-completed-table-page #order-listing .status-badge i {
+  font-size: 11px !important;
 }

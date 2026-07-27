@@ -1828,6 +1828,88 @@ function getCookie(name) {
 
 <!-- Script for dynamic model image gallery view -->
 <script nonce="{{ csp_nonce }}">
+const ipCompletedPreviewImageCache = {};
+
+function normalizeIpCompletedImageUrl(rawUrl) {
+  const value = String(rawUrl || '').trim();
+  if (!value) return '';
+  try {
+    const parsed = new URL(value, window.location.origin);
+    const hostname = String(parsed.hostname || '').toLowerCase();
+    const isLoopbackHost =
+      hostname === '127.0.0.1' ||
+      hostname === 'localhost' ||
+      hostname === '::1' ||
+      hostname === '[::1]';
+    const isApplicationAsset =
+      parsed.pathname.startsWith('/media/') ||
+      parsed.pathname.startsWith('/static/');
+    if (parsed.origin === window.location.origin || (isLoopbackHost && isApplicationAsset)) {
+      return parsed.pathname + parsed.search + parsed.hash;
+    }
+    return parsed.href;
+  } catch (error) {
+    return value;
+  }
+}
+
+function getIpCompletedImageUrlFromEntry(entry) {
+  if (!entry) return '';
+  return normalizeIpCompletedImageUrl(entry.preview_image || entry.image_url || entry.url || entry.src || entry.image || '');
+}
+
+function resolveIpCompletedPreviewImage(payload) {
+  const previewImage = normalizeIpCompletedImageUrl(payload && payload.preview_image);
+  if (previewImage) return previewImage;
+  const images = Array.isArray(payload && payload.images) ? payload.images : [];
+  const insideView = images.find(function(entry) {
+    return String(entry && entry.view_code || '').toUpperCase() === 'IV';
+  });
+  const insideViewUrl = getIpCompletedImageUrlFromEntry(insideView);
+  if (insideViewUrl) return insideViewUrl;
+  const noImage = images.find(function(entry) {
+    const viewCode = String(entry && entry.view_code || '').toUpperCase();
+    return viewCode === 'NO_IMAGE' || entry && entry.is_placeholder === true;
+  });
+  return getIpCompletedImageUrlFromEntry(noImage);
+}
+
+function fetchIpCompletedPreviewImage(modelNo) {
+  const cacheKey = String(modelNo || '').trim().toUpperCase();
+  if (!cacheKey) return Promise.resolve('');
+  if (Object.prototype.hasOwnProperty.call(ipCompletedPreviewImageCache, cacheKey)) {
+    return Promise.resolve(ipCompletedPreviewImageCache[cacheKey]);
+  }
+  return fetch('/adminportal/api/model-hover-preview/?stock_no=' + encodeURIComponent(modelNo) + '&_ts=' + Date.now(), {
+    credentials: 'same-origin',
+    cache: 'no-store',
+    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+  })
+    .then(function(response) {
+      if (!response.ok) return '';
+      return response.json();
+    })
+    .then(function(payload) {
+      const imageUrl = resolveIpCompletedPreviewImage(payload);
+      ipCompletedPreviewImageCache[cacheKey] = imageUrl || '';
+      return imageUrl || '';
+    })
+    .catch(function() {
+      ipCompletedPreviewImageCache[cacheKey] = '';
+      return '';
+    });
+}
+
+function hydrateIpCompletedPreviewImages(root) {
+  if (!root) return;
+  root.querySelectorAll('.ip-completed-preview-img[data-model-no]').forEach(function(img) {
+    const modelNo = img.getAttribute('data-model-no') || '';
+    fetchIpCompletedPreviewImage(modelNo).then(function(previewUrl) {
+      if (previewUrl) img.src = previewUrl;
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const modal = document.getElementById('modelRemarkModal');
   const closeBtn = document.getElementById('closeModelRemarkModal');
@@ -1851,12 +1933,12 @@ document.addEventListener("DOMContentLoaded", function () {
         modelList.forEach(function(modelNo, index) {
           const color = modelColors[modelNo] || '#ccc';
           const modelImageData = modelImages[modelNo] || {};
-          const firstImage = modelImageData.first_image || '/static/assets/images/imagePlaceholder.jpg';
+          const firstImage = normalizeIpCompletedImageUrl(modelImageData.first_image) || '/static/assets/images/imagePlaceholder.jpg';
           
           html += `
             <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
               <span class="model-circle" style="background:${color};width:22px;height:22px;display:inline-block;margin-bottom:2px;"></span>
-              <img src="${firstImage}" alt="${modelNo}" style="max-width:80px;max-height:80px;border-radius:8px;border:1px solid #eee;background:#fafafa;cursor:pointer;" onclick="showModelImages('${modelNo}', '${JSON.stringify(modelImageData.images || []).replace(/'/g, "\\'")}')"/>
+              <img src="${firstImage}" data-model-no="${modelNo}" class="ip-completed-preview-img" alt="${modelNo}" style="max-width:80px;max-height:80px;border-radius:8px;border:1px solid #eee;background:#fafafa;cursor:pointer;object-fit:contain;" onclick="showModelImages('${modelNo}', '${JSON.stringify(modelImageData.images || []).replace(/'/g, "\\'")}')"/>
               <div style="font-weight:600;color:#023E4DCC;font-size:0.98rem;text-align:center;word-break:break-all;">${modelNo}</div>
             </div>
           `;
@@ -1864,6 +1946,7 @@ document.addEventListener("DOMContentLoaded", function () {
         html += `</div>`;
 
         modalContent.innerHTML = html;
+        hydrateIpCompletedPreviewImages(modalContent);
         modal.style.display = 'block';
       } catch (error) {
         console.error('Error parsing model data:', error);

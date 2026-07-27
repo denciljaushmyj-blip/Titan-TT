@@ -607,7 +607,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   width: 100% !important;
   height: 100% !important;
   max-width: 210px !important;
-  max-height: 190px !important;
+  max-height: 120px !important;
   object-fit: contain !important;
   object-position: center !important;
   overflow: visible !important;
@@ -640,22 +640,20 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 }
 
 .model-image-tooltip {
-  width: 230px !important;
-  min-width: 230px !important;
-  max-width: 230px !important;
-  min-height: 185px !important;
+  width: auto !important;
   height: auto !important;
-  padding: 12px !important;
+  padding: 48px 18px 18px !important;
   gap: 8px !important;
   box-sizing: border-box !important;
   background: #fff !important;
-  border: 1px solid #cfd8dc !important;
-  border-radius: 8px !important;
-  box-shadow: 0 6px 18px rgba(0,0,0,.18) !important;
-  overflow: hidden !important;
-  z-index: 500000 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  z-index: 10010 !important;
   font-size: 12px !important;
   line-height: 1.3 !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 .model-image-tooltip,
@@ -663,40 +661,57 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   font-size: 12px !important;
 }
 
-.model-image-tooltip .info-btn,
+.model-image-tooltip .info-btn {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  z-index: 2 !important;
+}
+
 .model-image-tooltip .close-btn {
-  min-width: 48px !important;
-  height: 28px !important;
-  padding: 4px 9px !important;
-  line-height: 18px !important;
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 2 !important;
 }
 
 .model-image-tooltip .img-gallery {
-  width: 204px !important;
-  height: 135px !important;
-  min-height: 135px !important;
-  max-height: 135px !important;
-  margin: 0 auto !important;
+  width: 260px !important;
+  height: 210px !important;
+  min-height: 210px !important;
+  margin: 0 !important;
+  padding: 0 !important;
   overflow: hidden !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: #fff !important;
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  box-sizing: border-box !important;
 }
 
 .model-image-tooltip .img-gallery img,
 .model-image-tooltip .nickel-preview-img,
 .model-image-tooltip .model-preview-image {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 204px !important;
-  max-height: 135px !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
   object-fit: contain !important;
   object-position: center !important;
   display: block !important;
-  background: #fff !important;
-  border: none !important;
+  margin: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 0 !important;
   box-shadow: none !important;
+  filter: none !important;
+  background: transparent !important;
 }
 
 </style>
@@ -862,7 +877,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                                         <td >
                       <span class="model-hover-trigger" data-plating-stk-no="{{ data.plating_stk_no }}" style="cursor: pointer; word-break: break-all;">
                         {{ data.plating_stk_no|highlight_plating_color|safe_html }}
-                        <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s; min-width: 220px;">
+                        <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 10010; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
                           
                           <!-- Header with Info and Close buttons - Initially hidden -->
                           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -876,7 +891,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                           <!-- Image gallery section -->
                           <div style="display: flex; align-items: center; gap: 8px;">
                             <!-- Hide scroll buttons since only one image is shown -->
-                            <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;"></div>
+                            <div class="img-gallery" style="display: flex; justify-content:center; align-items:center; gap: 6px; overflow: hidden; width: 260px; height: 210px; min-height: 210px; padding:0; margin:0; border:0; outline:0; border-radius:0; box-shadow:none; filter:none; background:transparent; box-sizing:border-box;"></div>
                           </div>
                         </div>
                       </span>
@@ -1832,25 +1847,77 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!modalUserImg || !stockNo) return;
         const previewCache = window.NickelModelPreviewCache || new Map();
         window.NickelModelPreviewCache = previewCache;
+        const normalizeModalImageUrl = function(rawUrl) {
+          if (window.NickelAuditNormalizeImageUrl) {
+            return window.NickelAuditNormalizeImageUrl(rawUrl);
+          }
+          if (window.normalizeStockImageUrl) {
+            return window.normalizeStockImageUrl(rawUrl);
+          }
+          return String(rawUrl || '').trim();
+        };
+        const getImageUrlFromEntry = function(entry) {
+          if (!entry) return "";
+          return entry.preview_image || entry.image_url || entry.url || entry.src || entry.image || "";
+        };
+        const resolveModalImage = function(payload) {
+          const previewUrl = normalizeModalImageUrl(payload && payload.preview_image);
+          if (previewUrl) {
+            return { url: previewUrl, alt: payload && payload.preview_view ? payload.preview_view : "Inside View" };
+          }
+          const images = Array.isArray(payload && payload.images) ? payload.images : [];
+          const ivEntry = images.find(function(image) {
+            return String(image && image.view_code || "").toUpperCase() === "IV";
+          });
+          const ivUrl = normalizeModalImageUrl(getImageUrlFromEntry(ivEntry));
+          if (ivUrl) {
+            return { url: ivUrl, alt: "Inside View" };
+          }
+          const placeholderEntry = images.find(function(image) {
+            const viewCode = String(image && image.view_code || "").toUpperCase();
+            return viewCode === "NO_IMAGE" || image && image.is_placeholder === true;
+          });
+          const placeholderUrl = normalizeModalImageUrl(getImageUrlFromEntry(placeholderEntry));
+          if (placeholderUrl) {
+            return { url: placeholderUrl, alt: "No Image" };
+          }
+          return null;
+        };
         const renderPayload = function (payload) {
-          if (payload && payload.preview_image && modal.dataset.activePlatingStkNo === stockNo) {
-            modalUserImg.src = window.NickelAuditNormalizeImageUrl ? window.NickelAuditNormalizeImageUrl(payload.preview_image) : payload.preview_image;
+          if (modal.dataset.activePlatingStkNo !== stockNo) return;
+          const resolvedImage = resolveModalImage(payload);
+          if (resolvedImage) {
+            modalUserImg.src = resolvedImage.url;
+            modalUserImg.alt = resolvedImage.alt;
+          } else {
+            modalUserImg.removeAttribute('src');
+            modalUserImg.alt = 'Image unavailable';
           }
         };
-        modalUserImg.src = "";
+        modalUserImg.removeAttribute('src');
+        modalUserImg.alt = 'Loading model image';
         if (previewCache.has(stockNo)) {
           renderPayload(previewCache.get(stockNo));
           return;
         }
-        fetch("/adminportal/api/model-hover-preview/?stock_no=" + encodeURIComponent(stockNo), {
-          headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" }
+        fetch("/adminportal/api/model-hover-preview/?stock_no=" + encodeURIComponent(stockNo) + "&_ts=" + Date.now(), {
+          credentials: "same-origin",
+          headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
+          cache: "no-store"
         })
           .then(function (response) { return response.ok ? response.json() : null; })
           .then(function (payload) {
+            if (payload) {
+              payload.preview_image = normalizeModalImageUrl(payload.preview_image);
+            }
             previewCache.set(stockNo, payload);
             renderPayload(payload);
           })
-          .catch(function () {});
+          .catch(function () {
+            if (modal.dataset.activePlatingStkNo !== stockNo) return;
+            modalUserImg.removeAttribute('src');
+            modalUserImg.alt = 'Image unavailable';
+          });
       }
 
       modal.dataset.activePlatingStkNo = (link.dataset.platingStkNo || '').trim();
@@ -2595,35 +2662,49 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       const parsed = new URL(value, window.location.origin);
+      const hostname = String(parsed.hostname || "").toLowerCase();
+      const isLoopbackHost =
+        hostname === "127.0.0.1" ||
+        hostname === "localhost" ||
+        hostname === "::1" ||
+        hostname === "[::1]";
+      const isApplicationAsset =
+        parsed.pathname.startsWith("/media/") ||
+        parsed.pathname.startsWith("/static/");
 
       if (
-        parsed.pathname.startsWith("/media/") ||
-        parsed.pathname.startsWith("/static/")
+        parsed.origin === window.location.origin ||
+        (isLoopbackHost && isApplicationAsset)
       ) {
         return parsed.pathname + parsed.search + parsed.hash;
       }
 
       return parsed.href;
     } catch (error) {
-      if (
-        value.startsWith("media/") ||
-        value.startsWith("static/")
-      ) {
-        return "/" + value;
-      }
-
       return value;
     }
   }
 
+  window.normalizeStockImageUrl = normalizeImageUrl;
   window.NickelAuditNormalizeImageUrl = normalizeImageUrl;
+
+  function getDefaultVisualAidUrl(stockNo) {
+    return "/adminportal/dp_visualaid/?plating_stk_no=" + encodeURIComponent(stockNo);
+  }
+
+  function setTriggerVisualAidUrl(trigger, stockNo, payload) {
+    if (!trigger || !stockNo) return;
+    trigger.dataset.visualAidUrl = payload && payload.visual_aid_url
+      ? payload.visual_aid_url
+      : getDefaultVisualAidUrl(stockNo);
+  }
 
   function renderLoading(trigger) {
     const gallery = getGallery(trigger);
     if (!gallery) return;
 
     gallery.innerHTML =
-      '<span style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
+      '<span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
   }
 
   function renderMessage(trigger, message) {
@@ -2661,9 +2742,21 @@ document.addEventListener("DOMContentLoaded", function () {
     image.loading = "eager";
     image.decoding = "async";
     image.style.cssText =
-      "width:100%;height:100%;max-width:204px;max-height:135px;" +
-      "object-fit:contain;object-position:center;" +
-      "border-radius:6px;background:#fff;display:block;";
+      "display:block;" +
+      "width:auto;" +
+      "height:auto;" +
+      "max-width:100%;" +
+      "max-height:100%;" +
+      "object-fit:contain;" +
+      "object-position:center;" +
+      "margin:auto;" +
+      "padding:0;" +
+      "border:0;" +
+      "outline:0;" +
+      "border-radius:0;" +
+      "box-shadow:none;" +
+      "filter:none;" +
+      "background:transparent;";
 
     image.addEventListener("error", function () {
       console.error(
@@ -2695,7 +2788,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const request = fetch(
       "/adminportal/api/model-hover-preview/?stock_no=" +
-        encodeURIComponent(stockNo),
+        encodeURIComponent(stockNo) +
+        "&_ts=" +
+        Date.now(),
       {
         headers: {
           "Accept": "application/json",
@@ -2713,6 +2808,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(function (payload) {
+        payload.preview_image = normalizeImageUrl(payload.preview_image);
         previewCache.set(stockNo, payload);
         return payload;
       })
@@ -2733,8 +2829,12 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    setTriggerVisualAidUrl(trigger, stockNo);
+
     if (previewCache.has(stockNo)) {
-      renderPreview(trigger, previewCache.get(stockNo));
+      const cached = previewCache.get(stockNo);
+      setTriggerVisualAidUrl(trigger, stockNo, cached);
+      renderPreview(trigger, cached);
       return;
     }
 
@@ -2742,6 +2842,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     requestPreview(stockNo)
       .then(function (payload) {
+        setTriggerVisualAidUrl(trigger, stockNo, payload);
         renderPreview(trigger, payload);
       })
       .catch(function (error) {
@@ -2929,9 +3030,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const stockNo = getStockNo(trigger);
         if (!stockNo) return;
 
-        window.location.href =
-          "/adminportal/dp_visualaid/?plating_stk_no=" +
-          encodeURIComponent(stockNo);
+        window.location.href = trigger.dataset.visualAidUrl || getDefaultVisualAidUrl(stockNo);
       });
     }
 

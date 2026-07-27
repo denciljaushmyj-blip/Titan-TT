@@ -2926,28 +2926,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       const parsed = new URL(value, window.location.origin);
-
-      // Project media/static must always load from the currently opened
-      // deployment. This corrects localhost, 127.0.0.1, internal IP,
-      // wrong-host and HTTP/HTTPS mismatches returned by the API.
-      if (
+      const hostname = String(parsed.hostname || "").toLowerCase();
+      const isLoopbackHost =
+        hostname === "127.0.0.1" ||
+        hostname === "localhost" ||
+        hostname === "::1" ||
+        hostname === "[::1]";
+      const isApplicationAsset =
         parsed.pathname.startsWith("/media/") ||
-        parsed.pathname.startsWith("/static/")
+        parsed.pathname.startsWith("/static/");
+
+      // Application media/static URLs are safer as relative paths behind IIS/reverse proxy.
+      if (
+        parsed.origin === window.location.origin ||
+        (isLoopbackHost && isApplicationAsset)
       ) {
         return parsed.pathname + parsed.search + parsed.hash;
       }
 
       return parsed.href;
     } catch (error) {
-      if (value.startsWith("media/") || value.startsWith("static/")) {
-        return "/" + value;
-      }
       return value;
     }
   }
 
-  // Also expose normalization to the tray-detail modal image code.
+  window.normalizeStockImageUrl = normalizeImageUrl;
   window.__normalizeModelMediaUrl = normalizeImageUrl;
+
+  function getDefaultVisualAidUrl(stockNo) {
+    return "/adminportal/dp_visualaid/?plating_stk_no=" + encodeURIComponent(stockNo);
+  }
+
+  function setTriggerVisualAidUrl(trigger, stockNo, payload) {
+    if (!trigger || !stockNo) return;
+    trigger.dataset.visualAidUrl = payload && payload.visual_aid_url
+      ? payload.visual_aid_url
+      : getDefaultVisualAidUrl(stockNo);
+  }
 
   function renderLoading(trigger) {
     const gallery = getGallery(trigger);
@@ -3024,7 +3039,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const request = fetch(
       "/adminportal/api/model-hover-preview/?stock_no=" +
-        encodeURIComponent(stockNo),
+        encodeURIComponent(stockNo) +
+        "&_ts=" +
+        Date.now(),
       {
         method: "GET",
         credentials: "same-origin",
@@ -3032,7 +3049,8 @@ document.addEventListener("DOMContentLoaded", function () {
           "Accept": "application/json",
           "X-Requested-With": "XMLHttpRequest"
         },
-        signal: controller.signal
+        signal: controller.signal,
+        cache: "no-store"
       }
     )
       .then(function (response) {
@@ -3042,6 +3060,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(function (payload) {
+        payload.preview_image = normalizeImageUrl(payload.preview_image);
         previewCache.set(stockNo, payload);
         return payload;
       })
@@ -3062,8 +3081,12 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    setTriggerVisualAidUrl(trigger, stockNo);
+
     if (previewCache.has(stockNo)) {
-      renderPreview(trigger, previewCache.get(stockNo));
+      const cached = previewCache.get(stockNo);
+      setTriggerVisualAidUrl(trigger, stockNo, cached);
+      renderPreview(trigger, cached);
       return;
     }
 
@@ -3073,6 +3096,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (payload) {
         // Complete the initiating popup even when the pointer briefly leaves.
         // This prevents the tooltip remaining permanently on Loading.
+        setTriggerVisualAidUrl(trigger, stockNo, payload);
         renderPreview(trigger, payload);
       })
       .catch(function (error) {
@@ -3261,9 +3285,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const stockNo = getStockNo(trigger);
         if (!stockNo) return;
 
-        window.location.href =
-          "/adminportal/dp_visualaid/?plating_stk_no=" +
-          encodeURIComponent(stockNo);
+        window.location.href = trigger.dataset.visualAidUrl || getDefaultVisualAidUrl(stockNo);
       });
     }
 

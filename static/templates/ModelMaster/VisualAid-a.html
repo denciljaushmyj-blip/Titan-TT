@@ -134,50 +134,24 @@
         border: 2px solid transparent;
     }
 
-    .visual-aid-thumbnail {
-        border: 2px solid transparent;
-        background: transparent;
-        padding: 0;
-        width: 22%;
-        max-width: 150px;
-        aspect-ratio: 1/1;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .visual-aid-thumbnail img {
-        width: 100%;
-        height: 100%;
-        border-radius: 6px;
-        object-fit: contain;
-        object-position: center;
-        background: #fff;
-        display: block;
-    }
-
-    .scrollable-image:hover,
-    .visual-aid-thumbnail:hover {
+    .scrollable-image:hover {
         transform: scale(1.05);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
-    .scrollable-image.active,
-    .visual-aid-thumbnail.active {
+    .scrollable-image.active {
         border-color: #007bff;
         box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
     }
 
     @media (max-width: 768px) {
-        .scrollable-image,
-        .visual-aid-thumbnail {
+        .scrollable-image {
             width: 45%;
         }
     }
 
     @media (max-width: 480px) {
-        .scrollable-image,
-        .visual-aid-thumbnail {
+        .scrollable-image {
             width: 100%;
         }
     }
@@ -447,8 +421,8 @@
                     Model No: {{ plating_stk_no|default:"N/A" }}
                 </h5>
                 <div class="big-image-container">
-                    {% if image_data and image_data|length > 0 %}
-                        <img id="bigImage" src="" alt="Big View" />
+                    {% if image_urls and image_urls|length > 0 %}
+                        <img id="bigImage" src="{{ image_urls.0 }}" alt="Big View" />
                     {% else %}
                         <div class="visual-aid-empty-state">
                             No image available
@@ -574,23 +548,12 @@
                 <div class="mt-4">
                    <!--  <h5 class="text-center">360° View</h5> -->
                     <div class="scrollable-images" id="imageGallery">
-                        {% if image_data and image_data|length > 0 %}
-                            {% for image in image_data %}
-                                <button
-                                    type="button"
-                                    class="visual-aid-thumbnail"
-                                    data-image-id="{{ image.id }}"
-                                    data-image-url="{{ image.url }}"
-                                    data-view-code="{{ image.view_code }}"
-                                    data-view-label="{{ image.view }}"
-                                    aria-label="{{ image.view }}"
-                                >
-                                    <img
-                                        src="{{ image.url }}"
-                                        alt="{{ image.view }}"
-                                        loading="lazy"
-                                    />
-                                </button>
+                        {% if image_urls and image_urls|length > 0 %}
+                            {% for url in image_urls %}
+                                <img src="{{ url }}" 
+                                     alt="360 View {{ forloop.counter }}" 
+                                     class="scrollable-image {% if forloop.first %}active{% endif %}" 
+                                     data-index="{{ forloop.counter0 }}" />
                             {% endfor %}
                         {% else %}
                             <div class="no-images-message visual-aid-empty-state">
@@ -659,7 +622,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const zoomIndicator = document.getElementById('zoomIndicator');
-    const thumbnailButtons = Array.from(document.querySelectorAll('.visual-aid-thumbnail'));
+    const smallImages = document.querySelectorAll('.scrollable-image');
     
     let currentImageIndex = 0;
     let zoomLevel = 1;
@@ -667,89 +630,60 @@ document.addEventListener("DOMContentLoaded", function() {
     const zoomMin = 0.5;
     const zoomMax = 3;
 
-    function normalizeVisualAidImageUrl(rawUrl) {
+    // Build image URLs array from Django template
+    const imageUrls = [
+        {% if image_urls and image_urls|length > 0 %}
+            {% for url in image_urls %}
+                "{{ url|escapejs }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        {% endif %}
+    ].map(function(rawUrl) {
         const value = String(rawUrl || "").trim();
         if (!value) return "";
 
         try {
             const parsed = new URL(value, window.location.origin);
-            const hostname = String(parsed.hostname || "").toLowerCase();
-            const isLoopbackHost =
-                hostname === "127.0.0.1" ||
-                hostname === "localhost" ||
-                hostname === "::1" ||
-                hostname === "[::1]";
-            const isApplicationAsset =
-                parsed.pathname.startsWith("/media/") ||
-                parsed.pathname.startsWith("/static/");
-
-            if (
-                parsed.origin === window.location.origin ||
-                (isLoopbackHost && isApplicationAsset)
-            ) {
+            if (parsed.origin === window.location.origin) {
                 return parsed.pathname + parsed.search + parsed.hash;
             }
             return parsed.href;
         } catch (error) {
             return value;
         }
-    }
-
-    const visualAidImages = [];
-    const seenImages = new Set();
-
-    thumbnailButtons.forEach(function(button) {
-        const imageUrl = normalizeVisualAidImageUrl(button.dataset.imageUrl);
-        const imageId = String(button.dataset.imageId || "").trim();
-        const dedupeKey = imageId || imageUrl;
-
-        if (!imageUrl || seenImages.has(dedupeKey)) {
-            button.remove();
-            return;
-        }
-
-        button.dataset.imageUrl = imageUrl;
-        const thumbnailImage = button.querySelector("img");
-        if (thumbnailImage) {
-            thumbnailImage.src = imageUrl;
-            thumbnailImage.addEventListener("error", function() {
-                console.error(
-                    "Visual Aid image failed:",
-                    thumbnailImage.src,
-                    button.dataset.viewCode
-                );
-            }, { once: true });
-        }
-        seenImages.add(dedupeKey);
-        visualAidImages.push({
-            button: button,
-            url: imageUrl,
-            viewCode: String(button.dataset.viewCode || "").trim().toUpperCase()
-        });
-    });
-
-    const imageUrls = visualAidImages.map(function(image) {
-        return image.url;
-    });
+    }).filter(Boolean);
 
     console.log('🖼️ Loaded images:', imageUrls);
+
+    const visualAidFallback = "{% static 'assets/images/imagePlaceholder.jpg' %}";
 
     function applySafeImageSource(imageElement, sourceUrl) {
         if (!imageElement) return;
 
-        const normalizedSource = normalizeVisualAidImageUrl(sourceUrl);
+        const normalizedSource = String(sourceUrl || "").trim();
         if (normalizedSource) {
             imageElement.src = normalizedSource;
         }
 
-        imageElement.addEventListener("error", function() {
-            console.error(
-                "Visual Aid image failed:",
-                imageElement.src,
-                visualAidImages[currentImageIndex] ? visualAidImages[currentImageIndex].viewCode : ""
-            );
-        }, { once: true });
+        imageElement.addEventListener("error", function handleImageError() {
+            imageElement.removeEventListener("error", handleImageError);
+            if (
+                visualAidFallback &&
+                imageElement.getAttribute("src") !== visualAidFallback
+            ) {
+                imageElement.src = visualAidFallback;
+            }
+        });
     }
+
+    if (bigImg && imageUrls.length > 0) {
+        applySafeImageSource(bigImg, imageUrls[0]);
+    }
+
+    smallImages.forEach(function(imageElement, index) {
+        if (imageUrls[index]) {
+            applySafeImageSource(imageElement, imageUrls[index]);
+        }
+    });
 
     // Update zoom indicator
     function updateZoomIndicator() {
@@ -758,8 +692,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Update active image indicator
     function updateActiveImage() {
-        visualAidImages.forEach((image, index) => {
-            image.button.classList.toggle('active', index === currentImageIndex);
+        smallImages.forEach((img, index) => {
+            img.classList.toggle('active', index === currentImageIndex);
         });
     }
 
@@ -812,9 +746,9 @@ document.addEventListener("DOMContentLoaded", function() {
             changeBigImage(newIndex);
         });
 
-        // Thumbnail click handlers
-        visualAidImages.forEach((image, index) => {
-            image.button.addEventListener('click', function() {
+        // Small image click handlers
+        smallImages.forEach((img, index) => {
+            img.addEventListener('click', function() {
                 changeBigImage(index);
             });
         });
@@ -863,11 +797,8 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
 
-        // Initialize with IV when available while keeping all distinct thumbnails.
-        const initialIndex = visualAidImages.findIndex(function(image) {
-            return image.viewCode === 'IV';
-        });
-        changeBigImage(initialIndex >= 0 ? initialIndex : 0);
+        // Initialize
+        updateActiveImage();
         updateZoomIndicator();
         
         console.log(`✅ VisualAid initialized with ${imageUrls.length} images`);
