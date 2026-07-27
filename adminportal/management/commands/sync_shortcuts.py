@@ -12,7 +12,9 @@ Options:
               (removes old/stale entries). Off by default.
 """
 from django.core.management.base import BaseCommand
+from django.core.cache import cache
 from adminportal.models import ShortcutConfiguration
+from adminportal.services import SHORTCUT_CACHE_KEY
 
 CANONICAL_SHORTCUTS = [
     {
@@ -310,9 +312,69 @@ CANONICAL_SHORTCUTS = [
         'target_selector': '#trayIDRedoBtn, #trayScanRedoBtn, #rejectionTrayRedoBtn, #delinkTrayRedoBtn, #topTrayRedoBtn, .jig-redo-btn, .redo-action-btn, [data-action="redo"]',
         'fallback_selector': '',
         'contexts': ['global'],
-        'allow_in_modal': True,
+        'allow_in_modal': False,
         'allow_when_typing': False,
         'sort_order': 131,
+        'is_active': True,
+    },
+    {
+        'code': 'dp_tray_undo',
+        'keys': ['O'],
+        'key_display': 'O',
+        'label': 'Undo Tray Clear',
+        'description': 'Restore the Day Planning tray scan values cleared with C.',
+        'action_type': 'builtin',
+        'target_selector': '',
+        'fallback_selector': '',
+        'contexts': ['/dayplanning/dp_pick_table/'],
+        'allow_in_modal': True,
+        'allow_when_typing': True,
+        'sort_order': 132,
+        'is_active': True,
+    },
+    {
+        'code': 'dp_tray_clear',
+        'keys': ['C'],
+        'key_display': 'C',
+        'label': 'Clear Tray Scan',
+        'description': 'Clear the open Day Planning tray scan inputs.',
+        'action_type': 'page_action',
+        'target_selector': '#trayIDRedoBtn',
+        'fallback_selector': '',
+        'contexts': ['/dayplanning/dp_pick_table/'],
+        'allow_in_modal': True,
+        'allow_when_typing': False,
+        'sort_order': 133,
+        'is_active': True,
+    },
+    {
+        'code': 'is_reject_undo',
+        'keys': ['O'],
+        'key_display': 'O',
+        'label': 'Undo Clear',
+        'description': 'Restore the Input Screening reject modal values cleared with Clear.',
+        'action_type': 'builtin',
+        'target_selector': '',
+        'fallback_selector': '',
+        'contexts': ['/inputscreening/IS_PickTable/'],
+        'allow_in_modal': True,
+        'allow_when_typing': True,
+        'sort_order': 134,
+        'is_active': True,
+    },
+    {
+        'code': 'is_modal_close',
+        'keys': ['C'],
+        'key_display': 'C',
+        'label': 'Close Modal',
+        'description': 'Close the open Input Screening reject modal.',
+        'action_type': 'builtin',
+        'target_selector': '',
+        'fallback_selector': '',
+        'contexts': ['/inputscreening/IS_PickTable/'],
+        'allow_in_modal': True,
+        'allow_when_typing': True,
+        'sort_order': 135,
         'is_active': True,
     },
     {
@@ -377,10 +439,10 @@ class Command(BaseCommand):
             )
             if created:
                 created_count += 1
-                self.stdout.write(self.style.SUCCESS(f'  [CREATED] {code} → {obj.key_display} ({obj.label})'))
+                self.stdout.write(self.style.SUCCESS(f'  [CREATED] {code} -> {obj.key_display} ({obj.label})'))
             else:
                 updated_count += 1
-                self.stdout.write(f'  [UPDATED] {code} → {obj.key_display} ({obj.label})')
+                self.stdout.write(f'  [UPDATED] {code} -> {obj.key_display} ({obj.label})')
 
         if options['purge']:
             stale = ShortcutConfiguration.objects.exclude(code__in=canonical_codes)
@@ -393,6 +455,8 @@ class Command(BaseCommand):
             else:
                 self.stdout.write('  [PURGE] No stale shortcuts found.')
 
+        cache.delete(SHORTCUT_CACHE_KEY)
+
         self.stdout.write('')
         self.stdout.write(self.style.SUCCESS(
             f'Done. Created: {created_count}, Updated: {updated_count}'
@@ -404,4 +468,8 @@ class Command(BaseCommand):
         self.stdout.write('--- Current shortcuts in DB ---')
         for sc in ShortcutConfiguration.objects.order_by('sort_order'):
             status = 'ACTIVE' if sc.is_active else 'INACTIVE'
-            self.stdout.write(f'  [{status}] {sc.key_display:15s} {sc.code:25s} {sc.label}')
+            key_display = str(sc.key_display).encode('ascii', 'replace').decode('ascii')
+            label = str(sc.label).encode('ascii', 'replace').decode('ascii')
+            self.stdout.write(f'  [{status}] {key_display:15s} {sc.code:25s} {label}')
+
+

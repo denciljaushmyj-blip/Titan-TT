@@ -1218,6 +1218,58 @@
 <script nonce="{{ csp_nonce }}" src="{% static 'js/inputscreening_shortcuts.js' %}" defer></script>
 
 <script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  function isTvmOpen() {
+    var modal = document.getElementById("trayVerificationModal");
+    return !!(modal && modal.style.display !== "none");
+  }
+
+  function closeTvm() {
+    var closeBtn = document.getElementById("closeTrayVerificationModal");
+    if (closeBtn) {
+      closeBtn.click();
+      return;
+    }
+    var modal = document.getElementById("trayVerificationModal");
+    if (modal) modal.style.display = "none";
+    if (typeof window.restoreRowPosition === "function") window.restoreRowPosition();
+  }
+
+  function clickTvmButton(id) {
+    var button = document.getElementById(id);
+    if (!button || button.disabled || button.getAttribute("aria-disabled") === "true") return false;
+    button.click();
+    return true;
+  }
+
+  document.addEventListener("keydown", function (event) {
+    if (!isTvmOpen()) return;
+    if (document.querySelector(".swal2-container")) return;
+
+    var key = event.key || "";
+    var handled = false;
+
+    if (key === "Escape" || event.keyCode === 27 || key === "c" || key === "C") {
+      closeTvm();
+      handled = true;
+    } else if (key === "d" || key === "D") {
+      handled = clickTvmButton("tvm-save-draft-btn");
+    } else if (key === "o" || key === "O") {
+      handled = clickTvmButton("tvm-undo-all-btn");
+    } else if (key === "Enter") {
+      handled = clickTvmButton("tvm-scan-btn");
+    }
+
+    if (handled) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
+    }
+  }, true);
+});
+</script>
+
+<script nonce="{{ csp_nonce }}">
   document.addEventListener("DOMContentLoaded", function () {
   let openTooltip = null;
   let activePreviewTrigger = null;

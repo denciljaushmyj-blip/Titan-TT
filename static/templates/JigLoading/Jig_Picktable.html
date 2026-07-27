@@ -6678,7 +6678,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const resolved = resolvePreviewImage(payload);
     if (!gallery) return;
     if (!resolved || !resolved.url) {
-      renderMessage(trigger, "Image unavailable");
+      renderMessage(trigger, "Coming Soon");
       return;
     }
     gallery.textContent = "";
@@ -6688,7 +6688,7 @@ document.addEventListener("DOMContentLoaded", function () {
     image.decoding = "async";
     image.style.cssText = "width:120px;height:120px;object-fit:contain;object-position:center;display:block;";
     image.addEventListener("error", function() {
-      renderMessage(trigger, "Image unavailable");
+      renderMessage(trigger, "Coming Soon");
     }, { once: true });
     gallery.appendChild(image);
   }
@@ -6721,7 +6721,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch(function(error) {
         console.error("[Jig Loading Pick] Model preview failed:", error);
-        renderMessage(trigger, "Image unavailable");
+        renderMessage(trigger, "Coming Soon");
       });
   }
 

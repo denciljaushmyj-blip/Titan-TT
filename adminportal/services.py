@@ -314,6 +314,23 @@ def get_active_shortcut_configurations():
     elapsed_ms = (time.time() - t0) * 1000
     logger.debug('shortcuts DB query: %.2fms rows=%d', elapsed_ms, len(raw))
 
+    if not raw:
+        from .management.commands.sync_shortcuts import CANONICAL_SHORTCUTS
+
+        logger.warning(
+            'No active ShortcutConfiguration rows found; serving canonical shortcut defaults.'
+        )
+        shortcuts = [
+            {
+                field: shortcut.get(field, '' if field in {'description', 'target_selector', 'fallback_selector'} else [])
+                for field in _SHORTCUT_VALUES_FIELDS
+            }
+            for shortcut in CANONICAL_SHORTCUTS
+            if shortcut.get('is_active', True)
+        ]
+        cache.set(SHORTCUT_CACHE_KEY, shortcuts, timeout=SHORTCUT_CACHE_TTL)
+        return shortcuts
+
     # Normalise None values that blank=True fields can return.
     shortcuts = [
         {

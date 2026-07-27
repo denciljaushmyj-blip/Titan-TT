@@ -718,7 +718,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const imageUrl = normalizeImageUrl(payload && payload.preview_image);
     if (!imageUrl) {
-      setTooltipMessage(tooltip, "Image unavailable");
+      setTooltipMessage(tooltip, "Coming Soon");
       return;
     }
 
@@ -772,7 +772,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (activeTrigger !== trigger || activeStockNo !== stockNo) {
           return;
         }
-        setTooltipMessage(tooltip, "Image unavailable");
+        setTooltipMessage(tooltip, "Coming Soon");
       });
   }
 
@@ -2131,11 +2131,33 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   // ─── Event: ESC key ────────────────────────────────────────────────────────
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      const modal = document.getElementById("trayVerificationModal");
-      if (modal && modal.style.display !== "none") tvmClose();
+    const modal = document.getElementById("trayVerificationModal");
+    if (!modal || modal.style.display === "none") return;
+    if (document.querySelector(".swal2-container")) return;
+
+    if (e.key === "Escape" || e.key === "c" || e.key === "C") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      tvmClose();
+      return;
     }
-  });
+
+    if (e.key === "d" || e.key === "D") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      tvmSaveDraft();
+      return;
+    }
+
+    if (e.key === "o" || e.key === "O") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      tvmUndoAll();
+    }
+  }, true);
   // ─── Event: Verify All checkbox ────────────────────────────────────────────
   const tvmVerifyAllCb = document.getElementById("tvm-verify-all-cb");
   if (tvmVerifyAllCb) {

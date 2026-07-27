@@ -1496,7 +1496,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } catch (previewError) {
               console.error('Unable to load Brass Audit reject IV preview:', previewError);
               modalUserImg.removeAttribute('src');
-              modalUserImg.alt = 'Model image unavailable';
+              modalUserImg.alt = 'Model Coming Soon';
             }
           }
     
@@ -2010,7 +2010,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const imageUrl = normalizeImageUrl(rawUrl);
 
     if (!imageUrl) {
-      renderMessage(trigger, "Image unavailable");
+      renderMessage(trigger, "Coming Soon");
       return;
     }
 
