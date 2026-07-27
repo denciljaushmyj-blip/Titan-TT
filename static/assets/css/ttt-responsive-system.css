@@ -892,10 +892,19 @@ html:not(.ttt-viewport-tablet) :is(.is-pick-table-page, .is-completed-table-page
   z-index: 45 !important;
 }
 
-html:not(.ttt-viewport-tablet) :is(.is-pick-table-page, .is-completed-table-page) #order-listing th:nth-child(4),
 html:not(.ttt-viewport-tablet) :is(.is-pick-table-page, .is-completed-table-page) #order-listing td:nth-child(4) {
   position: static !important;
   left: auto !important;
+}
+
+/* Fix: Action column header must stay pinned to the top like every other
+   header when scrolling, otherwise row content shows through in its place. */
+html:not(.ttt-viewport-tablet) :is(.is-pick-table-page, .is-completed-table-page) #order-listing thead th:nth-child(4) {
+  position: sticky !important;
+  top: 0 !important;
+  left: auto !important;
+  z-index: 40 !important;
+  background: #028084 !important;
 }
 
 html:not(.ttt-viewport-tablet) :is(.is-pick-table-page, .is-completed-table-page) #order-listing thead th:nth-child(-n+3) {
@@ -971,4 +980,66 @@ html.ttt-viewport-tablet .is-completed-table-page #order-listing td:nth-child(4)
   left: auto !important;
   right: 0 !important;
   transform: none !important;
+}
+
+/* Safety override: DP & Brass QC Completed Tables use the normal .content-wrapper
+   shell (height: auto), not the flex-height shell that .is-completed-table-page
+   assumes. That rule set the wrapper to display:flex + overflow:hidden with the
+   table area at flex-basis:0, which collapsed the table to 0 height/invisible on
+   these two pages while the pagination (flex:0 0 auto) still rendered fine.
+   Scoped narrowly to these two modules only - does not touch is-completed-table-page
+   itself, so any other page relying on it is unaffected. */
+.dp-completed-table-page.is-completed-table-page,
+.brass-completed-table-page.is-completed-table-page {
+  display: block !important;
+  overflow: visible !important;
+  min-height: 0 !important;
+  flex: none !important;
+}
+
+.dp-completed-table-page.is-completed-table-page .card,
+.dp-completed-table-page.is-completed-table-page .card-body,
+.brass-completed-table-page.is-completed-table-page .card,
+.brass-completed-table-page.is-completed-table-page .card-body {
+  display: block !important;
+  overflow: visible !important;
+  min-height: 0 !important;
+}
+
+.dp-completed-table-page.is-completed-table-page .table-responsive,
+.brass-completed-table-page.is-completed-table-page .table-responsive {
+  flex: none !important;
+  height: auto !important;
+}
+
+/* Safety override 2: match the compact row/badge sizing already used on the Pick
+   Table pages. Without this, DP/Brass Completed pages inherit larger font-size,
+   row height and badge padding from elsewhere in the stylesheet meant for a
+   different (touch-optimized) table, making rows/badges look oversized compared
+   to the Pick Table. Scoped to the same two modules only. */
+.dp-completed-table-page.is-completed-table-page #order-listing th,
+.dp-completed-table-page.is-completed-table-page #order-listing td,
+.brass-completed-table-page.is-completed-table-page #order-listing th,
+.brass-completed-table-page.is-completed-table-page #order-listing td {
+  font-size: 14px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 3px 7px !important;
+  line-height: 1.15 !important;
+  vertical-align: middle !important;
+}
+
+.dp-completed-table-page.is-completed-table-page #order-listing thead th,
+.brass-completed-table-page.is-completed-table-page #order-listing thead th {
+  height: 46px !important;
+  min-height: 46px !important;
+}
+
+.dp-completed-table-page.is-completed-table-page #order-listing :is(.btn, button, .rounded-pill, .badge, .status-badge),
+.brass-completed-table-page.is-completed-table-page #order-listing :is(.btn, button, .rounded-pill, .badge, .status-badge) {
+  font-size: 12px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 4px 10px !important;
+  line-height: 1.15 !important;
 }

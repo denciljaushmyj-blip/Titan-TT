@@ -315,7 +315,7 @@ class BrassPickTableView(APIView):
             elif data.get('brass_qc_rejection') or data.get('brass_qc_few_cases_accptance') or data.get('brass_qc_accptance'):
                 data['lot_status'] = 'Yet to Release'
             elif data.get('brass_qc_accepted_qty_verified'):
-                data['lot_status'] = 'Released'
+                data['lot_status'] = 'yet to Release'
             else:
                 data['lot_status'] = 'Yet to Start'
 

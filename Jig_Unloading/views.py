@@ -2242,6 +2242,54 @@ class JigUnloading_Completedtable(LoginRequiredMixin, TemplateView):
                     model_images_map[model_master.plating_stk_no] = image_payload
                 print(f"[DEBUG] Model {model_master.model_no}: {len(image_urls)} images, first: {first_image}")
 
+        # Nickel Wiping persists its first tray-scan activity in its own table,
+        # while draft/hold/submit activity is stored on the unload row. Build
+        # the lookup once so the completed table reflects entry into Nickel
+        # Wiping without waiting for that module to complete.
+        from Nickel_Inspection.models import (
+            NickelQcTrayId,
+            Nickel_QC_AutoSave,
+            Nickel_QC_Draft_Store,
+            Nickel_QC_TopTray_Draft_Store,
+            NickelQC_Submission,
+        )
+
+        completed_unload_lot_ids = [
+            unload.lot_id for unload in completed_unloads if unload.lot_id
+        ]
+        nickel_wiping_lot_ids = set(
+            NickelQcTrayId.objects.filter(
+                lot_id__in=completed_unload_lot_ids
+            ).values_list('lot_id', flat=True)
+        )
+        for activity_model in (
+            Nickel_QC_AutoSave,
+            Nickel_QC_Draft_Store,
+            Nickel_QC_TopTray_Draft_Store,
+            NickelQC_Submission,
+        ):
+            nickel_wiping_lot_ids.update(
+                activity_model.objects.filter(
+                    lot_id__in=completed_unload_lot_ids
+                ).values_list('lot_id', flat=True)
+            )
+        nickel_activity_fields = (
+            'nq_draft',
+            'nq_onhold_picking',
+            'nq_hold_lot',
+            'nq_release_lot',
+            'nq_qc_accptance',
+            'nq_qc_rejection',
+            'nq_qc_few_cases_accptance',
+            'nq_accepted_tray_scan_status',
+            'nq_rejection_tray_scan_status',
+        )
+        nickel_wiping_lot_ids.update(
+            unload.lot_id
+            for unload in completed_unloads
+            if any(getattr(unload, field, False) for field in nickel_activity_fields)
+        )
+
         # ✅ ENHANCED: Process each unload record with comprehensive data
         table_data = []
         for idx, unload in enumerate(completed_unloads):
@@ -2582,6 +2630,57 @@ class JigUnloading_Completedtable(LoginRequiredMixin, TemplateView):
             if row_type_of_input == 'Fresh' and unload.lot_id in type_of_input_map:
                 row_type_of_input = type_of_input_map[unload.lot_id]
 
+            # ✅ Shared stock is the source of truth for completed-row status.
+            # Build a wide candidate lot-id list (raw id, id without leading '-',
+            # extracted id, id after ':', id after '-') so this table can find the
+            # downstream stage even when Nickel Wiping/Nickel Inspection stores the
+            # lot under a slightly different id format.
+            _completed_lot_ids = set()
+
+            def _remember_completed_lot_id(raw_lot_id):
+                _raw_text = str(raw_lot_id or '').strip()
+                if not _raw_text:
+                    return
+                _completed_lot_ids.add(_raw_text)
+                _completed_lot_ids.add(_raw_text.lstrip('-'))
+                _extracted = _extract_lot_id(_raw_text)
+                if _extracted:
+                    _completed_lot_ids.add(str(_extracted).strip())
+                if ':' in _raw_text:
+                    _completed_lot_ids.add(_raw_text.rsplit(':', 1)[-1].strip())
+                if '-' in _raw_text:
+                    _completed_lot_ids.add(_raw_text.rsplit('-', 1)[-1].strip())
+
+            _remember_completed_lot_id(unload.lot_id)
+            _remember_completed_lot_id(getattr(unload, 'unload_lot_id', None))
+            for _raw_lot_id in (unload.combine_lot_ids or []):
+                _remember_completed_lot_id(_raw_lot_id)
+            _completed_lot_ids = {lot_id for lot_id in _completed_lot_ids if lot_id}
+
+            _live_completed_stage = (
+                TotalStockModel.objects.filter(lot_id__in=list(_completed_lot_ids))
+                .exclude(current_stage__isnull=True)
+                .exclude(current_stage__exact='')
+                .values_list('current_stage', flat=True).first()
+            )
+            _object_stage = str(unload.current_stage or '').strip()
+            _object_stage_key = _object_stage.lower().replace('_', ' ')
+            _live_completed_stage_key = str(_live_completed_stage or '').strip().lower().replace('_', ' ')
+            _completed_stage = (
+                'Nickel Wiping'
+                if unload.lot_id in nickel_wiping_lot_ids
+                else (
+                    _live_completed_stage if _live_completed_stage and not _live_completed_stage_key.startswith('jig unloading')
+                    else (_object_stage if _object_stage and not _object_stage_key.startswith('jig unloading')
+                          else (_live_completed_stage or _object_stage or unload.last_process_module or 'Jig Unloading'))
+                )
+            )
+            _completed_stage_key = str(_completed_stage).strip().lower().replace('_', ' ')
+            _completed_lot_status = (
+                'Yet to Release' if _completed_stage_key.startswith('jig unloading')
+                else 'Released'
+            )
+
             # ✅ ENHANCED: Create comprehensive table data entry using SAVED LIST FIELDS
             table_entry = {
                 # Basic fields
@@ -2624,9 +2723,11 @@ class JigUnloading_Completedtable(LoginRequiredMixin, TemplateView):
                 'no_of_trays': no_of_trays,
                 'calculated_no_of_trays': no_of_trays,
                 # Prefer the live current_stage SSOT (modelmasterapp/stage_service.py) so
-                # this stays in sync with downstream modules (e.g. Spider Spindle) that
-                # only update current_stage and not last_process_module.
-                'last_process_module': unload.current_stage or unload.last_process_module,
+                # this stays in sync with downstream modules (e.g. Nickel Wiping/Inspection,
+                # Spider Spindle) that only update current_stage and not last_process_module.
+                'last_process_module': _completed_stage,
+                'current_stage_display': _completed_stage,
+                'lot_status': _completed_lot_status,
                 
                 # Dates
                 'created_at': unload.created_at,

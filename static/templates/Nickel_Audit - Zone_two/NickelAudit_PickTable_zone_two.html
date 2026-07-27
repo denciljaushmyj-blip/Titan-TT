@@ -2,7 +2,7 @@
 {% load stock_filters %} 
 
 <style nonce="{{ csp_nonce }}">
-/* ========== Tablet override — paste at file end (after other table styles) ========== */
+  /* ========== Tablet override — paste at file end (after other table styles) ========== */
 /* --- Tablet: freeze first 3 columns consistently with desktop --- */
 @media (pointer: coarse) and (min-width: 680px) and (max-width: 1400px) {
 
@@ -11,9 +11,11 @@
 }
 
 :root { --app-font-size: var(--ttt-font-size-tablet); }
+
 .rounded-circle{
   padding: 17px !important;
 }
+
 .model-image-tooltip{
   transform: translateX(-25%) !important;
   top: 45% !important;
@@ -148,21 +150,21 @@
   }
 
   /* Other columns (fit remaining space) */
-  #order-listing th:nth-child(4)  { min-width: 140px !important; max-width: 140px !important; }
-  #order-listing th:nth-child(5)  { min-width: 120px !important; max-width: 120px !important; }
+  #order-listing th:nth-child(4)  { min-width: 135px !important; max-width: 135px !important; }
+  #order-listing th:nth-child(5)  { min-width: 140px !important; max-width: 140px !important; }
   #order-listing th:nth-child(6)  { min-width: 135px !important; max-width: 135px !important; }
-  #order-listing th:nth-child(7)  { min-width: 115px !important; max-width: 125px !important; }
-  #order-listing th:nth-child(8)  { min-width: 140px !important; max-width: 140px !important; }
-  #order-listing th:nth-child(9)  { min-width: 140px !important; max-width: 145px !important; }
-  #order-listing th:nth-child(10) { min-width: 130px !important; max-width: 130px !important; }
-  #order-listing th:nth-child(11) { min-width: 120px !important; max-width: 130px !important; }
-  #order-listing th:nth-child(12) { min-width: 130px !important; max-width: 130px !important; }
+  #order-listing th:nth-child(7)  { min-width: 135px !important; max-width: 140px !important; }
+  #order-listing th:nth-child(8)  { min-width: 150px !important; max-width: 150px !important; }
+  #order-listing th:nth-child(9)  { min-width: 130px !important; max-width: 130px !important; }
+  #order-listing th:nth-child(10) { min-width: 150px !important; max-width: 150px !important; }
+  #order-listing th:nth-child(11) { min-width: 130px !important; max-width: 130px !important; }
+  #order-listing th:nth-child(12) { min-width: 130px !important; max-width: 140px !important; }
   #order-listing th:nth-child(13) { min-width: 130px !important; max-width: 130px !important; }
-  #order-listing th:nth-child(14) { min-width: 120px !important; max-width: 140px !important; }
-  #order-listing th:nth-child(15) { min-width: 115px !important; max-width: 115px !important; }
-  #order-listing th:nth-child(16) { min-width: 130px !important; max-width: 150px !important; }
-  #order-listing th:nth-child(17) { min-width: 130px !important; max-width: 130px !important; }
-  #order-listing th:nth-child(18) { min-width: 130px !important; max-width: 130px !important; }
+  #order-listing th:nth-child(14) { min-width: 140px !important; max-width: 140px !important; }
+  #order-listing th:nth-child(15) { min-width: 130px !important; max-width: 130px !important; }
+  #order-listing th:nth-child(16) { min-width: 120px !important; max-width: 130px !important; }
+  #order-listing th:nth-child(17) { min-width: 140px !important; max-width: 140px !important; }
+  #order-listing th:nth-child(18) { min-width: 140px !important; max-width: 140px !important; }
   #order-listing th:nth-child(19) { min-width: 140px !important; max-width: 140px !important; }
   #order-listing th:nth-child(20) { min-width: 130px !important; max-width: 130px !important; }
 
@@ -178,9 +180,8 @@
   #order-listing td[hidden] {
     display: none !important;
   }
-}
-
- /* Add to your CSS file for Excel-like grid lines */
+}   
+      /* Add to your CSS file for Excel-like grid lines */
 .table-bordered th, .table-bordered td {
   border: 1px solid #d9dedf !important;
 }
@@ -587,100 +588,6 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
     grid-template-columns: 30px 1fr 70px 90px !important;
   }
 }
-.btn-accept-is {
-  background-color: #1ba878 !important;
-  color: #ffffff !important;
-  border: none !important;
-  padding: 6px 12px !important;
-  border-radius: 4px !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-  height: 28px !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-  transition: background-color 0.15s ease !important;
-}
-.btn-accept-is:hover:not(:disabled) {
-  background-color: #0b8a6a !important;
-}
-.btn-accept-is:disabled,
-.btn-accept-is[disabled] {
-  background-color: #1ba878 !important;
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
-  pointer-events: none !important;
-}
-.btn-reject-is {
-  background-color: #e57373 !important;
-  color: #ffffff !important;
-  border: none !important;
-  padding: 6px 12px !important;
-  border-radius: 4px !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-  height: 28px !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-  transition: background-color 0.15s ease !important;
-}
-.btn-reject-is:hover:not(:disabled) {
-  background-color: #a93226 !important;
-}
-.btn-reject-is:disabled,
-.btn-reject-is[disabled] {
-  background-color: #e57373 !important;
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
-  pointer-events: none !important;
-}
-.nq-reject-modal-shell {
-  width: 1120px;
-  max-width: 98vw;
-}
-.nq-alloc-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
-  gap: 12px;
-  align-items: stretch;
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-.nq-alloc-col {
-  min-width: 0;
-  border-radius: 8px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-}
-.nq-alloc-reject { border: 1px solid #ffcdd2; background: #fff8f8; }
-.nq-alloc-delink { border: 1px solid #ffe0b2; background: #fffaf0; }
-.nq-alloc-accept { border: 1px solid #c8e6c9; background: #f9fdf9; }
-.nq-alloc-col h6 {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 32px;
-}
-.nq-alloc-col h6 span {
-  float: none !important;
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-.nq-alloc-body,
-.nq-alloc-body > div {
-  min-width: 0;
-}
-.nq-alloc-body input {
-  min-width: 0;
-  width: 100%;
-}
 
 /* Nickel Audit model preview: show the full IV image without cropping */
 .model-image-tooltip .image-container {
@@ -724,18 +631,72 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 }
 
 
-#nickelAuditModalModelImage {
-  display: block !important;
-  width: 72px !important;
-  height: 72px !important;
+/* ================================================================
+   NICKEL AUDIT Z1/Z2 — DYNAMIC MODEL PREVIEW FINAL OVERRIDE
+   Compact tooltip, tablet-safe sizing, non-cropped images.
+   ================================================================ */
+.model-hover-trigger {
+  position: relative !important;
+}
+
+.model-image-tooltip {
+  width: 230px !important;
+  min-width: 230px !important;
+  max-width: 230px !important;
+  min-height: 185px !important;
+  height: auto !important;
+  padding: 12px !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+  background: #fff !important;
+  border: 1px solid #cfd8dc !important;
+  border-radius: 8px !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18) !important;
+  overflow: hidden !important;
+  z-index: 500000 !important;
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+}
+
+.model-image-tooltip,
+.model-image-tooltip * {
+  font-size: 12px !important;
+}
+
+.model-image-tooltip .info-btn,
+.model-image-tooltip .close-btn {
+  min-width: 48px !important;
+  height: 28px !important;
+  padding: 4px 9px !important;
+  line-height: 18px !important;
+}
+
+.model-image-tooltip .img-gallery {
+  width: 204px !important;
+  height: 135px !important;
+  min-height: 135px !important;
+  max-height: 135px !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #fff !important;
+}
+
+.model-image-tooltip .img-gallery img,
+.model-image-tooltip .nickel-preview-img,
+.model-image-tooltip .model-preview-image {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 204px !important;
+  max-height: 135px !important;
   object-fit: contain !important;
   object-position: center !important;
+  display: block !important;
+  background: #fff !important;
   border: none !important;
-  border-radius: 0 !important;
   box-shadow: none !important;
-  background: transparent !important;
-  outline: none !important;
-  clip-path: none !important;
 }
 
 </style>
@@ -746,19 +707,43 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
     <div class="col-12 grid-margin stretch-card">
       <div class="card">
         <div class="card-body" style="padding-bottom:12px;">
-          <div class="mb-4" style="position: relative;">
-            <h5 class="text-left mt-0 mb-0 d-inline-block" style="font-weight:700;">Nickel Audit Pick Table - Zone I
-              <button type="button" class="btn btn-primary btn-sm ms-3" id="scanButton"
-                      style="background-color: #028084; border-color: #028084; font-weight: 600; vertical-align: middle;">
-                <i class="fa fa-qrcode" style="margin-right: 6px;"></i>
-                Scan
-              </button>
-              <span id="scanStatusMessage" style="display: none; margin-left: 12px; vertical-align: middle; color: #28a745; font-size: 15px; font-weight: 700;">PLEASE SCAN</span>
-            </h5>
-            <input type="text" id="scanHiddenInput" style="position: absolute; left: -9999px; opacity: 0;" autocomplete="off" />
+          <h5 class="text-left mt-0 mb-4" style="font-weight:700;">Nickel Audit Complete Table - Zone I</h5>
+          <!-- 🔥 NEW: Date Filter Section -->
+          <div class="calendar-bar">
+            <div class="date-input-group">
+              <label for="from-date-brass" style="font-weight: 600; color: #028084; margin-right: 8px;">From Date:</label>
+              <input type="date" id="from-date-brass" name="from_date" 
+                     value="{{ from_date }}" 
+                     max="{{ 'now'|date:'Y-m-d' }}"
+                     style="border: 1.5px solid #028084; border-radius: 6px; padding: 6px 12px; font-size: 14px; color: #028084; font-weight: 600;">
+            </div>
+            
+            <div class="date-input-group">
+              <label for="to-date-brass" style="font-weight: 600; color: #028084; margin-right: 8px;">To Date:</label>
+              <input type="date" id="to-date-brass" name="to_date" 
+                     value="{{ to_date }}" 
+                     max="{{ 'now'|date:'Y-m-d' }}"
+                     style="border: 1.5px solid #028084; border-radius: 6px; padding: 6px 12px; font-size: 14px; color: #028084; font-weight: 600;">
+            </div>
+            
+            <button id="search-date-range-brass" type="button" style="background: #028084; border: none; border-radius: 6px; cursor: pointer; padding: 8px 18px; color: #fff; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <i class="fa fa-search"></i> Search
+            </button>
+            
+            <button id="clear-date-filter-brass" type="button" style="background: #6c757d; border: none; border-radius: 6px; cursor: pointer; padding: 8px 18px; color: #fff; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px; margin-left: 10px;">
+              <i class="fa fa-times"></i> Clear Filter
+            </button>
+                                              <!-- Filter Active indicator - positioned above table -->
+        <div id="filterActiveIndicator" style="display: none; margin: 10px 0;">
+          <span style="font-size: 12px; color: #fff; font-weight: 600; background: #28a745; padding: 5px 12px; border-radius: 15px; border: 1px solid #1e7e34; display: inline-block;">Filter Active</span>
+        </div>
           </div>
 
-         
+          <input type="hidden" id="from-date-hidden-brass" value="{{ from_date }}" />
+          <input type="hidden" id="to-date-hidden-brass" value="{{ to_date }}" />
+          <!-- 🔥 END: Date Filter Section -->
+
+        
             <!-- Table Section -->
             <div class="table-responsive">
               <table id="order-listing" class="table">
@@ -772,36 +757,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Plating <br> Stk No
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Action <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      No of Trays <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Lot Qty
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Accept <br> Qty
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Reject Qty<i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Lot Status
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th style="cursor: pointer;min-width: 95px;max-width: 95px;">
-                      Current <br> Stage
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Process Status
+                      Plating Stk No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -809,11 +765,20 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Plating Color
+                      Plating<br>Stk No
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Category
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
                       Polish Finish
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+
+                     <th>
+                      Tray Cate- <br> Capacity
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -825,92 +790,86 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
+                       No of <br> Trays  <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Lot Qty
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Physical Qty <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Accept <br> Qty
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                      </th>
+                    <th>
+                      Reject Qty<i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Process Status
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Action <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Lot Status
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Current <br> Stage
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
                       Remarks <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                    <th style="display:none;">
-                      Version <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
+                   
                   </tr>
                 </thead>
                 <tbody>
                   <!-- Row 1 - Highlighted -->
                    {% for data in master_data %}
-<tr class="highlighted-tray-scan" 
-    data-batch-id="{{data.batch_id}}" 
-    data-stock-lot-id="{{ data.stock_lot_id }}"
-    data-model-no="{{ data.plating_stk_no }}"
-                         data-plating-stk-no="{{ data.plating_stk_no }}"
-    data-available-qty="{{ data.available_qty }}" 
-    data-brass-onhold-picking="{{ data.na_onhold_picking }}"
-    data-brass-batch-rejection="{{ data.na_qc_rejection|yesno:'True,False' }}"
-    data-brass-qc-accptance="{{ data.na_qc_acceptance|yesno:'True,False' }}"
-    data-brass-qc-rejection="{{ data.na_qc_rejection|yesno:'True,False' }}"
-    data-brass-qc-few-cases-accptance="{{ data.na_qc_few_cases_accptance|yesno:'True,False' }}"
-    data-accepted-ip-stock="{{ data.accepted_Ip_stock|yesno:'True,False' }}"
-    data-rejected-ip-stock="{{ data.rejected_ip_stock|yesno:'True,False' }}"
-    data-few-cases-accepted-ip-stock="{{ data.few_cases_accepted_Ip_stock|yesno:'True,False' }}"
-    data-brass-physical-qty="{{ data.na_physical_qty|default:0 }}"
-    data-brass-missing-qty="{{ data.na_missing_qty|default:0 }}"
-    data-brass-qc-accepted-qty-verified="{{ data.na_ac_accepted_qty_verified|yesno:'True,False' }}"
-    data-aql-limit="{{ data.aql_limit }}"
-    data-sample-qty="{{ data.sample_qty }}">
-                      <td {% if data.na_hold_lot %} class="row-inactive-blur"{% endif %}>
+
+                  <!-- Update the table row to include brass QC status data attributes -->
+                  <tr class="highlighted-tray-scan" 
+                      data-batch-id="{{data.batch_id}}" 
+                      data-stock-lot-id="{{ data.stock_lot_id }}"
+                      data-available-qty="{{ data.available_qty }}" 
+                      data-brass-onhold-picking="{{ data.na_onhold_picking }}"
+                      data-brass-qc-accptance="{{ data.na_qc_accptance|default:'false' }}"
+                      data-brass-qc-rejection="{{ data.na_qc_rejection|default:'false' }}"
+                      data-brass-qc-few-cases-accptance="{{ data.na_qc_few_cases_accptance|default:'false' }}"
+                      data-brass-physical-qty="{{ data.na_physical_qty|default:0 }}"
+                      data-brass-missing-qty="{{ data.na_missing_qty|default:0 }}">
+                      <td {% if data.brass_hold_lot %} class="row-inactive-blur"{% endif %}
+                      >
                     <span style="display:flex; align-items:center; gap:3px;">
-                      {% if can_hold_release %}
-                        <!-- Admin users: Show toggle switch -->
-                        <label class="hold-toggle-switch" style="margin-bottom:0;">
-                          {% if not data.na_hold_lot %}
-                            <input type="checkbox" class="hold-toggle-btn" checked />
-                            <span class="hold-slider"></span>
-                          {% else %}
-                            <input type="checkbox" class="hold-toggle-btn" />
-                            <span class="hold-slider"></span>
-                          {% endif %}
-                        </label>
-                        <!-- Hold remark icon -->
-                        <span class="hold-remark-icon"
-                              style="display:{% if data.na_hold_lot or data.na_release_lot or data.na_holding_reason or data.na_release_reason %}inline-block{% else %}none{% endif %}; cursor:pointer;"
-                              data-bs-toggle="tooltip" data-placement="right"
-                              data-bs-original-title="{% if data.na_holding_reason %}Holding Reason: {{ data.na_holding_reason }} (by {{ data.na_hold_by }} on {{ data.na_hold_at }}){% endif %}{% if data.na_holding_reason and data.na_release_reason %}&#10;{% endif %}{% if data.na_release_reason %}Release Reason: {{ data.na_release_reason }} (by {{ data.na_release_by }} on {{ data.na_release_at }}){% endif %}">
-                          {% if data.na_hold_lot or data.na_release_lot or data.na_holding_reason or data.na_release_reason %}
-                            <img src="{% static 'assets/icons/view2.png' %}" alt="Remark" style="width:12px; height:12px;" />
-                          {% endif %}
-                        </span>
-                      {% else %}
-                        <!-- Non-admin: Only show view icon if there's a holding/release reason -->
-                        {% if data.na_hold_lot or data.na_release_lot or data.na_holding_reason or data.na_release_reason %}
-                          <span class="hold-remark-icon"
-                                style="display:inline-block; cursor:pointer;"
-                                data-bs-toggle="tooltip" data-placement="right"
-                                data-bs-original-title="{% if data.na_holding_reason %}Holding Reason: {{ data.na_holding_reason }} (by {{ data.na_hold_by }} on {{ data.na_hold_at }}){% endif %}{% if data.na_holding_reason and data.na_release_reason %}&#10;{% endif %}{% if data.na_release_reason %}Release Reason: {{ data.na_release_reason }} (by {{ data.na_release_by }} on {{ data.na_release_at }}){% endif %}">
-                            <img src="{% static 'assets/icons/view2.png' %}" alt="View Reason" style="width:18px; height:18px;" />
-                          </span>
-                        {% endif %}
-                      {% endif %}
+                     
+                    
                       <span class="sno-value">{{ page_obj.start_index|add:forloop.counter0 }}</span>
                     </span>
-                    {% if data.na_qc_acceptance or data.send_brass_qc %}
+                    {% if data.iqf_acceptance or data.send_to_nickel_ip %}
                       <i class="fa fa-info-circle" style="color: #028084; font-size:13px;" data-bs-toggle="tooltip" data-placement="right" data-bs-original-title="IQF"></i>
                       {% endif %}
-                  </td>                     
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %} style="white-space:normal;word-break:break-all;">
-                        {{ data.nq_last_process_date_time|date:"d-M-y" }}<br>
-                        <span style="display:inline-block; margin-top:4px;word-break: break-all;">
-                          {{ data.nq_last_process_date_time|date:"h:i A" }}
-                        </span>
-                     
-                    </td>
-        <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
+                  </td>  
+                    
+                    
+                    <td style="white-space:normal;word-break:break-all;">
+                              {{ data.na_last_process_date_time|date:"d-M-y"  }}<br>
+                        <span style="display:inline-block; margin-top:4px;word-break: break-all;">{{ data.na_last_process_date_time|date:"h:i A" }}</span>
+                        </td>
+                                        <td >
                       <span class="model-hover-trigger" data-plating-stk-no="{{ data.plating_stk_no }}" style="cursor: pointer; word-break: break-all;">
                         {{ data.plating_stk_no|highlight_plating_color|safe_html }}
                         <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s; min-width: 220px;">
                           
-                          <!-- Header with Info and Close buttons -->
+                          <!-- Header with Info and Close buttons - Initially hidden -->
                           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <button class="info-btn" style="background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
-                               Info
+                            <button class="info-btn" style="background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; display: none;">
+                              Info
                             </button>
-                            <button class="close-btn" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                            <button class="close-btn" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; display: none;">
                                Close
                             </button>
                           </div>
@@ -922,267 +881,257 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                         </div>
                       </span>
                     </td>
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                      {% if not data.na_qc_acceptance and not data.na_qc_rejection and not data.na_accepted_tray_scan_status and not data.na_qc_few_cases_accptance and data.na_ac_accepted_qty_verified %}
-                        <a href="#" class="delete-batch-btn" title="Delete" data-batch-id="{{ data.batch_id }}" data-stock-lot-id="{{ data.stock_lot_id }}">
-                          <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 20px; margin-right: 8px; height: auto" />
-                        </a>
-                      {% else %}
-                        <span title="Delete Disabled" style="opacity: 0.5; pointer-events: none;">
-                          <img src="{% static 'assets/icons/bin.png' %}" alt="Delete Disabled" style="width: 20px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);" />
-                        </span>
-                      {% endif %}
-                      {% if data.na_onhold_picking or data.na_draft %}
-                        <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
-                                style="opacity: 0.6; cursor: not-allowed; pointer-events: none;"
-                                disabled>Accept</button>
-                        {% if data.is_delink_only %}
-                          <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is{% if data.na_draft %} draft-resume-btn{% endif %}"
-                                  data-stock-lot-id="{{ data.stock_lot_id }}"
-                                  data-batch-id="{{ data.batch_id }}"
-                                  data-is-delink-only="false">Set Delink</button>
-                        {% else %}
-                          <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is{% if data.na_draft %} draft-resume-btn{% endif %}"
-                                  data-stock-lot-id="{{ data.stock_lot_id }}"
-                                  data-batch-id="{{ data.batch_id }}"
-                                  data-is-delink-only="false">Set Top Tray</button>
-                        {% endif %}
-                      {% elif data.na_qc_rejection or data.na_qc_few_cases_accptance %}
-                        <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
-                                style="opacity: 0.6; cursor: not-allowed; pointer-events: none;" disabled>Accept</button>
-                        <span class="btn btn-social-icon-text btn-youtube btn-reject-is"
-                              style="opacity: 0.8; cursor: not-allowed; pointer-events: none;">Rejected</span>
-                      {% else %}
-                        <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
-                                data-lot-id="{{ data.stock_lot_id }}"
-                                {% if not data.na_ac_accepted_qty_verified %}disabled{% endif %}>Accept</button>
-                        <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is"
-                                data-stock-lot-id="{{ data.stock_lot_id }}"
-                                data-batch-id="{{ data.batch_id }}"
-                                {% if not data.na_ac_accepted_qty_verified %}disabled{% endif %}>Reject</button>
-                      {% endif %}
-                      <a href="#"
-                         title="View"
-                         class="text-primary tray-scan-btn-BQ-view tray-scan-btn-Jig"
-                         style="text-decoration: underline"
-                         data-stock-lot-id="{{ data.stock_lot_id }}"
-                         data-batch-id="{{ data.batch_id }}"
-                         data-model-no="{{ data.plating_stk_no }}"
-                         data-plating-stk-no="{{ data.plating_stk_no }}"
-                         data-no-of-trays="{{ data.no_of_trays }}"
-                         data-tray-capacity="{{ data.tray_capacity|default:'0' }}"
-                         data-total-batch-quantity="{{ data.display_accepted_qty|default:0 }}"
-                         data-brass-missing-qty="{{ data.na_missing_qty|default:0 }}">
-                        <img src="{% static 'assets/icons/view.png' %}" alt="View" style="width: 20px; margin-right: 8px; height: auto; cursor:pointer;" />
-                      </a>
-                    </td>
-                    <!-- No of Trays -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{data.no_of_trays}}</td>
-                    <!-- Lot Qty -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
+                    <td >{{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}</td>
+
+                    <td >{{ data.plating_color }}</td>
+                    <td >{{ data.category }}</td>
+                    <td >{{data.polish_finish}}</td>
+                    <td >{{data.tray_type}}-{{data.tray_capacity}}</td>
+                    <td >{{data.location__location_name}}</td>
+                    <td>{% include 'partials/_type_of_input_cell.html' with type_of_input=data.type_of_input %}</td>
+
+                    <td >{{data.no_of_trays}}</td>
+                    <td>
                       <span class="lot-qty" style="min-width: 30px; text-align: right">{{ data.display_accepted_qty }}</span>
                       <span style="display: inline-flex; align-items: center; gap: 4px;">
-                        {% if not data.na_ac_accepted_qty_verified %}
-                          <input type="checkbox"
-                            class="brass-checkbox"
-                            data-lot-id="{{ data.lot_id }}"
-                            style="width: 15px; height: 15px" />
-                        {% else %}
-                          <span style="display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:#0c8249;color:white;font-size:14px;font-weight:bold;margin-left:2px;">&#10003;</span>
-                        {% endif %}
+                        <input type="checkbox"
+                                class="brass-checkbox"
+                                data-lot-id="{{ data.stock_lot_id }}"
+                                style="width: 15px; height: 15px"
+                                {% if data.na_ac_accepted_qty_verified %}checked disabled{% endif %} />
+                        <input type="text"
+                                class="missing-qty-input"
+                                value="{{ data.na_missing_qty|default_if_none:'' }}"
+                                style="width: 36px; padding: 1px 3px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px;"
+                                {% if data.na_ac_accepted_qty_verified %}disabled{% endif %} />
                       </span>
                     </td>
-                    <!-- Accept Qty -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                        {{ data.na_qc_accepted_qty|default:0 }}
+                    <td>{{data.na_physical_qty}}</td>
+
+                    <td >
+                        {{ data.na_qc_accepted_qty|default:0 }}    
                     </td>
-                    <!-- Reject Qty -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                        {{ data.brass_rejection_total_qty|default:0 }}
+                    <td >
+                        {{ data.na_rejection_qty|default:0 }}
                     </td>
-                    <!-- Lot Status -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                      {% if data.na_onhold_picking %}
-                        <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-                            style="border: 1px solid #4997ac; background-color: #d1f2f3; color: #03425d; font-size: clamp(0.75rem, 2vw, 0.875rem); white-space: nowrap; padding: 5px;">
-                          Draft
+                    <!-- Process Status Column -->
+                    <td >
+                      <div class="d-flex">
+                        <!-- Q: Green if na_ac_accepted_qty_verified, else gray -->
+                        <div
+                          title="Tray Scan"
+                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+                          style="
+                            width: 25px;
+                            height: 25px;
+                            background-color: {% if data.na_ac_accepted_qty_verified %}#0c8249{% else %}#bdbdbd{% endif %};
+                            color: white;
+                            font-weight: bold;
+                            line-height: 20px;
+                            text-align: center;
+                            padding-top: 1px;
+                            padding-right: 1px;
+                          "
+                        >
+                          Q
                         </div>
-                      {% elif data.na_hold_lot %}
-                        <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-                            style="border: 1px solid #dc3545; background-color: #f8d7da; color: #721c24; font-size: 13px; white-space: nowrap; padding: 5px;">
-                          On Hold
+                        <!-- QC: Green if na_qc_rejection or na_qc_accptance, else gray -->
+                        <div
+                          title="Tray Scan"
+                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+                          style="
+                            width: 25px;
+                            height: 25px;
+                            background-color: {% if data.na_qc_rejection or data.na_qc_accptance or data.na_qc_few_cases_accptance %}#0c8249{% else %}#bdbdbd{% endif %};
+                            color: white;
+                            font-weight: bold;
+                            line-height: 20px;
+                            text-align: center;
+                            padding-top: 1px;
+                            padding-right: 1px;
+                          "
+                        >
+                          QC
                         </div>
-                      {% elif data.na_qc_rejection or data.na_qc_few_cases_accptance or data.na_qc_acceptance %}
+                      </div>
+                    </td>
+                    <td >
+                      <!-- Acceptance/Rejection Status -->
+                      
+
+                      <!-- Status Display (Simplified) -->
+                      {% if data.na_qc_accptance %}
+                        <!-- Show "Accepted" status -->
+                        <span class="status-badge accepted" style="
+                          background-color: #66bb6a; 
+                          color: white; 
+                          padding: 6px 12px; 
+                          border-radius: 20px; 
+                          font-size: 12px; 
+                          font-weight: 600;
+                          display: inline-flex;
+                          align-items: center;
+                          gap: 4px;
+                        ">
+                          <i class="fa fa-check-circle"></i>Accepted
+                        </span>
+
+                      {% elif data.na_qc_rejection %}
+                        <!-- Show "Rejected" status -->
+                        <span class="status-badge rejected" style="
+                          background-color: #e57373; 
+                          color: white; 
+                          padding: 6px 12px; 
+                          border-radius: 20px; 
+                          font-size: 12px; 
+                          font-weight: 600;
+                          display: inline-flex;
+                          align-items: center;
+                          gap: 4px;
+                        ">
+                          <i class="fa fa-times-circle"></i>Rejected
+                        </span>
+
+                      {% elif data.na_qc_few_cases_accptance %}
+                        <!-- Show "Partial Reject" status -->
+                        <span class="status-badge partial-rejected" style="
+                          background-color: #fb9393; 
+                          color: white; 
+                          padding: 6px 12px; 
+                          border-radius: 20px; 
+                          font-size: 12px; 
+                          font-weight: 600;
+                          display: inline-flex;
+                          align-items: center;
+                          gap: 4px;
+                        ">
+                          <i class="fa fa-adjust"></i>Partial Rejected
+                        </span>
+
+                      {% endif %}
+                      <!-- Eye icon to view submitted "Tray Scan Table" -->
+                          <a href="#"
+                             title="View"
+                             class="text-primary tray-scan-btn-BQ-view tray-scan-btn-Jig"
+                             style="text-decoration: underline"
+                             data-stock-lot-id="{{ data.stock_lot_id }}"
+                             data-batch-id="{{ data.batch_id }}"
+                             data-model-no="{{ data.plating_stk_no }}"
+                         data-plating-stk-no="{{ data.plating_stk_no }}"
+                             data-no-of-trays="{{ data.no_of_trays }}"
+                             data-tray-capacity="{{ data.tray_capacity|default:'0' }}"
+                             data-moved-to-d-picker="{{ data.Moved_to_D_Picker }}"
+                             data-plating-stk-no="{{ data.plating_stk_no }}"
+                             data-tray-qty-list="{{ data.tray_qty_list|default:'[]'|safe }}"
+                             data-brass-qc-accptance="{{ data.na_qc_accptance|default:'false' }}"
+                             data-brass-qc-rejection="{{ data.na_qc_rejection|default:'false' }}"
+                             data-brass-qc-few-cases-accptance="{{ data.na_qc_few_cases_accptance|default:'false' }}"
+                                data-total-batch-quantity="{{ data.na_physical_qty }}"
+                                data-missing-qty="{{ data.na_missing_qty|default:'' }}"
+                                data-physical-qty="{{ data.na_physical_qty|default:'' }}">
+
+                            <img src="{% static 'assets/icons/view.png' %}"
+                                 alt="View"
+                                 style="width: 20px; margin-right: 8px; height: auto; cursor:pointer;" />
+                          </a>
+                    </td>
+                    <td>
+                      {% if data.na_ac_accepted_qty_verified  %}
                         <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-                            style="border: 1px solid #0d5d17; background-color: #c5f9c2; color: #2f801b; font-size: 13px; white-space: nowrap; padding: 5px;">
-                          Yet to Release
+                           style="border: 1px solid #0d5d17; background-color: #c5f9c2; color: #2f801b; font-size: 13px; white-space: nowrap; padding: 5px;">
+                          Released
                         </div>
                       {% else %}
                         <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-                            style="border: 1px solid #f9a825; background-color: #fff8e1; color: #b26a00; font-size:13px; white-space: nowrap; padding: 5px;">
-                          Yet to Start
+                           style="border: 1px solid #0d5d17; background-color: #F0F5B7; color: #727c08; font-size: 13px; white-space: nowrap; padding: 5px;">
+                          Yet to release
                         </div>
                       {% endif %}
                     </td>
-                    <!-- Current Stage -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
+                    <td >
                       <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                            style="border: 1px solid #d1edf3; background-color: #d1edf3; color: #033b5d; font-size: 13px; white-space: nowrap; padding: 5px;">
                         {{ data.last_process_module|default:"N/A" }}
                       </div>
                     </td>
-                    <!-- Process Status -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                      <div class="d-flex">
-                        <div title="Qty Verify"
-                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-                          style="width:25px;height:25px;background-color:{% if data.na_ac_accepted_qty_verified %}#0c8249{% else %}#bdbdbd{% endif %};color:white;font-weight:bold;line-height:20px;text-align:center;padding-top:1px;padding-right:1px;">
-                          Q
-                        </div>
-                        <div title="QC"
-                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-                          style="width:25px;height:25px;background:{% if data.na_onhold_picking or data.na_draft %}linear-gradient(to right, #0c8249 50%, #bdbdbd 50%){% elif data.na_qc_rejection or data.na_qc_acceptance or data.na_qc_few_cases_accptance %}#0c8249{% else %}#bdbdbd{% endif %};color:white;font-weight:bold;line-height:20px;text-align:center;padding-top:1px;padding-right:1px;">
-                          QC
-                        </div>
-                      </div>
-                    </td>
-                    <!-- Polishing Stk No -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}</td>
-                    <!-- Plating Color -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{ data.plating_color }}</td>
-                    <!-- Polish Finish -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{data.polish_finish}}</td>
-                    <!-- Input Source -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{data.location__location_name}}</td>
-                    <!-- Type of Input -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{% include 'partials/_type_of_input_cell.html' with type_of_input=data.type_of_input %}</td>
-                    <!-- Remarks -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                      <a href="#" title="{% if data.na_pick_remarks %}{% else %}Add Remark{% endif %}" class="remark-tooltip-trigger"
-                        style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: pointer;">
-                        <img src="{% static 'assets/icons/chat_icon.png' %}" alt="Chat"
-                          style="width: 20px; height: 20px; {% if data.na_pick_remarks %}filter: grayscale(0) brightness(1.1) sepia(1) hue-rotate(80deg) saturate(3) contrast(1.2); opacity: 1;{% endif %}" />
-                        <div class="remark-tooltip"
-                          style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;">
-                          <textarea placeholder="Type your remark..."
-                            style="width: 85%; height: 40px; resize: vertical; border: 1px solid #ccc; padding: 5px; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px;"
-                            {% if data.na_pick_remarks %}readonly{% endif %}>{{ data.na_pick_remarks|default_if_none:"" }}</textarea>
-                          <div style="text-align: right; margin-top: -35px">
-                            {% if not data.na_pick_remarks %}
-                              <button type="button" class="remark-send-btn" style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;"><i class="fa fa-send"></i></button>
-                            {% else %}
-                              <div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;">
-                                <i class="fa fa-info-circle" style="margin-right: 6px;"></i>Remark already saved and cannot be edited.
+                    <td>
+                        <!-- VoiceRec with tooltip (audio remark) -->
+                        <a href="#" title="Add Audio Remark" class="remark-tooltip-trigger" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; position: relative; cursor: pointer;">
+                          <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec" style="width: 20px; height: 20px"/>
+                          <div class="remark-tooltip" style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 265px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 10px; z-index: 1000;">
+                            <!-- Audio recording UI placeholder -->
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                              <button type="button" style="background: #28a745; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa fa-microphone"></i>
+                              </button>
+                              <span style="font-size: 14px; color: #333;">Hold to record audio</span>
+                              <div style="text-align: right; margin-top: 10px;">
+                                <button type="button" style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                  <i class="fa fa-send"></i>
+                                </button>
                               </div>
-                            {% endif %}
+                            </div>
                           </div>
-                        </div>
-                      </a>
-                      <a href="#"
-                         title="{{ data.nq_pick_remarks|default:'No previous remark available.' }}"
-                         class="prev-remark-tooltip-trigger"
-                         style="margin-left: 5px; color: #007bff; font-size: 16px; display: inline-flex; align-items: center;">
-                        <i class="fa fa-info-circle"></i>
-                      </a>
-                      <a href="#" class="remark-history-btn" data-lot-id="{{ data.stock_lot_id }}" title="View full remark history" style="margin-left: 5px; color: #6c757d; font-size: 15px; display: inline-flex; align-items: center;">
-                        <i class="fa fa-history"></i>
-                      </a>
+                        </a>
+                        <a
+                          href="#"
+                          title="Add Remark"
+                          class="saved-remark-tooltip-trigger"
+                          data-remark="{{ data.na_pick_remarks|default_if_none:'' }}"
+                          aria-label="View saved remark"
+                          data-jig-lot-id="{{ jig_detail.jig_lot_id }}"
+                          style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: pointer;"
+                        >
+                          <img
+                            src="{% static 'assets/icons/chat_icon.png' %}"
+                            alt="Chat"
+                            style="width: 20px; height: 20px; {% if data.na_pick_remarks %}filter: grayscale(0) brightness(1.1) sepia(1) hue-rotate(80deg) saturate(3) contrast(1.2); opacity: 1;{% endif %}"
+                          />
+                          <div
+                            class="remark-tooltip"
+                            style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;"
+                          >
+                            <textarea
+                              placeholder="Type your remark..."
+                              style="width: 85%; height: 40px; resize: vertical; border: 1px solid #ccc; padding: 5px; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px;"
+                              {% if data.na_pick_remarks %}readonly{% endif %}
+                            >{{ data.na_pick_remarks|default_if_none:"" }}</textarea>
+                            <div style="text-align: right; margin-top: -35px">
+                              {% if not data.na_pick_remarks %}
+                              <button
+                                type="button"
+                                style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;"
+                              >
+                                <i class="fa fa-send"></i>
+                              </button>
+                              {% else %}
+                              <div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;">
+                                <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
+                                Remark already saved and cannot be edited.
+                              </div>
+                              {% endif %}
+                            </div>
+                          </div>
+                        </a>
                     </td>
-                    <!-- Version (hidden) -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %} style="display:none">{{data.version__version_name}}</td>
+                   
                   </tr>
                   {% endfor%}
               
                 </tbody>
               </table>
-              <!-- ══════════ Nickel Audit Zone I REJECTION MODAL ══════════ -->
-              <div id="nickelAuditRejectModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:20000; align-items:center; justify-content:center;">
-                <div class="nq-reject-modal-shell" style="background:#fff; border-radius:12px; width:1120px; max-width:98vw; max-height:90vh; overflow:auto; box-shadow:0 8px 32px rgba(0,0,0,0.22); position:relative;">
-                  <!-- Header -->
-                  <div style="padding:18px 24px 12px; border-bottom:1px solid #e8edf2;">
-                    <span id="nickelAuditRejectModalClose" style="position:absolute; top:10px; right:18px; font-size:22px; font-weight:bold; color:#d9534f; cursor:pointer;">&times;</span>
-                    <h5 style="margin:0 0 8px; color:#028084; font-weight:700;">Nickel Audit Zone I - Rejection Window</h5>
-                    <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; font-size:13px;">
-                      <span>Plating Stk No: <strong id="naRejectModalPlatingStk" style="color:#028084;"></strong></span>
-                      <span>Total Lot Qty: <strong id="naRejectModalTotalQty" style="color:#e67e22;"></strong></span>
-                      <label style="margin-left:auto; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                        <input type="checkbox" id="naFullLotRejectionCb" />
-                        <span style="font-weight:600; color:#c62828;">Full Lot Rejection</span>
-                      </label>
-                    </div>
-                  </div>
-                  <!-- Rejection Reasons -->
-                  <div style="padding:14px 24px 0;">
-                    <h6 style="margin:0 0 8px; font-weight:600; color:#444;">Rejection Reasons</h6>
-                    <div id="naRejectReasonsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:0 16px;"></div>
-                    <div style="margin-top:10px; background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 14px; display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
-                      <span style="font-size:13px;">Total Reject Qty: <strong id="naRejectTotalQtyDisplay" style="color:#c62828; font-size:15px;">0</strong></span>
-                      <span style="font-size:13px;">Accept Qty: <strong id="naRejectRemainingQtyDisplay" style="color:#388e3c; font-size:15px;">0</strong></span>
-                      <span style="font-size:12px; color:#555; margin-left:auto;">Original Trays <span style="font-size:11px; color:#888;">(click to assign)</span></span>
-                      <button type="button" id="naGlobalClearAllBtn" style="background:#f5f5f5; border:1px solid #ccc; border-radius:4px; padding:3px 12px; font-size:11px; color:#666; cursor:pointer;">Clear All</button>
-                    </div>
-                  </div>
-                  <!-- Tray Allocation Section -->
-                  <div id="naTrayAllocationSection" style="display:none; padding:10px 24px;">
-                    <div style="margin-bottom:10px;">
-                      <div id="naOriginalTraysContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-                    </div>
-                    <div class="nq-alloc-grid">
-                      <div class="nq-alloc-col nq-alloc-reject">
-                        <h6 style="margin:0 0 4px; font-weight:600; color:#c62828; font-size:13px;">
-                          Reject Trays
-                          <span style="float:right; font-size:12px; color:#b71c1c;">Qty: <strong id="naRejectTotalQtyLabel">0</strong></span>
-                        </h6>
-                        <p style="margin:0 0 6px; font-size:10px; color:#999; font-style:italic;">Rejected -> Reports</p>
-                        <div id="naRejectSlotsContainer" class="nq-alloc-body"></div>
-                      </div>
-                      <div id="naDelinkSection" class="nq-alloc-col nq-alloc-delink" style="display:none;">
-                        <h6 style="margin:0 0 6px; font-weight:600; color:#f57c00; font-size:13px;">
-                          <i class="fa fa-unlink"></i> Delink Trays
-                        </h6>
-                        <p id="naRejectReuseInfo" style="margin:0 0 6px; font-size:11px; color:#e65100; display:none;"></p>
-                        <div id="naDelinkListContainer" class="nq-alloc-body" style="font-size:12px;"></div>
-                      </div>
-                      <div class="nq-alloc-col nq-alloc-accept">
-                        <h6 style="margin:0 0 4px; font-weight:600; color:#388e3c; font-size:13px;">
-                          Accept Trays (Scan only Top Tray)
-                          <span style="float:right; font-size:12px; color:#2e7d32;">Qty: <strong id="naAcceptTotalQtyLabel">0</strong></span>
-                        </h6>
-                        <p style="margin:0 0 6px; font-size:10px; color:#999; font-style:italic;">Accepted → Complete</p>
-                        <div id="naAcceptSlotsContainer" class="nq-alloc-body"></div>
-                      </div>
-                    </div>
-                    <div style="margin-top:8px; font-size:12px; display:flex; gap:16px; color:#555;">
-                      <span>Accepted: <strong id="naCombinedAcceptQty" style="color:#388e3c;">0</strong></span>
-                      <span>Rejected: <strong id="naCombinedRejectQty" style="color:#c62828;">0</strong></span>
-                      <span>Delinked: <strong id="naCombinedDelinkQty" style="color:#f57c00;">0</strong></span>
-                    </div>
-                  </div>
-                  <!-- Footer -->
-                  <div style="padding:12px 24px 18px; border-top:1px solid #e8edf2;">
-                    <textarea id="naRejectRemarksInput" maxlength="255" rows="2" placeholder="Enter remarks (optional, mandatory for full lot rejection)" style="width:100%; border:1px solid #ccc; border-radius:6px; padding:8px; font-size:13px; resize:none; margin-bottom:10px;" autocomplete="off"></textarea>
-                    <div id="naRejectModalError" style="color:#c62828; font-size:13px; min-height:18px; margin-bottom:6px;"></div>
-                    <div style="display:flex; justify-content:flex-end; gap:10px;">
-                      <button id="naDraftSaveBtn" type="button" style="background:#f0ad4e; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; font-weight:600; cursor:pointer;"><i class="fa fa-save"></i> Draft</button>
-                      <button id="naRejectSubmitBtn" type="button" style="background:#28a745; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; font-weight:600; cursor:pointer;">Submit</button>
-                      <button id="naRejectCancelBtn" type="button" style="background:#6c757d; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; cursor:pointer;">Cancel</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- ══════════ END Nickel Audit Zone I REJECTION MODAL ══════════ -->
 
-              <div
-                id="trayScanModal_DayPlanning"
-                class="tray-scan-modal-DayPlanning"
-                style="display:none"
-              >
+                                    <div
+  id="trayScanModal_DayPlanning"
+  class="tray-scan-modal-DayPlanning"
+  style="display:none"
+>
   <div class="tray-scan-modal-DayPlanning-content">
     <span id="closeTrayScanModal_DayPlanning" class="tray-scan-close-readonly">&times;</span>
     
     <div class="modal-top-header" style="display: flex; align-items: center; gap: 20px; padding-bottom: 10px;">
       <div class="user-profile" style="display: flex; align-items: center; gap: 8px">
-        <img id="nickelAuditModalModelImage" src="/static/assets/images/imagePlaceholder.png" alt="Model preview" style="border:none; border-radius:0; box-shadow:none; background:transparent; width:72px; height:72px; object-fit:contain; object-position:center;" />
+        <img src="/static/assets/images/imagePlaceholder.png" alt="Model preview" style="border:none; border-radius:0; box-shadow:none; background:transparent; width:64px; height:64px; object-fit:contain; object-position:center;" />
         <!-- Model No and Lot Qty in same line -->
         <div style="display: flex; flex-direction: column; gap: 2px;">
           <div style="display: flex; align-items: center; gap: 15px;">
@@ -1218,91 +1167,9 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
       <!-- Headers and dynamic content will be injected here -->
     </div>
   </div>
-</div>
-              <!-- Tray Scan Details Modal (Left Popup) -->
-              <div id="trayScanModal" class="tray-scan-modal">
-                <div class="tray-scan-modal-content">
-                  <span id="closeTrayScanModal" class="tray-scan-close-readonly">&times;</span>
-                  <h3>
-                    Nickel Audit / <span id="trayScanModalHeaderModelNo" style="font-weight:bold; color:#028084;"></span> / Rejection Window
-                  </h3>
-                  <p style="margin: 0 0 0 2px;">
-                    Lot Qty: <span id="trayScanModalLotQty" style="font-weight:bold; color:#e67e22;"></span> /
-                    Missing Qty: <span id="trayScanModalMissingQty" style="font-weight:bold; color:#d32f2f;"></span> /
-                    Physical Qty: <span id="trayScanModalPhysicalQty" style="font-weight:bold; color:#388e3c;"></span>
-                  </p>
-                  <!-- ADD HERE -->
-                  <div class="aql-info" style="margin-bottom: 10px;">
-                    <span style="font-weight:600; color:#028084; font-size:13px;">AQL Limit:</span>
-                    <span id="trayScanModalAqlLimit" style="font-weight:bold; color:#e67e22; font-size:13px;"></span>
-                    &nbsp;|&nbsp;
-                    <span style="font-weight:600; color:#028084; font-size:13px;">Sample Qty:</span>
-                    <span id="trayScanModalSampleQty" style="font-weight:bold; color:#388e3c; font-size:13px;"></span>
-                  </div>
-                  <div id="trayScanDetails">
-                    <!-- Dynamic content will be loaded here -->
-                  </div>
-                </div>
-              </div>
-              <!-- New Popup Modal (Right Popup) -->
-              <div id="newPopupModal" class="new-popup-modal">
-                <div class="tray-scan-modal-content">
-                  <span id="closeNewPopupModal" class="tray-scan-close-readonly"
-                    >&times;</span
-                  >
-                  <!-- New top header container: title + user profile aligned left -->
-                  <div
-                    class="modal-top-header"
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 20px;
-                      padding-bottom: 10px;
-                    "
-                  >
-                  
-                  </div>
-                  <!-- Existing centered h3 title -->
-                  <!-- Redo icon for clearing "tray ID" -->
-                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                    <h5 style="text-align: center; margin: 0; flex: 1; font-weight: 600; color:#595959">
-                      Brass Qc - Accepted case tray scan table
-                    </h5>
-                    <img
-                      src="{% static 'assets/icons/redo2.png' %}"
-                      alt="Redo"
-                      id="trayScanRedoBtn"
-                      style="width: 24px; height: 24px; cursor: pointer; margin-right: 14px;"
-                      title="Clear Tray IDs"
-                    />
-                  </div>
-                  <!-- Accepted Case Tray Scan Table - Grid View with Visible Borders -->
-                  <div id="trayScanDetails" class="table-grid">
-
-                    <!-- NEW BUTTONS SECTION -->
-                    <div class="tray-scan-modal-buttons" style="grid-column: 1 / -1; display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-                       <button
-                    style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 30px;">
-                    Draft
-                  </button>
-                  <button
-                    style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 30px;">
-                    Submit
-                  </button>
-                  <button
-                    style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 30px;">
-                    Cancel
-                  </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            </div>
-            
-           
-          
-         <!-- Pagination Section -->
+</div>       
+          </div>
+            <!-- Pagination Section -->
 
             <div class="pagination-wrapper">
               <nav aria-label="Page navigation">
@@ -1408,8 +1275,1138 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
     <div id="holdRemarkError" style="color:red; font-size:13px; min-height:18px; margin-top:6px;"></div>
   </div>
 </div>
-</div>
-{% block script %}
+
+            
+  {% block script %}
+
+ <!-- 🔥 NEW: Date Filter JavaScript for Brass Table -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function() {
+  console.log('🔄 Initializing HTML5 date filtering for Brass QC Completed Table...');
+  
+  // ✅ Use Brass-specific IDs
+  const fromInput = document.getElementById('from-date-brass');
+  const toInput = document.getElementById('to-date-brass');
+  const searchBtn = document.getElementById('search-date-range-brass');
+  const clearBtn = document.getElementById('clear-date-filter-brass');
+  const filterIndicatorBrass = document.getElementById('filterActiveIndicator');
+  
+  console.log('📋 Brass Elements found:');
+  console.log('- From input:', fromInput);
+  console.log('- To input:', toInput);
+  console.log('- Search button:', searchBtn);
+  console.log('- Clear button:', clearBtn);
+  console.log('- Filter indicator:', filterIndicatorBrass);
+  
+  // Check if we're in filter mode by looking at URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasFromDateParam = urlParams.has('from_date') && urlParams.get('from_date');
+  const hasToDateParam = urlParams.has('to_date') && urlParams.get('to_date');
+  const isFilterMode = hasFromDateParam && hasToDateParam;
+  
+  // Show "Filter Active" text ONLY if actual URL filter parameters exist
+  if (isFilterMode && filterIndicatorBrass) {
+    filterIndicatorBrass.style.display = 'block';
+    console.log('Filter mode detected for Brass table - showing indicator');
+  } else {
+    if (filterIndicatorBrass) {
+      filterIndicatorBrass.style.display = 'none';
+    }
+    console.log('No filter mode for Brass table - hiding indicator');
+  }
+  
+  // ✅ Set default dates if not provided by Django
+  function setDefaultDates() {
+    const today = new Date();
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(today.getDate() - 2);
+    
+    // Format dates as YYYY-MM-DD for HTML5 date inputs
+    const formatDate = (date) => {
+      return date.getFullYear() + '-' + 
+             String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+             String(date.getDate()).padStart(2, '0');
+    };
+    
+    // Only set defaults if inputs are completely empty and we're not in filter mode
+    if (fromInput && !fromInput.value && !isFilterMode) {
+      fromInput.value = formatDate(twoDaysAgo);
+      console.log('📅 Set default from date:', fromInput.value);
+    }
+    
+    if (toInput && !toInput.value && !isFilterMode) {
+      toInput.value = formatDate(today);
+      console.log('📅 Set default to date:', toInput.value);
+    }
+  }
+  
+  // Call the function to set default dates
+  if (!isFilterMode) {
+    setDefaultDates();
+  }
+  
+  // ✅ Date validation
+  if (fromInput && toInput) {
+    fromInput.addEventListener('change', function() {
+      console.log('📅 From date changed:', fromInput.value);
+      if (toInput.value && fromInput.value > toInput.value) {
+        toInput.value = fromInput.value;
+      }
+      toInput.min = fromInput.value;
+    });
+    
+    toInput.addEventListener('change', function() {
+      console.log('📅 To date changed:', toInput.value);
+      if (fromInput.value && toInput.value < fromInput.value) {
+        fromInput.value = toInput.value;
+      }
+      fromInput.max = toInput.value;
+    });
+  }
+  
+  // ✅ Search functionality
+  if (searchBtn) {
+    searchBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const fromDate = fromInput ? fromInput.value : '';
+      const toDate = toInput ? toInput.value : '';
+      
+      console.log('🔍 Brass Search clicked - From:', fromDate, 'To:', toDate);
+      
+      if (!fromDate || !toDate) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Date Selection Required',
+            text: 'Please select both start and end dates.',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          alert('Please select both start and end dates.');
+        }
+        return;
+      }
+      
+      if (new Date(fromDate) > new Date(toDate)) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Date Range',
+            text: 'Start date must be before or equal to end date.',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          alert('Start date must be before or equal to end date.');
+        }
+        return;
+      }
+      
+      // Construct URL for Brass table
+      const currentUrl = window.location.href.split('?')[0];
+      const newUrl = `${currentUrl}?from_date=${fromDate}&to_date=${toDate}`;
+      console.log('🔄 Redirecting to:', newUrl);
+      window.location.href = newUrl;
+    });
+  } else {
+    console.error('❌ Brass Search button not found with ID: search-date-range-brass');
+  }
+  
+  // ✅ Clear functionality (prevents cache/flickering issues)
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Immediately redirect to clean URL without date parameters
+      // This prevents any intermediate state or cache issues
+      const currentUrl = window.location.href.split('?')[0];
+      console.log('🔄 Redirecting to:', currentUrl);
+      window.location.href = currentUrl;
+    });
+  } else {
+    console.error('❌ Brass Clear button not found with ID: clear-date-filter-brass');
+  }
+  
+  console.log('✅ HTML5 date filtering initialization complete for Brass QC Completed Table');
+});
+</script>
+
+
+  <script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  const redoBtn = document.getElementById("trayScanRedoBtn");
+  const validateInput = document.getElementById("trayValidateInput");
+  const detailsDiv = document.getElementById("trayScanDetails_DayPlanning");
+  const errorMessage = document.getElementById("trayErrorMessage");
+
+  if (redoBtn && validateInput && detailsDiv) {
+    redoBtn.addEventListener("click", function () {
+      // Hide and clear the input
+      validateInput.value = "";
+      validateInput.blur();
+      
+      // Hide error message
+      if (errorMessage) {
+        errorMessage.style.display = "none";
+      }
+      
+      // Reset Tray Validate button to normal state
+      const validateBtn = document.getElementById("trayValidateBtn");
+      if (validateBtn) {
+        validateBtn.style.background = "#f5faff";
+        validateBtn.style.borderColor = "#023E4DCC";
+        validateBtn.style.color = "#023E4DCC";
+      }
+
+      // Reset all icons in the validation status column (read-only modal)
+      // For table layout:
+      const rows = detailsDiv.querySelectorAll("tbody tr");
+      if (rows.length > 0) {
+        rows.forEach(row => {
+          const statusCell = row.querySelector("td:last-child");
+          if (statusCell) {
+            statusCell.innerHTML = `
+              <div class="validation-status">
+                <div class="status-icon fail">
+                  <img src="{% static 'assets/icons/fail.png' %}" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                </div>
+                <div class="status-icon pass">
+                  <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                </div>
+              </div>
+            `;
+          }
+        });
+      } else {
+        // For grid layout (if used)
+        detailsDiv.querySelectorAll('.tray-validation-status-header, .tray-validation-status-cell').forEach(cell => {
+          cell.innerHTML = `
+            Tray Validation Status
+            <span style="margin-left: 10px;">
+              <img src="{% static 'assets/icons/fail.png' %}" alt="Cross" title="Fail" style="width:18px; height:18px; margin-right:6px; vertical-align:middle;" />
+              <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px; vertical-align:middle;" />
+            </span>
+          `;
+        });
+      }
+    });
+  }
+});
+</script>
+
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  const validateBtn = document.getElementById("trayValidateBtn");
+  const validateInput = document.getElementById("trayValidateInput");
+  const redoBtn = document.getElementById("trayScanRedoBtn");
+  const errorMessage = document.getElementById("trayErrorMessage");
+
+  if (validateBtn && validateInput) {
+    validateBtn.addEventListener("click", function () {
+      validateInput.value = "";
+      
+      // Hide error message when starting new validation
+      if (errorMessage) {
+        errorMessage.style.display = "none";
+      }
+      
+      // Change button to active state (green color)
+      validateBtn.style.background = "#e8f5e8";
+      validateBtn.style.borderColor = "#4caf50";
+      validateBtn.style.color = "#2e7d32";
+      
+      // Add the 4th column to the table
+      const modal = document.getElementById("trayScanModal_DayPlanning");
+      const detailsDiv = document.getElementById("trayScanDetails_DayPlanning");
+      
+      if (modal && detailsDiv && modal.buildTableHTML) {
+        // Rebuild table with validation column
+        detailsDiv.innerHTML = modal.buildTableHTML(true);
+      }
+      
+      // Focus the hidden input so it can receive keystrokes
+      validateInput.focus();
+    });
+  }
+  
+  if (redoBtn && validateInput) {
+    redoBtn.addEventListener("click", function () {
+      validateInput.value = "";
+      validateInput.blur();
+      
+      // Hide error message
+      if (errorMessage) {
+        errorMessage.style.display = "none";
+      }
+      
+      // Reset button to normal state (original blue color)
+      if (validateBtn) {
+        validateBtn.style.background = "#f5faff";
+        validateBtn.style.borderColor = "#023E4DCC";
+        validateBtn.style.color = "#023E4DCC";
+      }
+      
+      // Remove the 4th column from the table
+      const modal = document.getElementById("trayScanModal_DayPlanning");
+      const detailsDiv = document.getElementById("trayScanDetails_DayPlanning");
+      
+      if (modal && detailsDiv && modal.buildTableHTML) {
+        // Rebuild table without validation column
+        detailsDiv.innerHTML = modal.buildTableHTML(false);
+      }
+      
+      redoBtn.focus();
+    });
+  }
+});
+</script>
+
+<!-- ✅ UPDATED: Tray Validation JavaScript with BrassTrayId awareness -->
+<script nonce="{{ csp_nonce }}">
+// ✅ UPDATED: Tray validation with BrassTrayId awareness and enhanced logging
+document.addEventListener("DOMContentLoaded", function () {
+  const validateInput = document.getElementById("trayValidateInput");
+  const detailsDiv = document.getElementById("trayScanDetails_DayPlanning");
+  const errorMessage = document.getElementById("trayErrorMessage");
+  const errorText = document.getElementById("trayErrorText");
+
+  console.log("🔍 [Tray Validation] Script loaded with BrassTrayId awareness");
+
+  function getCurrentBatchId() {
+    const modal = document.getElementById("trayScanModal_DayPlanning");
+    if (modal && modal.dataset.batchId) return modal.dataset.batchId;
+    const lastBtn = document.querySelector('.tray-scan-btn-Jig[data-batch-id]');
+    return lastBtn ? lastBtn.getAttribute('data-batch-id') : '';
+  }
+
+  function getBrassQcAcceptedQtyVerifiedFromModal() {
+    const modal = document.getElementById("trayScanModal_DayPlanning");
+    if (modal && modal.dataset.brassQcAcceptedQtyVerified) {
+      return modal.dataset.brassQcAcceptedQtyVerified === 'true';
+    }
+    return false;
+  }
+
+// ✅ COMPLETELY SIMPLIFIED: Only lot_id for all validation
+function getValidationConfig() {
+  const isVerified = getBrassQcAcceptedQtyVerifiedFromModal();
+  
+  // Get lot_id from modal context
+  const modal = document.getElementById("trayScanModal_DayPlanning");
+  const stockLotId = modal?.dataset.stockLotId || getCurrentLotId();
+  
+  if (isVerified) {
+    console.log("✅ [Validation Config] Using AfterCheck validation (BrassTrayId data)");
+    console.log(`   AfterCheck Parameters: lot_id=${stockLotId}`);
+    
+    return {
+      endpoint: "/nickel_audit/pick_complete_tray_validate/",
+      dataSource: "BrassTrayId",
+      params: {
+        lot_id: stockLotId
+      }
+    };
+  } else {
+    console.log("✅ [Validation Config] Using Pick validation (JigUnload_TrayId data)");
+    console.log(`   Pick Parameters: lot_id=${stockLotId}`);
+    
+    return {
+      endpoint: "/nickel_audit/pick_complete_tray_validate/",
+      dataSource: "JigUnload_TrayId", 
+      params: {
+        lot_id: stockLotId
+      }
+    };
+  }
+}
+function showError(message) {
+    console.log("🚨 [Validation Error]", message);
+    if (errorMessage && errorText) {
+      errorText.textContent = message;
+      errorMessage.style.setProperty('display', 'block', 'important');
+      errorMessage.style.setProperty('visibility', 'visible', 'important');
+      errorMessage.style.setProperty('opacity', '1', 'important');
+      errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      
+      setTimeout(() => {
+        errorMessage.style.display = "none";
+      }, 8000);
+    }
+  }
+
+  function hideError() {
+    if (errorMessage) {
+      errorMessage.style.display = "none";
+    }
+  }
+
+  if (validateInput && detailsDiv) {
+// ✅ FIXED: Updated validation function in the keydown event listener
+validateInput.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    const trayId = validateInput.value.trim();
+    
+    if (!trayId) {
+      return;
+    }
+    
+    // ✅ Get validation configuration with lot_id only
+    const validationConfig = getValidationConfig();
+    
+    // ✅ FIXED: Check for lot_id instead of batch_id
+    if (!validationConfig.params.lot_id) {
+      showError("Lot ID not found. Please refresh and try again.");
+      return;
+    }
+
+    hideError();
+
+    // Add tray_id to parameters
+    const requestData = {
+      ...validationConfig.params,
+      tray_id: trayId
+    };
+
+    console.log(`🚀 [Single Validation Call] Making request to: ${validationConfig.endpoint}`);
+    console.log(`   Data Source: ${validationConfig.dataSource}`);
+    console.log(`   Parameters:`, requestData);
+
+    fetch(validationConfig.endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie('csrftoken')
+      },
+      body: JSON.stringify(requestData)
+    })
+    .then(res => {
+      console.log("📡 [Validation Response] Status:", res.status);
+      return res.json();
+    })
+    .then(data => {
+      console.log("📊 [Validation Response] Data:", data);
+      
+      // Enhanced response logging
+      if (data.data_source) {
+        console.log(`   Confirmed Data Source: ${data.data_source}`);
+      }
+      
+      const rows = detailsDiv.querySelectorAll("tbody tr");
+      let found = false;
+      
+      rows.forEach((row, index) => {
+        const trayIdInput = row.querySelector('input[type="text"]');
+        if (trayIdInput) {
+          const rowTrayId = trayIdInput.value.trim();
+          
+          if (rowTrayId === trayId) {
+            found = true;
+            const statusCell = row.querySelector("td:last-child");
+            if (statusCell) {
+              if (data.success && data.exists) {
+                statusCell.innerHTML = `
+                  <div class="validation-status">
+                    <div class="status-icon fail inactive">
+                      <img src="/static/assets/icons/fail.png" alt="Fail" style="width:18px; height:18px;" />
+                    </div>
+                    <div class="status-icon pass active">
+                      <img src="/static/assets/icons/pass.png" alt="Pass" style="width:18px; height:18px;" />
+                    </div>
+                  </div>
+                `;
+                row.style.backgroundColor = '#e8f5e8';
+                setTimeout(() => {
+                  row.style.backgroundColor = '';
+                }, 2000);
+                console.log(`✅ [Validation Success] Tray "${trayId}" validated successfully in ${validationConfig.dataSource}`);
+              } else {
+                statusCell.innerHTML = `
+                  <div class="validation-status">
+                    <div class="status-icon fail active">
+                      <img src="/static/assets/icons/fail.png" alt="Fail" style="width:18px; height:18px;" />
+                    </div>
+                    <div class="status-icon pass inactive">
+                      <img src="/static/assets/icons/pass.png" alt="Pass" style="width:18px; height:18px;" />
+                    </div>
+                  </div>
+                `;
+                row.style.backgroundColor = '#ffebee';
+                setTimeout(() => {
+                  row.style.backgroundColor = '';
+                }, 2000);
+                console.log(`❌ [Validation Failed] Tray "${trayId}" validation failed in ${validationConfig.dataSource}`);
+              }
+            }
+          }
+        }
+      });
+      
+      if (!found) {
+        showError(`Tray ID "${trayId}" not found in table (${validationConfig.dataSource}).`);
+      }
+      
+      validateInput.value = "";
+      validateInput.focus();
+    })
+    .catch(error => {
+      console.error('❌ [Validation Network Error]', error);
+      showError(`Network error occurred while validating the tray ID in ${validationConfig.dataSource}.`);
+      validateInput.value = "";
+      validateInput.focus();
+    });
+  }
+});
+  }
+  
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
+</script>
+
+<!-- ✅ FIXED: JavaScript to prevent dual endpoint calls -->
+<script nonce="{{ csp_nonce }}">
+// Enhanced JavaScript section for modal population with dynamic Lot Qty/Physical Qty
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll('.tray-scan-btn-Jig').forEach(function(link) {
+    link.addEventListener('click', async function (e) {
+      e.preventDefault();
+
+      const modal = document.getElementById("trayScanModal_DayPlanning");
+      const detailsDiv = document.getElementById("trayScanDetails_DayPlanning");
+      const modalModelNo = document.getElementById("modalModelNo_DayPlanning");
+      const modalLotQty = document.getElementById("modalLotQty_DayPlanning");
+      const modalQtyLabel = document.getElementById("modalQtyLabel_DayPlanning");
+
+      // Get data attributes
+      const batchId = link.getAttribute('data-batch-id');
+      const modelNo = link.getAttribute('data-model-no');
+      const stockLotId = link.getAttribute('data-stock-lot-id');
+      
+      // Get the row to access additional data
+      const row = link.closest('tr');
+      const brassPhysicalQty = row ? row.getAttribute('data-brass-physical-qty') : "0";
+      const displayAcceptedQty = link.getAttribute('data-total-batch-quantity') || "0";
+      const brassMissingQty = row ? row.getAttribute('data-brass-missing-qty') : "0";
+      const brassQcAcceptedQtyVerified = row ? row.getAttribute('data-brass-qc-accepted-qty-verified') === 'True' : false;
+
+      // Enhanced detection with detailed logging
+      const checkbox = row ? row.querySelector('.brass-checkbox') : null;
+      const actuallyVerified = checkbox ? (checkbox.checked && checkbox.disabled) : false;
+
+      console.log(`🔍 [Enhanced Detection] Results for lot ${stockLotId}:`);
+      console.log(`   Data attribute verified: ${brassQcAcceptedQtyVerified}`);
+      console.log(`   Checkbox verified: ${actuallyVerified}`);
+      console.log(`   Display accepted qty: ${displayAcceptedQty}`);
+      console.log(`   Brass physical qty: ${brassPhysicalQty}`);
+
+      // Use the more reliable checkbox-based detection
+      const isVerified = actuallyVerified;
+
+      // Store data in modal
+      modal.dataset.batchId = batchId;
+      modal.dataset.brassQcAcceptedQtyVerified = isVerified.toString();
+      modal.dataset.stockLotId = stockLotId;
+
+      // Set modal content
+      if (modalModelNo && modelNo) {
+        modalModelNo.textContent = modelNo;
+        
+      }
+      function setModalPreviewImage(link, modal) {
+        const modalUserImg = modal.querySelector('.user-profile img');
+        const stockNo = (link.dataset.platingStkNo || '').trim();
+        if (!modalUserImg || !stockNo) return;
+        const previewCache = window.NickelModelPreviewCache || new Map();
+        window.NickelModelPreviewCache = previewCache;
+        const renderPayload = function (payload) {
+          if (payload && payload.preview_image && modal.dataset.activePlatingStkNo === stockNo) {
+            modalUserImg.src = window.NickelAuditNormalizeImageUrl ? window.NickelAuditNormalizeImageUrl(payload.preview_image) : payload.preview_image;
+          }
+        };
+        modalUserImg.src = "";
+        if (previewCache.has(stockNo)) {
+          renderPayload(previewCache.get(stockNo));
+          return;
+        }
+        fetch("/adminportal/api/model-hover-preview/?stock_no=" + encodeURIComponent(stockNo), {
+          headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" }
+        })
+          .then(function (response) { return response.ok ? response.json() : null; })
+          .then(function (payload) {
+            previewCache.set(stockNo, payload);
+            renderPayload(payload);
+          })
+          .catch(function () {});
+      }
+
+      modal.dataset.activePlatingStkNo = (link.dataset.platingStkNo || '').trim();
+      const modalUserImg = modal.querySelector('.user-profile img');
+      if (modalUserImg) {
+        setModalPreviewImage(link, modal);
+      }
+
+      
+      // Set dynamic values for Lot Qty, Missing Qty, Physical Qty
+      document.getElementById('modalLotQty').textContent = displayAcceptedQty || '';
+      document.getElementById('modalMissingQty').textContent = brassMissingQty || '';
+      document.getElementById('modalPhysicalQty').textContent = brassPhysicalQty || '';
+
+      // ✅ ENHANCED: Dynamic quantity display based on verification status
+      if (modalLotQty && modalQtyLabel) {
+        if (isVerified) {
+          // Show Physical Qty when verified
+          modalQtyLabel.textContent = "Physical Qty:";
+          modalLotQty.textContent = brassPhysicalQty; // <-- This should be the correct value
+          modalLotQty.style.color = "#28a745";
+          console.log(`✅ Showing Physical Qty: ${brassPhysicalQty}`);
+        } else {
+          // Show Lot Qty when not verified
+          modalQtyLabel.textContent = "Lot Qty:";
+          modalLotQty.textContent = displayAcceptedQty;
+          modalLotQty.style.color = "#e67e22";
+          console.log(`✅ Showing Lot Qty: ${displayAcceptedQty}`);
+        }
+      }
+
+
+
+      // Continue with existing endpoint selection logic...
+      let trayListEndpoint;
+      let apiParams;
+      let dataSource;
+
+      if (isVerified) {
+        // AFTER CHECK: Use BrassTrayId data with Brass QC parameters
+        trayListEndpoint = '/nickel_audit/pick_CompleteTable_tray_id_list/';
+        dataSource = 'BrassTrayId';
+        
+        // Get Brass QC status from row data attributes
+        apiParams = {
+          lot_id: stockLotId,
+
+        };
+        
+        console.log(`✅ [AFTER CHECK MODE] Using: ${trayListEndpoint}`);
+        console.log(`   Data Source: ${dataSource} (Physical Qty: ${brassPhysicalQty})`);
+        console.log(`   Parameters:`, apiParams);
+      } else {
+        // PICK MODE: Use TrayId data with IP stock parameters  
+        trayListEndpoint = '/nickel_audit/pick_CompleteTable_tray_id_list/';
+        dataSource = 'TrayId (IPTrayId)';
+
+        apiParams = {
+          lot_id: stockLotId,
+        };
+        
+        console.log(`✅ [PICK MODE] Using: ${trayListEndpoint}`);
+        console.log(`   Data Source: ${dataSource} (Lot Qty: ${displayAcceptedQty})`);
+        console.log(`   Parameters:`, apiParams);  
+      }
+
+      // Continue with existing API call and table building logic...
+      let traysData = [];
+      let rejectionSummary = {};
+      
+      try {
+        const params = new URLSearchParams(apiParams);
+        const finalUrl = `${trayListEndpoint}?${params}`;
+        
+        console.log(`🚀 [SINGLE CALL] Making request to: ${finalUrl}`);
+        
+        const resp = await fetch(finalUrl);
+        const result = await resp.json();
+        
+        if (result.success) {
+          traysData = result.trays || [];
+          rejectionSummary = result.rejection_summary || {};
+          console.log(`✅ [SUCCESS] Fetched ${traysData.length} trays from ${dataSource}`);
+        } else {
+          console.error(`❌ [ERROR] API call failed:`, result);
+        }
+      } catch (e) {
+        console.error(`❌ [NETWORK ERROR] Failed to fetch tray data:`, e);
+      }
+
+      function buildTableHTML(showValidationColumn = false) {
+        let html = `
+          <table class="table table-bordered table-sm" style="width:100%; margin-bottom:0;">
+            <thead>
+              <tr>
+                <th style="width:50px;">S.no</th>
+                <th>Tray ID</th>
+                <th>Tray Qty</th>
+                ${showValidationColumn ? '<th>Tray Validation Status</th>' : ''}
+              </tr>
+            </thead>
+            <tbody>
+        `;
+      
+        let rowCounter = 1;
+      
+        // --- ACCEPTED TRAYS ---
+        const acceptedTrays = traysData.filter(tray => !tray.rejected_tray && !tray.delink_tray);
+        if (acceptedTrays.length > 0) {
+          html += `
+            <tr style="background-color: #e8f5e8; font-weight: bold;">
+              <td colspan="${showValidationColumn ? '4' : '3'}" style="text-align: center; color: #2e7d32; padding: 8px;">
+                ✅ ACCEPTED TRAYS
+              </td>
+            </tr>
+          `;
+          // Top tray first
+          const topTray = acceptedTrays.find(tray => tray.top_tray === true);
+          if (topTray) {
+            html += `
+              <tr>
+                <td>${rowCounter} <span style="color:#028084;font-weight:600;">(Top Tray)</span></td>
+                <td>
+                  <input type="text" class="form-control" value="${topTray.tray_id || ''}" readonly style="width: 100%;" />
+                  <span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">ACCEPTED</span>
+                </td>
+                <td>
+                  <input type="number" class="form-control" value="${topTray.tray_quantity || ''}" readonly style="width: 100%;" />
+                </td>
+                ${showValidationColumn ? `
+                  <td>
+                    <div class="validation-status">
+                      <div class="status-icon fail">
+                        <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                      </div>
+                      <div class="status-icon pass">
+                        <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                      </div>
+                    </div>
+                  </td>
+                ` : ''}
+              </tr>
+            `;
+            rowCounter++;
+          }
+          acceptedTrays.filter(tray => !tray.top_tray).forEach(tray => {
+            html += `
+              <tr>
+                <td>${rowCounter}</td>
+                <td>
+                  <input type="text" class="form-control" value="${tray.tray_id || ''}" readonly style="width: 100%;" />
+                  <span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">ACCEPTED</span>
+                </td>
+                <td>
+                  <input type="number" class="form-control" value="${tray.tray_quantity || ''}" readonly style="width: 100%;" />
+                </td>
+                ${showValidationColumn ? `
+                  <td>
+                    <div class="validation-status">
+                      <div class="status-icon fail">
+                        <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                      </div>
+                      <div class="status-icon pass">
+                        <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                      </div>
+                    </div>
+                  </td>
+                ` : ''}
+              </tr>
+            `;
+            rowCounter++;
+          });
+        }
+      
+        // --- REJECTED TRAYS ---
+        const rejectedTrays = traysData.filter(tray => tray.rejected_tray && !tray.delink_tray);
+        if (rejectedTrays.length > 0) {
+          html += `
+            <tr style="background-color: #ffebee; font-weight: bold;">
+              <td colspan="${showValidationColumn ? '4' : '3'}" style="text-align: center; color: #c62828; padding: 8px;">
+                ❌ REJECTED TRAYS
+              </td>
+            </tr>
+          `;
+          // Top tray first
+          const topTray = rejectedTrays.find(tray => tray.top_tray === true);
+          if (topTray) {
+            html += `
+              <tr>
+                <td>${rowCounter} <span style="color:#028084;font-weight:600;">(Top Tray)</span></td>
+                <td>
+                  <input type="text" class="form-control" value="${topTray.tray_id || ''}" readonly style="width: 100%;" />
+                  <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">REJECTED</span>
+                </td>
+                <td>
+                  <input type="number" class="form-control" value="${topTray.tray_quantity || ''}" readonly style="width: 100%;" />
+                </td>
+                ${showValidationColumn ? `
+                  <td>
+                    <div class="validation-status">
+                      <div class="status-icon fail">
+                        <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                      </div>
+                      <div class="status-icon pass">
+                        <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                      </div>
+                    </div>
+                  </td>
+                ` : ''}
+              </tr>
+            `;
+            rowCounter++;
+          }
+          rejectedTrays.filter(tray => !tray.top_tray).forEach(tray => {
+            html += `
+              <tr>
+                <td>${rowCounter}</td>
+                <td>
+                  <input type="text" class="form-control" value="${tray.tray_id || ''}" readonly style="width: 100%;" />
+                  <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">REJECTED</span>
+                </td>
+                <td>
+                  <input type="number" class="form-control" value="${tray.tray_quantity || ''}" readonly style="width: 100%;" />
+                </td>
+                ${showValidationColumn ? `
+                  <td>
+                    <div class="validation-status">
+                      <div class="status-icon fail">
+                        <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                      </div>
+                      <div class="status-icon pass">
+                        <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                      </div>
+                    </div>
+                  </td>
+                ` : ''}
+              </tr>
+            `;
+            rowCounter++;
+          });
+        }
+      
+        // --- DELINKED TRAYS ---
+        const delinkedTrays = traysData.filter(tray => tray.delink_tray);
+        if (delinkedTrays.length > 0) {
+          html += `
+            <tr style="background-color: #f8f9fa; font-weight: bold;">
+              <td colspan="${showValidationColumn ? '4' : '3'}" style="text-align: center; color: #6c757d; padding: 8px;">
+                🔗 DELINKED TRAYS
+              </td>
+            </tr>
+          `;
+          // Top tray first
+          const topTray = delinkedTrays.find(tray => tray.top_tray === true);
+          if (topTray) {
+            html += `
+              <tr>
+                <td>${rowCounter} <span style="color:#028084;font-weight:600;">(Top Tray)</span></td>
+                <td>
+                  <input type="text" class="form-control" value="${topTray.tray_id || ''}" readonly style="width: 100%;" />
+                  <span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">DELINKED</span>
+                </td>
+                <td>
+                  <input type="number" class="form-control" value="${topTray.tray_quantity || ''}" readonly style="width: 100%;" />
+                </td>
+                ${showValidationColumn ? `
+                  <td>
+                    <div class="validation-status">
+                      <div class="status-icon fail">
+                        <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                      </div>
+                      <div class="status-icon pass">
+                        <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                      </div>
+                    </div>
+                  </td>
+                ` : ''}
+              </tr>
+            `;
+            rowCounter++;
+          }
+          delinkedTrays.filter(tray => !tray.top_tray).forEach(tray => {
+            html += `
+              <tr>
+                <td>${rowCounter}</td>
+                <td>
+                  <input type="text" class="form-control" value="${tray.tray_id || ''}" readonly style="width: 100%;" />
+                  <span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">DELINKED</span>
+                </td>
+                <td>
+                  <input type="number" class="form-control" value="${tray.tray_quantity || ''}" readonly style="width: 100%;" />
+                </td>
+                ${showValidationColumn ? `
+                  <td>
+                    <div class="validation-status">
+                      <div class="status-icon fail">
+                        <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                      </div>
+                      <div class="status-icon pass">
+                        <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                      </div>
+                    </div>
+                  </td>
+                ` : ''}
+              </tr>
+            `;
+            rowCounter++;
+          });
+        }
+      
+        html += '</tbody></table>';
+        return html;
+      }
+
+      // Show table 
+      detailsDiv.innerHTML = buildTableHTML(false);
+
+      // Store data for later use
+      modal.buildTableHTML = buildTableHTML;
+      modal.traysData = traysData;
+      modal.rejectionSummary = rejectionSummary;
+
+      // Show the modal
+      modal.style.display = "block";
+      modal.classList.add("open");
+      
+      console.log(`🎯 [MODAL OPENED] Successfully displayed ${dataSource} data`);
+      console.log(`   Quantity Display: ${isVerified ? 'Physical Qty' : 'Lot Qty'} = ${isVerified ? brassPhysicalQty : displayAcceptedQty}`);
+    });
+  });
+
+  // Close handler (unchanged)
+  const closeBtn = document.getElementById("closeTrayScanModal_DayPlanning");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function () {
+      const modal = document.getElementById("trayScanModal_DayPlanning");
+      if (modal) {
+        modal.classList.remove("open");
+        modal.style.display = "none";
+      }
+    });
+  }
+});
+
+
+</script>
+
+   
+    <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+      var triggers = document.querySelectorAll(".remark-tooltip-trigger");
+      triggers.forEach(function (trigger) {
+        var tooltip = trigger.querySelector(".remark-tooltip");
+        var sendButton = tooltip ? tooltip.querySelector("button") : null;
+        function showTooltip() {
+          tooltip.style.opacity = "1";
+          tooltip.style.visibility = "visible";
+          var rect = tooltip.getBoundingClientRect();
+          if (rect.right > window.innerWidth) {
+            tooltip.style.left = "auto";
+            tooltip.style.right = "0";
+            tooltip.style.transform = "none";
+          }
+          if (rect.left < 0) {
+            tooltip.style.left = "0";
+            tooltip.style.transform = "none";
+          }
+          var textarea = tooltip.querySelector("textarea");
+          if (textarea) {
+            textarea.focus();
+          }
+        }
+        function hideTooltip() {
+          tooltip.style.opacity = "0";
+          tooltip.style.visibility = "hidden";
+        }
+        trigger.addEventListener("mouseenter", showTooltip);
+        trigger.addEventListener("mouseleave", function () {
+          setTimeout(function () {
+            if (!trigger.matches(":hover") && !tooltip.matches(":hover")) {
+              hideTooltip();
+            }
+          }, 100);
+        });
+        tooltip.addEventListener("mouseleave", function () {
+          setTimeout(function () {
+            if (!tooltip.matches(":hover") && !trigger.matches(":hover")) {
+              hideTooltip();
+            }
+          }, 100);
+        });
+        trigger.addEventListener("click", function (e) {
+          e.preventDefault();
+        });
+        if (sendButton) {
+          sendButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            // Find the textarea and get its value
+            var textarea = tooltip.querySelector("textarea");
+            var remark = textarea ? textarea.value.trim() : "";
+            if (!remark) {
+              Swal.fire('Error', 'Please enter a remark before sending.', 'error');
+              return;
+            }
+            // Find the batch_id from the row (tr) data attribute or from a hidden field
+            var row = trigger.closest("tr");
+            var trayScanLink = row ? row.querySelector('.tray-scan-btn') : null;
+            var batchId = row ? row.getAttribute('data-batch-id') : null;
+            if (!batchId) {
+              Swal.fire('Error', 'Batch ID not found.', 'error');
+              return;
+            }
+            fetch('/brass_qc/brass_save_ip_pick_remark/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+              },
+              body: JSON.stringify({
+                batch_id: batchId,
+                remark: remark
+              })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Remark saved!',
+                  timer: 1200,
+                  showConfirmButton: false
+                }).then(() => {
+                  // Make the textarea readonly
+                  if (textarea) {
+                    textarea.setAttribute("readonly", true);
+                  }
+
+                  // Replace send button with info message
+                  if (sendButton && tooltip) {
+                    const infoDiv = document.createElement("div");
+                    infoDiv.style.marginTop = "40px";
+                    infoDiv.style.color = "#31708f";
+                    infoDiv.style.background = "#d9edf7";
+                    infoDiv.style.border = "1px solid #bce8f1";
+                    infoDiv.style.borderRadius = "4px";
+                    infoDiv.style.padding = "8px 12px";
+                    infoDiv.style.fontSize = "10px";
+                    infoDiv.style.textAlign = "left";
+                    infoDiv.innerHTML = `
+                      <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
+                      Remark already saved and cannot be edited.
+                    `;
+                    sendButton.parentNode.replaceChild(infoDiv, sendButton);
+                  }
+
+                  hideTooltip(); // optional if you still want to hide the tooltip
+                });
+
+              } else {
+                Swal.fire('Error', data.error || 'Failed to save remark', 'error');
+              }
+            })
+            .catch(() => {
+              Swal.fire('Error', 'Network error', 'error');
+            });
+          });
+        }
+      });
+    });
+  </script>
+
+
+  <!-- Table Sorting Script -->
+  <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+      const table = document.getElementById("order-listing");
+      if (!table) return;
+      const headers = table.querySelectorAll("thead th");
+      const tbody = table.querySelector("tbody");
+      let sortDirection = {};
+      headers.forEach((header, index) => {
+        header.style.cursor = "pointer";
+        header.addEventListener("click", function () {
+          const rows = Array.from(tbody.querySelectorAll("tr"));
+          const dir = sortDirection[index] === "asc" ? "desc" : "asc";
+          sortDirection[index] = dir;
+          rows.sort((a, b) => {
+            const cellA = a.children[index].textContent.trim();
+            const cellB = b.children[index].textContent.trim();
+            const valA = isNaN(cellA) ? cellA : parseFloat(cellA);
+            const valB = isNaN(cellB) ? cellB : parseFloat(cellB);
+            if (valA < valB) return dir === "asc" ? -1 : 1;
+            if (valA > valB) return dir === "asc" ? 1 : -1;
+            return 0;
+          });
+          tbody.innerHTML = "";
+          rows.forEach((row) => tbody.appendChild(row));
+        });
+      });
+    });
+  </script>
+
+
+  <!-- Script for Text Remarks (unchanged) -->
+  <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+      var triggers = document.querySelectorAll(".remark-tooltip-trigger");
+      triggers.forEach(function (trigger) {
+        var tooltip = trigger.querySelector(".remark-tooltip");
+        var sendButton = tooltip ? tooltip.querySelector("button") : null;
+        function showTooltip() {
+          tooltip.style.opacity = "1";
+          tooltip.style.visibility = "visible";
+          var rect = tooltip.getBoundingClientRect();
+          if (rect.right > window.innerWidth) {
+            tooltip.style.left = "auto";
+            tooltip.style.right = "0";
+            tooltip.style.transform = "none";
+          }
+          if (rect.left < 0) {
+            tooltip.style.left = "0";
+            tooltip.style.transform = "none";
+          }
+          var textarea = tooltip.querySelector("textarea");
+          if (textarea) {
+            textarea.focus();
+          }
+        }
+        function hideTooltip() {
+          tooltip.style.opacity = "0";
+          tooltip.style.visibility = "hidden";
+        }
+        trigger.addEventListener("mouseenter", showTooltip);
+        trigger.addEventListener("mouseleave", function () {
+          setTimeout(function () {
+            if (!trigger.matches(":hover") && !tooltip.matches(":hover")) {
+              hideTooltip();
+            }
+          }, 100);
+        });
+        tooltip.addEventListener("mouseleave", function () {
+          setTimeout(function () {
+            if (!tooltip.matches(":hover") && !trigger.matches(":hover")) {
+              hideTooltip();
+            }
+          }, 100);
+        });
+        trigger.addEventListener("click", function (e) {
+          e.preventDefault();
+        });
+        if (sendButton) {
+          sendButton.addEventListener("click", hideTooltip);
+        }
+      });
+    });
+  </script>
 
 
 <!-- Active table row highlight -->
@@ -1449,14 +2446,6 @@ document.addEventListener("DOMContentLoaded", function() {
       row.classList.remove('dp-row-action-highlight');
       row.classList.remove('highlighted-tray-scan');
     });
-    if (window.GlobalShortcutManager && typeof window.GlobalShortcutManager.clear === 'function') {
-      window.GlobalShortcutManager.clear();
-    }
-    try {
-      sessionStorage.removeItem('globalScanModule');
-      sessionStorage.removeItem('globalScanTrayId');
-      sessionStorage.removeItem('globalScanLotId');
-    } catch (e) {}
   }
 
   function highlightRow(row) {
@@ -1479,7 +2468,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function actionTarget(target) {
     return target.closest(
-      '.hold-toggle-btn, .hold-remark-icon, .tray-scan-btn, .tray-scan-btn-Jig, .tray-scan-btn-BQ-view, .btn-accept-is:not(:disabled), .btn-reject-is:not(:disabled), .delete-batch-btn, .remark-send-btn, .rejection-popup-trigger, #delink-selected-btn'
+      '.hold-toggle-btn, .hold-remark-icon, .tray-scan-btn, .tray-scan-btn-Jig, .tray-scan-btn-BQ-view, .btn-accept-is:not(:disabled), .btn-reject-is:not(:disabled), .delete-batch-btn, .remark-send-btn, .remark-history-btn, .saved-remark-tooltip-trigger, .prev-remark-tooltip-trigger, .rejection-popup-trigger'
     );
   }
 
@@ -1533,7 +2522,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  // Handle ESC key to restore position
   document.addEventListener('click', function(event) {
     if (
       event.target &&
@@ -1546,6 +2534,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
+  // Handle ESC key to restore position
   document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
       restoreRowPosition();
@@ -1555,1369 +2544,592 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-<!-- NA Checkbox + Reject Modal JS -->
-<script nonce="{{ csp_nonce }}">
-(function () {
-  'use strict';
-  var API_BASE = '/nickel_audit/api/';
-  var csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
-  function post(url, body) {
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-      body: JSON.stringify(body),
-    }).then(function (r) { return r.json(); });
-  }
-
-  function showRemarkSavedModal() {
-    if (window.Swal && typeof Swal.fire === 'function') {
-      return Swal.fire({
-        icon: 'success',
-        title: 'Remark saved!',
-        timer: 1200,
-        showConfirmButton: false
-      });
-    }
-    alert('Remark saved!');
-    return Promise.resolve();
-  }
-
-  function closeNaRemarkTooltip(trigger) {
-    var tooltip = trigger ? trigger.querySelector('.remark-tooltip') : null;
-    if (!tooltip) return;
-    tooltip.classList.remove('pinned');
-    tooltip.style.opacity = '0';
-    tooltip.style.pointerEvents = 'none';
-    tooltip.style.visibility = 'hidden';
-    tooltip.style.display = 'none';
-  }
-
-  if (!window.__naZone1RemarkHandlerBound) {
-    window.__naZone1RemarkHandlerBound = true;
-    document.addEventListener('click', function (event) {
-      var sendBtn = event.target.closest('.remark-send-btn');
-      if (!sendBtn) return;
-
-      var trigger = sendBtn.closest('.remark-tooltip-trigger');
-      if (!trigger || !trigger.querySelector('textarea')) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (sendBtn.disabled || sendBtn.dataset.saving === 'true') return;
-
-      var row = sendBtn.closest('tr');
-      var textarea = trigger.querySelector('textarea');
-      var remark = textarea ? textarea.value.trim() : '';
-
-      if (!remark) {
-        alert('Please enter a remark before sending.');
-        return;
-      }
-
-      var lotId = row ? (row.getAttribute('data-stock-lot-id') || row.getAttribute('data-lot-id') || '') : '';
-      if (!lotId) {
-        alert('Could not identify the lot for this remark.');
-        return;
-      }
-
-      sendBtn.disabled = true;
-      sendBtn.dataset.saving = 'true';
-
-      fetch(API_BASE + 'action/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-        body: JSON.stringify({
-          action: 'SAVE_REMARK',
-          lot_id: lotId,
-          remark: remark
-        })
-      })
-        .then(function (response) {
-          var contentType = response.headers.get('content-type') || '';
-          if (contentType.indexOf('application/json') !== -1) {
-            return response.json().then(function (data) {
-              if (!response.ok) {
-                throw new Error(data.error || ('HTTP ' + response.status + ' while saving remark.'));
-              }
-              return data;
-            });
-          }
-          return response.text().then(function (text) {
-            console.error('Unexpected non-JSON remark response:', text);
-            throw new Error('HTTP ' + response.status + ' while saving remark. The server returned a non-JSON response.');
-          });
-        })
-        .then(function (data) {
-          if (!data.success) {
-            throw new Error(data.error || 'Failed to save remark.');
-          }
-          if (textarea) textarea.readOnly = true;
-          var img = trigger ? trigger.querySelector('img[alt="Chat"]') : null;
-          if (img) {
-            img.style.filter = 'grayscale(0) brightness(1.1) sepia(1) hue-rotate(80deg) saturate(3) contrast(1.2)';
-            img.style.opacity = '1';
-          }
-          if (sendBtn.parentElement) {
-            sendBtn.parentElement.innerHTML = '<div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;"><i class="fa fa-info-circle" style="margin-right: 6px;"></i>Remark already saved and cannot be edited.</div>';
-          }
-          return showRemarkSavedModal().then(function () {
-            closeNaRemarkTooltip(trigger);
-          });
-        })
-        .catch(function (error) {
-          sendBtn.disabled = false;
-          sendBtn.dataset.saving = 'false';
-          alert(error.message || 'Failed to save remark.');
-        });
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-
-    /* ── 1. Lot Qty Checkbox ── */
-    document.querySelectorAll('.brass-checkbox').forEach(function (cb) {
-      cb.addEventListener('change', function () {
-        if (!this.checked) return;
-        var lotId = this.dataset.lotId;
-        var row = this.closest('tr');
-        cb.disabled = true;
-        post(API_BASE + 'toggle-verified/', { lot_id: lotId })
-          .then(function (data) {
-            if (data.success) {
-              var wrap = cb.parentElement;
-              cb.remove();
-              var tick = document.createElement('span');
-              tick.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:#0c8249;color:white;font-size:14px;font-weight:bold;margin-left:2px;';
-              tick.innerHTML = '&#10003;';
-              wrap.insertBefore(tick, wrap.firstChild);
-              if (row) {
-                var qCircle = row.querySelector('.d-flex .rounded-circle');
-                if (qCircle) qCircle.style.backgroundColor = '#0c8249';
-                row.querySelectorAll('.btn-reject-is[disabled], .tray-scan-btn[disabled]').forEach(function (b) {
-                  b.removeAttribute('disabled');
-                });
-              }
-              setTimeout(function () { location.reload(); }, 500);
-            } else {
-              cb.checked = false;
-              cb.disabled = false;
-              alert(data.error || 'Failed to verify');
-            }
-          })
-          .catch(function () {
-            cb.checked = false;
-            cb.disabled = false;
-            alert('Server error');
-          });
-      });
-    });
-
-    /* ── 2. View Icon — tray snapshot modal ── */
-    var viewModal = document.getElementById('trayScanModal_DayPlanning');
-    var viewDetails = document.getElementById('trayScanDetails_DayPlanning');
-    var closeViewBtn = document.getElementById('closeTrayScanModal_DayPlanning');
-
-    function closeViewModal() {
-      if (viewModal) viewModal.classList.remove('open');
-    }
-    if (closeViewBtn) closeViewBtn.addEventListener('click', closeViewModal);
-    if (viewModal) viewModal.addEventListener('click', function (e) {
-      if (e.target === viewModal) closeViewModal();
-    });
-
-    document.querySelectorAll('.tray-scan-btn-BQ-view').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        var lotId = btn.dataset.stockLotId || '';
-        var modelNo = btn.dataset.modelNo || '';
-        var totalQty = btn.dataset.totalBatchQuantity || '0';
-        var missingQty = btn.dataset.brassMissingQty || '0';
-        var physQty = (parseInt(totalQty, 10) || 0) - (parseInt(missingQty, 10) || 0);
-
-        var elModel = document.getElementById('modalModelNo_DayPlanning');
-        var elLotQty = document.getElementById('modalLotQty');
-        var elMisQty = document.getElementById('modalMissingQty');
-        var elPhysQty = document.getElementById('modalPhysicalQty');
-        var elModelImage = document.getElementById('nickelAuditModalModelImage');
-        var platingStockNo = (btn.dataset.platingStkNo || modelNo || '').trim();
-        if (elModel) elModel.textContent = modelNo || lotId;
-        if (elLotQty) elLotQty.textContent = totalQty;
-        if (elMisQty) elMisQty.textContent = missingQty;
-        if (elPhysQty) elPhysQty.textContent = physQty;
-
-        if (viewDetails) viewDetails.innerHTML = '<span style="color:#888;font-size:13px;">Loading tray data...</span>';
-
-        // Load the IV-first model preview for the eye-icon modal.
-        // The shared API returns preview_image using IV → TV → FV → RSV → NO_IMAGE priority.
-        if (elModelImage) {
-          elModelImage.removeAttribute('src');
-          elModelImage.alt = 'Loading model preview';
-        }
-
-        if (platingStockNo && elModelImage) {
-          fetch('/adminportal/api/model-hover-preview/?stock_no=' + encodeURIComponent(platingStockNo), {
-            headers: {
-              'Accept': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest'
-            }
-          })
-            .then(function(response) {
-              if (!response.ok) throw new Error('Preview request failed');
-              return response.json();
-            })
-            .then(function(payload) {
-              if (payload && payload.preview_image) {
-                elModelImage.src = payload.preview_image;
-                elModelImage.alt = 'IV model preview';
-              } else {
-                elModelImage.src = '/static/assets/images/imagePlaceholder.png';
-                elModelImage.alt = 'Model preview unavailable';
-              }
-            })
-            .catch(function(error) {
-              console.error('[NickelAudit] Model preview error:', error);
-              elModelImage.src = '/static/assets/images/imagePlaceholder.png';
-              elModelImage.alt = 'Model preview unavailable';
-            });
-        } else if (elModelImage) {
-          elModelImage.src = '/static/assets/images/imagePlaceholder.png';
-          elModelImage.alt = 'Model preview unavailable';
-        }
-
-        if (viewModal) viewModal.classList.add('open');
-
-        if (!lotId) {
-          if (viewDetails) viewDetails.innerHTML = '<span style="color:red;">No lot ID found.</span>';
-          return;
-        }
-        post(API_BASE + 'action/', { action: 'GET_TRAYS', lot_id: lotId })
-          .then(function (data) {
-            if (!data.success) {
-              if (viewDetails) viewDetails.innerHTML = '<span style="color:red;">Failed to load tray data.</span>';
-              return;
-            }
-            var trays = data.trays || [];
-            var html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
-            html += '<thead><tr style="background:#f0f4f8;"><th style="padding:6px 10px;text-align:center;border-bottom:2px solid #dee2e6;width:50px;">S.No</th>';
-            html += '<th style="padding:6px 10px;text-align:left;border-bottom:2px solid #dee2e6;">Tray ID</th>';
-            html += '<th style="padding:6px 10px;text-align:center;border-bottom:2px solid #dee2e6;width:80px;">Qty</th></tr></thead><tbody>';
-            if (trays.length === 0) {
-              html += '<tr><td colspan="3" style="text-align:center;padding:16px;color:#888;">No tray data available.</td></tr>';
-            } else {
-              trays.forEach(function (t, i) {
-                var snoCell = (i === 0) ? (i + 1) + ' <span style="color:#028084;font-weight:600;">(Top Tray)</span>' : (i + 1);
-                html += '<tr style="background:' + (i % 2 === 0 ? '#fff' : '#f8f9fa') + ';">';
-                html += '<td style="padding:6px 10px;text-align:center;">' + snoCell + '</td>';
-                html += '<td style="padding:6px 10px;font-weight:600;">' + t.tray_id + '</td>';
-                html += '<td style="padding:6px 10px;text-align:center;">' + t.qty + '</td>';
-                html += '</tr>';
-              });
-            }
-            html += '</tbody></table>';
-            html += '<p style="margin:8px 0 0;font-size:11px;color:#888;">Total Lot Qty: <strong>' + (data.total_qty || 0) + '</strong> | Tray Type: <strong>' + (data.tray_type || 'N/A') + '</strong> | Capacity: <strong>' + (data.tray_capacity || 0) + '</strong></p>';
-            if (viewDetails) viewDetails.innerHTML = html;
-          })
-          .catch(function () {
-            if (viewDetails) viewDetails.innerHTML = '<span style="color:red;">Server error.</span>';
-          });
-      });
-    });
-
-    /* ── 3. Accept Button ── */
-    document.querySelectorAll('.btn-accept-is').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var lotId = btn.dataset.lotId || btn.dataset.stockLotId || '';
-        if (!lotId) return;
-        Swal.fire({
-          title: 'Confirm Full Accept',
-          text: 'Accept this lot with current quantity and tray info?',
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'Yes, Accept',
-          cancelButtonText: 'Cancel',
-          focusCancel: true,
-          confirmButtonColor: '#0c8249',
-          cancelButtonColor: '#6c757d',
-        }).then(function (result) {
-          if (!result.isConfirmed) return;
-          btn.disabled = true;
-          btn.textContent = 'Saving...';
-          post(API_BASE + 'action/', { action: 'FULL_ACCEPT', lot_id: lotId })
-            .then(function (data) {
-              if (data.success) {
-                Swal.fire({ title: 'Accepted!', icon: 'success', timer: 1200, showConfirmButton: false });
-                setTimeout(function () { location.reload(); }, 1200);
-              } else {
-                Swal.fire('Error', data.error || 'Failed to accept lot', 'error');
-                btn.disabled = false;
-                btn.textContent = 'Accept';
-              }
-            })
-            .catch(function () {
-              Swal.fire('Error', 'Server error. Please try again.', 'error');
-              btn.disabled = false;
-              btn.textContent = 'Accept';
-            });
-        });
-      });
-    });
-
-    /* ── 4. Reject Modal ── */
-    var overlay = document.getElementById('nickelAuditRejectModalOverlay');
-    var modalClose = document.getElementById('nickelAuditRejectModalClose');
-    var cancelBtn = document.getElementById('naRejectCancelBtn');
-    var reasonsGrid = document.getElementById('naRejectReasonsGrid');
-    var totalQtyDisp = document.getElementById('naRejectTotalQtyDisplay');
-    var remainingDisp = document.getElementById('naRejectRemainingQtyDisplay');
-    var allocSection = document.getElementById('naTrayAllocationSection');
-    var origContainer = document.getElementById('naOriginalTraysContainer');
-    var rejectSlotsCont = document.getElementById('naRejectSlotsContainer');
-    var acceptSlotsCont = document.getElementById('naAcceptSlotsContainer');
-    var delinkSection = document.getElementById('naDelinkSection');
-    var delinkList = document.getElementById('naDelinkListContainer');
-    var reuseInfo = document.getElementById('naRejectReuseInfo');
-    var rejectQtyLabel = document.getElementById('naRejectTotalQtyLabel');
-    var acceptQtyLabel = document.getElementById('naAcceptTotalQtyLabel');
-    var combAccept = document.getElementById('naCombinedAcceptQty');
-    var combReject = document.getElementById('naCombinedRejectQty');
-    var combDelink = document.getElementById('naCombinedDelinkQty');
-    var submitBtn = document.getElementById('naRejectSubmitBtn');
-    var draftBtn = document.getElementById('naDraftSaveBtn');
-    var errDiv = document.getElementById('naRejectModalError');
-    var fullRejCb = document.getElementById('naFullLotRejectionCb');
-    var clearAllBtn = document.getElementById('naGlobalClearAllBtn');
-    if (!overlay) return;
-
-    var state = {
-      lotId: '', platingStk: '', totalQty: 0, trayCapacity: 20, trayType: '',
-      rejPrefix: 'NB', rejCap: 16,
-      reasons: [], origTrays: [], rejectSlots: [], acceptSlots: [],
-      reuseTrays: [], allocDone: false, acceptAutoTrays: [], autoDelinkIds: [], delinkSlots: [],
-      pendingRestore: null,
-    };
-    var lastFocusedTrayInput = null;
-
-    document.addEventListener('focusin', function (event) {
-      var target = event.target;
-      if (target && target.classList && (target.classList.contains('na-delink-tray-input') || target.classList.contains('na-acc-tray-input'))) {
-        lastFocusedTrayInput = target;
-      }
-    });
-
-    function getFocusedTrayInput(selector, container) {
-      var activeInput = document.activeElement;
-      if (activeInput && activeInput.matches && activeInput.matches(selector) && container.contains(activeInput)) {
-        return activeInput;
-      }
-      if (lastFocusedTrayInput && lastFocusedTrayInput.matches && lastFocusedTrayInput.matches(selector) && container.contains(lastFocusedTrayInput)) {
-        return lastFocusedTrayInput;
-      }
-      return null;
-    }
-
-    function normalizeTrayInputValue(input) {
-      var value = (input.value || '').toUpperCase().replace(/\s+/g, '');
-      if (value.length > 9) value = value.slice(0, 9);
-      input.value = value;
-      return value;
-    }
-
-    function selectTrayInputForOverwrite(input) {
-      if (!input || !input.value || input.value.length < 9 || typeof input.select !== 'function') return;
-      setTimeout(function () { input.select(); }, 0);
-    }
-
-    function closeModal() {
-      overlay.style.display = 'none';
-      errDiv.textContent = '';
-      state.allocDone = false;
-      allocSection.style.display = 'none';
-      if (window.GlobalShortcutManager && typeof window.GlobalShortcutManager.clear === 'function') {
-        window.GlobalShortcutManager.clear();
-      }
-      try {
-        sessionStorage.removeItem('globalScanModule');
-        sessionStorage.removeItem('globalScanTrayId');
-        sessionStorage.removeItem('globalScanLotId');
-      } catch (e) {}
-      if (typeof window.naRestoreRowPosition === 'function') {
-        window.naRestoreRowPosition();
-      }
-    }
-    if (modalClose) modalClose.addEventListener('click', closeModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
-
-    document.querySelectorAll('.tray-scan-btn.btn-reject-is').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var row = btn.closest('tr');
-        if (!row) return;
-        state.lotId = btn.dataset.stockLotId || btn.dataset.lotId || '';
-        state.platingStk = btn.dataset.platingStk || '';
-        state.totalQty = parseInt(btn.dataset.totalQty || 0, 10) || 0;
-        if (!state.lotId) {
-          var cb2 = row.querySelector('.brass-checkbox');
-          if (cb2) state.lotId = cb2.dataset.lotId || '';
-        }
-        if (!state.lotId) return;
-        openRejectModal();
-      });
-    });
-
-    function openRejectModal() {
-      errDiv.textContent = '';
-      allocSection.style.display = 'none';
-      state.allocDone = false;
-      state.pendingRestore = null;
-      reasonsGrid.innerHTML = '<span style="color:#888;font-size:13px;">Loading...</span>';
-      overlay.style.display = 'flex';
-      var initialRemarksInput = document.getElementById('naRejectRemarksInput');
-      if (initialRemarksInput) initialRemarksInput.value = '';
-      if (fullRejCb) fullRejCb.checked = false;
-      Promise.all([
-        post(API_BASE + 'action/', { action: 'GET_REASONS' }),
-        post(API_BASE + 'action/', { action: 'GET_TRAYS', lot_id: state.lotId }),
-        post(API_BASE + 'action/', { action: 'GET_DRAFT', lot_id: state.lotId }),
-      ]).then(function (results) {
-        var rData = results[0], tData = results[1], draftRes = results[2];
-        if (!rData.success || !tData.success) {
-          reasonsGrid.innerHTML = '<span style="color:red;">Failed to load data</span>';
-          return;
-        }
-        state.reasons = rData.reasons;
-        state.origTrays = tData.trays;
-        state.totalQty = tData.total_qty || state.totalQty;
-        state.trayCapacity = tData.tray_capacity || 20;
-        state.trayType = tData.tray_type || '';
-        state.platingStk = tData.plating_stk_no || state.platingStk;
-        document.getElementById('naRejectModalPlatingStk').textContent = state.platingStk;
-        document.getElementById('naRejectModalTotalQty').textContent = state.totalQty;
-        totalQtyDisp.textContent = '0';
-        remainingDisp.textContent = state.totalQty;
-        renderReasons();
-        if (draftRes && draftRes.success && draftRes.has_draft && draftRes.draft_data) {
-          var dd = draftRes.draft_data;
-          state.pendingRestore = dd;
-          state.totalQty = parseInt(dd.total_lot_qty || dd.total_qty || state.totalQty, 10) || state.totalQty;
-          state.platingStk = dd.plating_stk_no || state.platingStk;
-          document.getElementById('naRejectModalPlatingStk').textContent = state.platingStk;
-          document.getElementById('naRejectModalTotalQty').textContent = state.totalQty;
-          reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) { inp.max = state.totalQty; });
-          var remarksInp = document.getElementById('naRejectRemarksInput');
-          if (remarksInp) remarksInp.value = dd.remarks || '';
-          if (fullRejCb) fullRejCb.checked = !!dd.full_lot_rejection;
-          var totalRej = parseInt(dd.rejected_qty, 10) || 0;
-          if (dd.reason_qtys && dd.reason_qtys.length > 0) {
-            dd.reason_qtys.forEach(function (rq) {
-              var inp = reasonsGrid.querySelector('[data-reason-id="' + rq.reason_id + '"]');
-              if (inp) inp.value = rq.qty;
-            });
-            if (!totalRej) dd.reason_qtys.forEach(function (rq) { totalRej += (parseInt(rq.qty, 10) || 0); });
-          }
-          if (totalRej > 0 && totalRej <= state.totalQty) {
-            totalQtyDisp.textContent = totalRej;
-            remainingDisp.textContent = Math.max(0, state.totalQty - totalRej);
-            fetchAllocation(totalRej);
-          }
-        }
-      }).catch(function () {
-        reasonsGrid.innerHTML = '<span style="color:red;">Server error</span>';
-      });
-    }
-
-    function renderReasons() {
-      reasonsGrid.innerHTML = '';
-      state.reasons.forEach(function (r) {
-        var row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f0f0f0;';
-        row.innerHTML =
-          '<label style="flex:1;font-size:13px;color:#333;">' + r.rejection_reason + '</label>' +
-          '<input type="number" class="na-reason-qty" min="0" max="' + state.totalQty + '" ' +
-          'style="width:64px;border:1px solid #ccc;border-radius:4px;padding:2px 5px;font-size:13px;" ' +
-          'placeholder="Qty" data-reason-id="' + r.id + '">';
-        reasonsGrid.appendChild(row);
-      });
-      reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) {
-        inp.addEventListener('input', debounce(onReasonQtyChange, 350));
-      });
-      if (fullRejCb) {
-        fullRejCb.onchange = function () {
-          if (fullRejCb.checked) {
-            reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) { inp.value = ''; });
-            totalQtyDisp.textContent = state.totalQty;
-            remainingDisp.textContent = '0';
-            fetchAllocation(state.totalQty);
-          } else {
-            totalQtyDisp.textContent = '0';
-            remainingDisp.textContent = state.totalQty;
-            allocSection.style.display = 'none';
-            state.allocDone = false;
-          }
-        };
-      }
-    }
-
-    function getTotalRejectQty() {
-      if (fullRejCb && fullRejCb.checked) { return state.totalQty; }
-      var total = 0;
-      reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) {
-        total += parseInt(inp.value, 10) || 0;
-      });
-      return total;
-    }
-
-    function onReasonQtyChange() {
-      var total = getTotalRejectQty();
-      totalQtyDisp.textContent = total;
-      remainingDisp.textContent = Math.max(0, state.totalQty - total);
-      if (total > 0 && total <= state.totalQty) {
-        fetchAllocation(total);
-      } else {
-        allocSection.style.display = 'none';
-        state.allocDone = false;
-      }
-    }
-
-    function fetchAllocation(rejQty) {
-      allocSection.style.display = 'none';
-      post(API_BASE + 'action/', { action: 'ALLOCATE', lot_id: state.lotId, rejected_qty: rejQty })
-        .then(function (data) {
-          if (!data.success) return;
-          state.rejectSlots = data.reject_slots;
-          state.acceptSlots = data.accept_slots;
-          state.acceptAutoTrays = data.accept_auto_trays || [];
-          state.autoDelinkIds = data.auto_delink_tray_ids || [];
-          state.delinkSlots = data.delink_slots || [];
-          state.reuseTrays = [];
-          state.rejPrefix = data.rej_prefix || 'NB';
-          state.rejCap = data.rej_cap || 16;
-          renderAllocation(data);
-        });
-    }
-
-    function getDelinkRows() {
-      return Array.from(delinkList.querySelectorAll('.na-delink-tray-input')).map(function (inp) {
-        return {
-          tray_id: inp.value.trim().toUpperCase(),
-          qty: parseInt(inp.dataset.qty, 10) || 0,
-        };
-      }).filter(function (row) { return row.tray_id && row.qty > 0; });
-    }
-
-    function setChipDelinkState(trayId, selected) {
-      var chip = origContainer.querySelector('span[data-tray-id="' + trayId + '"]');
-      if (!chip) return;
-      chip.dataset.selected = selected ? '1' : '0';
-      chip.style.background = selected ? '#fff3e0' : '#e3f2fd';
-      chip.style.borderColor = selected ? '#e65100' : (chip.dataset.isTop === '1' ? '#1565c0' : '#90caf9');
-      chip.style.textDecoration = selected ? 'line-through' : 'none';
-      chip.style.opacity = selected ? '0.7' : '1';
-    }
-
-    function clearDuplicateDelinkValue(trayId, currentInput) {
-      if (!trayId) return;
-      delinkList.querySelectorAll('.na-delink-tray-input').forEach(function (inp) {
-        if (inp !== currentInput && inp.value.trim().toUpperCase() === trayId) {
-          inp.value = '';
-        }
-      });
-    }
-
-    function fillDelinkSlotFromTap(trayId) {
-      var delinkInputs = Array.from(delinkList.querySelectorAll('.na-delink-tray-input'));
-      if (!delinkInputs.length) return false;
-      var targetInput = getFocusedTrayInput('.na-delink-tray-input', delinkList) || delinkInputs.find(function (inp) { return !inp.value.trim(); }) || delinkInputs[0];
-      targetInput.value = trayId;
-      lastFocusedTrayInput = targetInput;
-      clearDuplicateDelinkValue(trayId, targetInput);
-      updateDelinkSection();
-      var nextInput = delinkInputs.find(function (inp) { return !inp.value.trim(); });
-      if (nextInput) {
-        nextInput.focus();
-        lastFocusedTrayInput = nextInput;
-      } else {
-        var acceptTopInput = acceptSlotsCont.querySelector('.na-acc-tray-input');
-        if (acceptTopInput) {
-          acceptTopInput.focus();
-          lastFocusedTrayInput = acceptTopInput;
-        } else {
-          targetInput.focus();
-        }
-      }
-      return true;
-    }
-
-    function fillAcceptSlotFromTap(trayId) {
-      var accInputs = Array.from(acceptSlotsCont.querySelectorAll('.na-acc-tray-input'));
-      if (!accInputs.length) return false;
-      var targetInput = getFocusedTrayInput('.na-acc-tray-input', acceptSlotsCont) || accInputs.find(function (inp) { return !inp.value.trim(); }) || accInputs[0];
-      targetInput.value = trayId;
-      lastFocusedTrayInput = targetInput;
-      var targetIndex = accInputs.indexOf(targetInput);
-      if (targetIndex === 0) {
-        targetInput.dispatchEvent(new Event('input'));
-      }
-      var nextInput = accInputs.slice(targetIndex + 1).find(function (inp) { return !inp.value.trim(); });
-      if (nextInput) nextInput.focus();
-      else targetInput.focus();
-      return true;
-    }
-
-    function updateDelinkSection() {
-      var delinkRows = getDelinkRows();
-      state.reuseTrays = delinkRows;
-      combDelink.textContent = delinkRows.length;
-
-      if ((state.delinkSlots || []).length > 0) {
-        delinkSection.style.display = '';
-        reuseInfo.textContent = 'Scan or tap delink trays: ' + delinkRows.length + '/' + state.delinkSlots.length;
-        reuseInfo.style.display = '';
-      } else {
-        delinkSection.style.display = 'none';
-        reuseInfo.style.display = 'none';
-      }
-
-      origContainer.querySelectorAll('span[data-tray-id]').forEach(function (chip) {
-        setChipDelinkState(chip.dataset.trayId, delinkRows.some(function (row) { return row.tray_id === chip.dataset.trayId; }));
-      });
-
-      var delinkedIdSet = delinkRows.map(function (row) { return row.tray_id; });
-      var filteredAutoTrays = (state.acceptAutoTrays || []).filter(function (t) {
-        return delinkedIdSet.indexOf(t.tray_id) === -1;
-      });
-      var accInputs = Array.from(acceptSlotsCont.querySelectorAll('.na-acc-tray-input'));
-      var slot0Val = accInputs.length > 0 ? accInputs[0].value.trim().toUpperCase() : '';
-      if (!slot0Val) {
-        for (var j = 1; j < accInputs.length; j++) accInputs[j].value = '';
-      } else {
-        var filteredForRest = filteredAutoTrays.filter(function (t) { return t.tray_id !== slot0Val; });
-        var availSlots = accInputs.length - 1;
-        filteredForRest.slice(0, availSlots).forEach(function (t, i) {
-          accInputs[i + 1].value = t.tray_id;
-        });
-        for (var k = Math.min(filteredForRest.length, availSlots) + 1; k < accInputs.length; k++) {
-          accInputs[k].value = '';
-        }
-      }
-    }
-
-    function renderAllocation(data) {
-      origContainer.innerHTML = '';
-      rejectSlotsCont.innerHTML = '';
-      acceptSlotsCont.innerHTML = '';
-      delinkList.innerHTML = '';
-      state.reuseTrays = [];
-
-      (data.original_trays || []).forEach(function (t) {
-        var chip = document.createElement('span');
-        chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:#e3f2fd;border:1px solid #90caf9;border-radius:14px;padding:3px 12px;font-size:12px;cursor:pointer;user-select:none;margin:2px;transition:all 0.15s;';
-        chip.textContent = t.tray_id + ' (' + t.qty + ')';
-        if (t.is_top) chip.style.borderColor = '#1565c0';
-        chip.title = 'Tap to scan this tray';
-        chip.dataset.trayId = t.tray_id;
-        chip.dataset.qty = t.qty;
-        chip.dataset.isTop = t.is_top ? '1' : '0';
-        chip.dataset.selected = '0';
-        chip.addEventListener('click', function () {
-          if (getFocusedTrayInput('.na-delink-tray-input', delinkList)) {
-            fillDelinkSlotFromTap(t.tray_id);
-            return;
-          }
-          if (getFocusedTrayInput('.na-acc-tray-input', acceptSlotsCont)) {
-            fillAcceptSlotFromTap(t.tray_id);
-            return;
-          }
-          if ((state.autoDelinkIds || []).indexOf(t.tray_id) !== -1) {
-            fillDelinkSlotFromTap(t.tray_id);
-            return;
-          }
-          fillAcceptSlotFromTap(t.tray_id);
-        });
-        origContainer.appendChild(chip);
-      });
-
-      (data.reject_slots || []).forEach(function (slot, i) {
-        var wrap = document.createElement('div');
-        wrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
-        wrap.innerHTML =
-          '<span style="font-size:11px;color:#888;min-width:24px;">' + (i + 1) + '.</span>' +
-          '<input class="na-rej-tray-input" type="text" placeholder="' + state.rejPrefix + 'xxxx" maxlength="9" ' +
-          'style="flex:1;border:1px solid #ef9a9a;border-radius:4px;padding:3px 6px;font-size:12px;text-transform:uppercase;" ' +
-          'data-qty="' + slot.qty + '" data-is-top="' + (slot.is_top ? '1' : '0') + '" data-slot-idx="' + i + '">' +
-          '<span class="na-rej-tray-status" style="font-size:11px;min-width:16px;"></span>' +
-          '<span style="font-size:12px;color:#c62828;">× ' + slot.qty + (slot.is_top ? ' Top' : '') + '</span>';
-        rejectSlotsCont.appendChild(wrap);
-      });
-
-      (data.accept_slots || []).forEach(function (slot, i) {
-        var wrap = document.createElement('div');
-        wrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
-        wrap.innerHTML =
-          '<span style="font-size:11px;color:#888;min-width:24px;">' + (i + 1) + '.</span>' +
-          '<input class="na-acc-tray-input" type="text" placeholder="Tray ID" value="" ' +
-          'maxlength="9" ' +
-          'style="flex:1;border:1px solid #a5d6a7;border-radius:4px;padding:3px 6px;font-size:12px;" ' +
-          'data-qty="' + slot.qty + '" data-is-top="' + (slot.is_top ? '1' : '0') + '" data-slot-idx="' + i + '">' +
-          '<span style="font-size:12px;color:#388e3c;">× ' + slot.qty + '</span>';
-        acceptSlotsCont.appendChild(wrap);
-      });
-
-      (data.delink_slots || []).forEach(function (slot, i) {
-        var wrap = document.createElement('div');
-        wrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
-        wrap.innerHTML =
-          '<span style="font-size:11px;color:#888;min-width:24px;">' + (i + 1) + '.</span>' +
-          '<input class="na-delink-tray-input" type="text" placeholder="Tray ID" ' +
-          'maxlength="9" ' +
-          'style="flex:1;border:1px solid #ffcc80;border-radius:4px;padding:3px 6px;font-size:12px;text-transform:uppercase;" ' +
-          'data-qty="' + slot.qty + '" data-expected-tray-id="' + slot.tray_id + '" data-slot-idx="' + i + '">' +
-          '<span style="font-size:12px;color:#e65100;">× ' + slot.qty + '</span>';
-        delinkList.appendChild(wrap);
-      });
-
-      delinkList.querySelectorAll('.na-delink-tray-input').forEach(function (inp) {
-        inp.addEventListener('input', function () {
-          normalizeTrayInputValue(inp);
-          var val = inp.value;
-          clearDuplicateDelinkValue(val, inp);
-          updateDelinkSection();
-        });
-      });
-
-      var allAccSlotInputs = Array.from(acceptSlotsCont.querySelectorAll('.na-acc-tray-input'));
-      allAccSlotInputs.forEach(function (inp) {
-        inp.addEventListener('input', function () { normalizeTrayInputValue(inp); });
-      });
-      if (allAccSlotInputs.length >= 1) {
-        allAccSlotInputs[0].addEventListener('input', function () {
-          var topVal = normalizeTrayInputValue(allAccSlotInputs[0]);
-          if (topVal) {
-            var otherTrays = (state.acceptAutoTrays || []).filter(function (t) { return t.tray_id !== topVal; });
-            var availSlots = allAccSlotInputs.length - 1;
-            otherTrays.slice(0, availSlots).forEach(function (t, idx) {
-              allAccSlotInputs[idx + 1].value = t.tray_id;
-            });
-            for (var k = Math.min(otherTrays.length, availSlots) + 1; k < allAccSlotInputs.length; k++) {
-              allAccSlotInputs[k].value = '';
-            }
-            updateDelinkSection();
-          } else {
-            for (var k2 = 1; k2 < allAccSlotInputs.length; k2++) { allAccSlotInputs[k2].value = ''; }
-            updateDelinkSection();
-          }
-        });
-      }
-
-      updateDelinkSection();
-
-      rejectQtyLabel.textContent = data.rejected_qty || 0;
-      acceptQtyLabel.textContent = data.accepted_qty || 0;
-      combReject.textContent = data.rejected_qty || 0;
-      combAccept.textContent = data.accepted_qty || 0;
-      allocSection.style.display = '';
-      state.allocDone = true;
-
-      if (state.pendingRestore) {
-        var pd = state.pendingRestore;
-        state.pendingRestore = null;
-        function restoreAcceptInputs() {
-          if (pd.accept_trays && pd.accept_trays.length > 0) {
-            var allAccInputs = Array.from(acceptSlotsCont.querySelectorAll('.na-acc-tray-input'));
-            pd.accept_trays.forEach(function (at, i) {
-              if (allAccInputs[i] && at.tray_id) allAccInputs[i].value = at.tray_id;
-            });
-          }
-        }
-        if (pd.reject_trays && pd.reject_trays.length > 0) {
-          var allRejInputs = Array.from(rejectSlotsCont.querySelectorAll('.na-rej-tray-input'));
-          pd.reject_trays.forEach(function (rt, i) {
-            if (allRejInputs[i] && rt.tray_id) allRejInputs[i].value = rt.tray_id;
-          });
-        }
-        restoreAcceptInputs();
-        if (pd.delink_trays && pd.delink_trays.length > 0) {
-          var allDelinkInputs = Array.from(delinkList.querySelectorAll('.na-delink-tray-input'));
-          pd.delink_trays.forEach(function (dt, i) {
-            var tid = (typeof dt === 'string' ? dt : dt.tray_id || '').trim().toUpperCase();
-            var input = tid ? delinkList.querySelector('.na-delink-tray-input[data-expected-tray-id="' + tid + '"]') : null;
-            if (!input) input = allDelinkInputs[i];
-            if (input) input.value = tid;
-          });
-          updateDelinkSection();
-          restoreAcceptInputs();
-        }
-      }
-
-      rejectSlotsCont.querySelectorAll('.na-rej-tray-input').forEach(function (inp) {
-        var statusEl = inp.nextElementSibling;
-        function validateTrayInput() {
-          var val = normalizeTrayInputValue(inp);
-          if (!val) { inp.style.borderColor = '#ef9a9a'; if (statusEl) statusEl.textContent = ''; errDiv.textContent = ''; return; }
-          if (!val.startsWith(state.rejPrefix)) {
-            inp.style.borderColor = '#f44336';
-            if (statusEl) { statusEl.textContent = '✗'; statusEl.style.color = '#f44336'; }
-            errDiv.textContent = 'Reject tray must start with ' + state.rejPrefix;
-            selectTrayInputForOverwrite(inp);
-            return;
-          }
-          post(API_BASE + 'action/', { action: 'CHECK_TRAY', tray_id: val })
-            .then(function (res) {
-              if (res.valid) {
-                inp.style.borderColor = '#4caf50';
-                if (statusEl) { statusEl.textContent = '✓'; statusEl.style.color = '#4caf50'; }
-                errDiv.textContent = '';
-                var allRejInputs = Array.from(rejectSlotsCont.querySelectorAll('.na-rej-tray-input'));
-                var idx = allRejInputs.indexOf(inp);
-                if (idx >= 0 && idx < allRejInputs.length - 1) allRejInputs[idx + 1].focus();
-                else if (idx === allRejInputs.length - 1) {
-                  var firstDelinkInput = Array.from(delinkList.querySelectorAll('.na-delink-tray-input')).find(function (input) {
-                    return !input.value.trim();
-                  });
-                  var firstAccInput = acceptSlotsCont.querySelector('.na-acc-tray-input');
-                  if (firstDelinkInput) firstDelinkInput.focus();
-                  else if (firstAccInput) firstAccInput.focus();
-                }
-              } else {
-                inp.style.borderColor = '#f44336';
-                if (statusEl) { statusEl.textContent = '✗'; statusEl.style.color = '#f44336'; }
-                errDiv.textContent = res.message || 'Tray not found in master';
-                selectTrayInputForOverwrite(inp);
-              }
-            }).catch(function () {
-              inp.style.borderColor = '#ef9a9a';
-              if (statusEl) statusEl.textContent = '';
-            });
-        }
-        var debouncedValidate = debounce(validateTrayInput, 400);
-        inp.addEventListener('input', function () {
-          var val = normalizeTrayInputValue(inp);
-          if (val.length >= 9) validateTrayInput();
-          else debouncedValidate();
-        });
-        inp.addEventListener('blur', validateTrayInput);
-      });
-    }
-
-    if (clearAllBtn) {
-      clearAllBtn.addEventListener('click', function () {
-        reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (i) { i.value = ''; });
-        totalQtyDisp.textContent = '0';
-        remainingDisp.textContent = state.totalQty;
-        if (state.allocDone) {
-          acceptSlotsCont.querySelectorAll('.na-acc-tray-input').forEach(function (inp) { inp.value = ''; });
-          rejectSlotsCont.querySelectorAll('.na-rej-tray-input').forEach(function (inp) {
-            inp.value = '';
-            inp.style.borderColor = '#ef9a9a';
-            var statusEl = inp.nextElementSibling;
-            if (statusEl) statusEl.textContent = '';
-          });
-          delinkList.querySelectorAll('.na-delink-tray-input').forEach(function (inp) { inp.value = ''; });
-          origContainer.querySelectorAll('span[data-tray-id]').forEach(function (chip) {
-            chip.dataset.selected = '0';
-            chip.style.background = '#e3f2fd';
-            chip.style.borderColor = chip.dataset.isTop === '1' ? '#1565c0' : '#90caf9';
-            chip.style.textDecoration = 'none';
-            chip.style.opacity = '1';
-          });
-          updateDelinkSection();
-        }
-      });
-    }
-
-    function buildPayload() {
-      var reasonIds = [];
-      reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) {
-        var rid = parseInt(inp.dataset.reasonId, 10);
-        if ((parseInt(inp.value, 10) || 0) > 0) reasonIds.push(rid);
-      });
-      if (fullRejCb && fullRejCb.checked && !reasonIds.length) {
-        var firstReason = reasonsGrid.querySelector('.na-reason-qty');
-        if (firstReason) reasonIds.push(parseInt(firstReason.dataset.reasonId, 10));
-      }
-      var rejTrays = [];
-      rejectSlotsCont.querySelectorAll('.na-rej-tray-input').forEach(function (inp) {
-        var tid = inp.value.trim();
-        var qty = parseInt(inp.dataset.qty, 10) || 0;
-        if (tid && qty > 0) rejTrays.push({ tray_id: tid, qty: qty });
-      });
-      var accTrays = [];
-      acceptSlotsCont.querySelectorAll('.na-acc-tray-input').forEach(function (inp) {
-        var tid = inp.value.trim();
-        var qty = parseInt(inp.dataset.qty, 10) || 0;
-        var isTop = inp.dataset.isTop === '1';
-        if (tid && qty > 0) accTrays.push({ tray_id: tid, qty: qty, is_top: isTop });
-      });
-      return {
-        reason_ids: reasonIds,
-        rejected_qty: getTotalRejectQty(),
-        reject_trays: rejTrays,
-        accept_trays: accTrays,
-        delink_trays: state.reuseTrays,
-        remarks: document.getElementById('naRejectRemarksInput').value.trim(),
-        lot_id: state.lotId,
-      };
-    }
-
-    if (submitBtn) {
-      submitBtn.addEventListener('click', function () {
-        errDiv.textContent = '';
-        var payload = buildPayload();
-        payload.action = 'SUBMIT_REJECT';
-        if (!payload.reason_ids.length) { errDiv.textContent = 'Select at least one rejection reason.'; return; }
-        if (!payload.rejected_qty) { errDiv.textContent = 'Enter rejected quantity.'; return; }
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Saving...';
-        post(API_BASE + 'action/', payload)
-          .then(function (data) {
-            if (data.success) {
-              closeModal();
-              setTimeout(function () { location.reload(); }, 300);
-            } else {
-              errDiv.textContent = data.error || 'Submission failed';
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Submit';
-            }
-          })
-          .catch(function () {
-            errDiv.textContent = 'Server error';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
-          });
-      });
-    }
-
-    if (draftBtn) {
-      draftBtn.addEventListener('click', function () {
-        errDiv.textContent = '';
-        var reasonQtys = [];
-        reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) {
-          var entered = inp.value.trim();
-          if (entered !== '') reasonQtys.push({ reason_id: parseInt(inp.dataset.reasonId, 10), qty: parseInt(entered, 10) || 0 });
-        });
-        var rejTrays = [];
-        rejectSlotsCont.querySelectorAll('.na-rej-tray-input').forEach(function (inp) {
-          var tid = inp.value.trim();
-          var qty = parseInt(inp.dataset.qty, 10) || 0;
-          if (tid) rejTrays.push({ tray_id: tid, qty: qty });
-        });
-        var accTrays = [];
-        acceptSlotsCont.querySelectorAll('.na-acc-tray-input').forEach(function (inp) {
-          var tid = inp.value.trim();
-          var qty = parseInt(inp.dataset.qty, 10) || 0;
-          if (tid) accTrays.push({ tray_id: tid, qty: qty, is_top: inp.dataset.isTop === '1' });
-        });
-        draftBtn.disabled = true;
-        draftBtn.innerHTML = '<i class="fa fa-save"></i> Saving...';
-        post(API_BASE + 'action/', {
-          action: 'SAVE_DRAFT',
-          lot_id: state.lotId,
-          draft_data: {
-            reason_qtys: reasonQtys,
-            reject_trays: rejTrays,
-            delink_trays: state.reuseTrays,
-            accept_trays: accTrays,
-            remarks: document.getElementById('naRejectRemarksInput').value.trim(),
-            rejected_qty: getTotalRejectQty(),
-            accepted_qty: Math.max(state.totalQty - getTotalRejectQty(), 0),
-            total_lot_qty: state.totalQty,
-            plating_stk_no: state.platingStk,
-            original_trays: state.origTrays,
-            reject_slots: state.rejectSlots,
-            accept_slots: state.acceptSlots,
-            delink_slots: state.delinkSlots,
-            accept_auto_trays: state.acceptAutoTrays,
-            auto_delink_tray_ids: state.autoDelinkIds,
-            tray_capacity: state.trayCapacity,
-            tray_type: state.trayType,
-            rej_prefix: state.rejPrefix,
-            rej_cap: state.rejCap,
-            full_lot_rejection: !!(fullRejCb && fullRejCb.checked),
-            partial_selection: getTotalRejectQty() > 0 && getTotalRejectQty() < state.totalQty,
-            tray_counts: {
-              original: state.origTrays.length,
-              reject: rejTrays.length,
-              accept: accTrays.length,
-              delink: state.reuseTrays.length,
-            },
-            isDraft: true,
-            status: 'Draft',
-          },
-        }).then(function (data) {
-          if (data.success) {
-            closeModal();
-            setTimeout(function () { location.reload(); }, 300);
-          } else {
-            errDiv.textContent = data.error || 'Draft save failed';
-            draftBtn.disabled = false;
-            draftBtn.innerHTML = '<i class="fa fa-save"></i> Draft';
-          }
-        }).catch(function () {
-          errDiv.textContent = 'Server error saving draft';
-          draftBtn.disabled = false;
-          draftBtn.innerHTML = '<i class="fa fa-save"></i> Draft';
-        });
-      });
-    }
-  });
-
-  function debounce(fn, ms) {
-    var t;
-    return function () { clearTimeout(t); t = setTimeout(fn, ms); };
-  }
-})();
-</script>
-
-<script nonce="{{ csp_nonce }}">
-document.addEventListener('DOMContentLoaded', function () {
-  'use strict';
-
-  var scanButton = document.getElementById('scanButton');
-  if (scanButton) {
-    scanButton.addEventListener('click', function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      if (window.GlobalPickTableScanner && typeof window.GlobalPickTableScanner.openScanModal === 'function') {
-        window.GlobalPickTableScanner.openScanModal();
-      } else if (typeof window.openGlobalScanModal === 'function') {
-        window.openGlobalScanModal();
-      }
-    });
-  }
-
-  function normalizeModule(value) {
-    return String(value || '').trim().toLowerCase().replace(/_/g, ' ');
-  }
-
-  function findRowByLot(lotId) {
-    if (!lotId) return null;
-    var normalizedLotId = String(lotId).trim();
-    return Array.from(document.querySelectorAll('#order-listing tbody tr[data-stock-lot-id]')).find(function (row) {
-      return row.getAttribute('data-stock-lot-id') === normalizedLotId || row.getAttribute('data-lot-id') === normalizedLotId;
-    }) || null;
-  }
-
-  document.addEventListener('globalScan:success', function (event) {
-    var detail = (event && event.detail) || {};
-    var moduleName = normalizeModule(detail.module);
-    if (moduleName !== 'nickel audit' && moduleName !== 'nickel audit z1' && moduleName !== 'nickel audit zone 1') return;
-
-    window.setTimeout(function () {
-      var row = document.querySelector('#order-listing tbody tr[data-global-scan-active="1"]') ||
-        findRowByLot(detail.lot_id) ||
-        document.querySelector('#order-listing tbody tr.dp-row-action-highlight, #order-listing tbody tr.gkb-row-focus, #order-listing tbody tr.gs-active-scan');
-      if (!row || row.classList.contains('row-inactive') || row.querySelector('.row-inactive-blur')) return;
-
-      var rejectButton = row.querySelector('button.tray-scan-btn.btn-reject-is');
-      if (!rejectButton || rejectButton.disabled || rejectButton.classList.contains('disabled') || rejectButton.getAttribute('aria-disabled') === 'true') return;
-
-      rejectButton.click();
-      document.dispatchEvent(new CustomEvent('nickelAudit:autoOpenRejectModal', {
-        detail: {
-          tray_id: detail.tray_id || '',
-          lot_id: row.getAttribute('data-stock-lot-id') || detail.lot_id || '',
-          zone: 'Z1',
-          triggered_by: 'global_scan'
-        }
-      }));
-    }, 300);
-  });
-});
-</script>
-
-<!-- Plating Stk - Image hover using shared backend preview priority -->
+<!-- Plating Stk - Image hover - fixed position while hitting the Plating Stk No -->
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
-  const previewCache = window.NickelModelPreviewCache || new Map();
-  window.NickelModelPreviewCache = previewCache;
-  let openTooltip = null;
-  let activeTrigger = null;
-  let activeStockNo = "";
+  const triggers = Array.from(
+    document.querySelectorAll(
+      ".model-hover-trigger[data-plating-stk-no]"
+    )
+  );
 
-  function stockFromTrigger(trigger) {
-    return ((trigger && trigger.dataset.platingStkNo) || "").trim();
+  if (!triggers.length) return;
+
+  const previewCache =
+    window.NickelAuditModelPreviewCache ||
+    new Map();
+
+  const requestCache =
+    window.NickelAuditModelPreviewRequestCache ||
+    new Map();
+
+  window.NickelAuditModelPreviewCache = previewCache;
+  window.NickelAuditModelPreviewRequestCache = requestCache;
+
+  let activeTrigger = null;
+  let pinnedTrigger = null;
+  let hideTimer = null;
+
+  function getStockNo(trigger) {
+    return String(
+      trigger && trigger.dataset
+        ? trigger.dataset.platingStkNo || ""
+        : ""
+    ).trim();
   }
 
-  function fetchPreview(stockNo) {
+  function getTooltip(trigger) {
+    return trigger
+      ? trigger.querySelector(".model-image-tooltip")
+      : null;
+  }
+
+  function getGallery(trigger) {
+    const tooltip = getTooltip(trigger);
+    return tooltip ? tooltip.querySelector(".img-gallery") : null;
+  }
+
+  function normalizeImageUrl(rawUrl) {
+    const value = String(rawUrl || "").trim();
+    if (!value) return "";
+
+    try {
+      const parsed = new URL(value, window.location.origin);
+
+      if (
+        parsed.pathname.startsWith("/media/") ||
+        parsed.pathname.startsWith("/static/")
+      ) {
+        return parsed.pathname + parsed.search + parsed.hash;
+      }
+
+      return parsed.href;
+    } catch (error) {
+      if (
+        value.startsWith("media/") ||
+        value.startsWith("static/")
+      ) {
+        return "/" + value;
+      }
+
+      return value;
+    }
+  }
+
+  window.NickelAuditNormalizeImageUrl = normalizeImageUrl;
+
+  function renderLoading(trigger) {
+    const gallery = getGallery(trigger);
+    if (!gallery) return;
+
+    gallery.innerHTML =
+      '<span style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
+  }
+
+  function renderMessage(trigger, message) {
+    const gallery = getGallery(trigger);
+    if (!gallery) return;
+
+    gallery.textContent = "";
+
+    const messageElement = document.createElement("span");
+    messageElement.textContent = message;
+    messageElement.style.cssText =
+      "font-size:12px;color:#777;text-align:center;padding:12px;";
+    gallery.appendChild(messageElement);
+  }
+
+  function renderPreview(trigger, payload) {
+    const gallery = getGallery(trigger);
+    if (!gallery) return;
+
+    const rawUrl = payload && payload.preview_image;
+    const imageUrl = normalizeImageUrl(rawUrl);
+
+    if (!imageUrl) {
+      renderMessage(trigger, "Image unavailable");
+      return;
+    }
+
+    gallery.textContent = "";
+
+    const image = document.createElement("img");
+    image.alt =
+      payload && payload.is_placeholder
+        ? "No image available"
+        : "Model IV preview";
+    image.loading = "eager";
+    image.decoding = "async";
+    image.style.cssText =
+      "width:100%;height:100%;max-width:204px;max-height:135px;" +
+      "object-fit:contain;object-position:center;" +
+      "border-radius:6px;background:#fff;display:block;";
+
+    image.addEventListener("error", function () {
+      console.error(
+        "[Nickel Audit] Preview image failed:",
+        rawUrl,
+        "Normalized URL:",
+        imageUrl
+      );
+      renderMessage(trigger, "Image could not be loaded");
+    });
+
+    gallery.appendChild(image);
+    image.src = imageUrl;
+  }
+
+  function requestPreview(stockNo) {
     if (previewCache.has(stockNo)) {
       return Promise.resolve(previewCache.get(stockNo));
     }
-    return fetch("/adminportal/api/model-hover-preview/?stock_no=" + encodeURIComponent(stockNo), {
-      headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" }
-    })
-      .then(function (response) { return response.ok ? response.json() : null; })
+
+    if (requestCache.has(stockNo)) {
+      return requestCache.get(stockNo);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(function () {
+      controller.abort();
+    }, 10000);
+
+    const request = fetch(
+      "/adminportal/api/model-hover-preview/?stock_no=" +
+        encodeURIComponent(stockNo),
+      {
+        headers: {
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "same-origin",
+        cache: "no-store",
+        signal: controller.signal
+      }
+    )
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+        return response.json();
+      })
       .then(function (payload) {
         previewCache.set(stockNo, payload);
         return payload;
       })
-      .catch(function () {
-        previewCache.set(stockNo, null);
-        return null;
+      .finally(function () {
+        window.clearTimeout(timeoutId);
+        requestCache.delete(stockNo);
+      });
+
+    requestCache.set(stockNo, request);
+    return request;
+  }
+
+  function loadPreview(trigger) {
+    const stockNo = getStockNo(trigger);
+
+    if (!stockNo) {
+      renderMessage(trigger, "Stock number unavailable");
+      return;
+    }
+
+    if (previewCache.has(stockNo)) {
+      renderPreview(trigger, previewCache.get(stockNo));
+      return;
+    }
+
+    renderLoading(trigger);
+
+    requestPreview(stockNo)
+      .then(function (payload) {
+        renderPreview(trigger, payload);
+      })
+      .catch(function (error) {
+        console.error(
+          "[Nickel Audit] Model preview request failed:",
+          stockNo,
+          error
+        );
+
+        if (error && error.name === "AbortError") {
+          renderMessage(trigger, "Image request timed out");
+        } else {
+          renderMessage(trigger, "Image unavailable");
+        }
       });
   }
 
-  function prepareTooltip(tooltip) {
-    if (!tooltip || tooltip.dataset.previewReady === "1") return;
-    tooltip.dataset.previewReady = "1";
-    tooltip.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;">' +
-        '<button type="button" class="info-btn" style="background:#007bff;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Info</button>' +
-        '<button type="button" class="close-btn" style="background:#dc3545;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Close</button>' +
-      '</div>' +
-      '<div class="image-container" style="display:flex;align-items:center;justify-content:center;width:210px;height:190px;border:none;border-radius:0;background:transparent;box-shadow:none;overflow:visible;padding:0;">' +
-        '<img class="nickel-preview-img" src="" alt="Model preview" style="display:block;width:100%;height:100%;max-width:210px;max-height:190px;object-fit:contain;object-position:center;border:none;border-radius:0;box-shadow:none;background:transparent;outline:none;clip-path:none;" loading="lazy" />' +
-      '</div>';
-  }
-
-  function closeTooltip(tooltip, trigger) {
+  function positionTooltip(trigger) {
+    const tooltip = getTooltip(trigger);
     if (!tooltip) return;
-    tooltip.classList.remove("pinned");
-    tooltip.style.opacity = "0";
-    tooltip.style.pointerEvents = "none";
-    tooltip.style.visibility = "hidden";
-    tooltip.style.display = "none";
-    if (trigger) {
-      trigger.style.backgroundColor = "";
-      trigger.style.borderRadius = "";
+
+    tooltip.style.left = "80%";
+    tooltip.style.right = "auto";
+    tooltip.style.top = "110%";
+    tooltip.style.transform = "translateX(-50%)";
+
+    const rect = tooltip.getBoundingClientRect();
+
+    if (rect.right > window.innerWidth - 8) {
+      tooltip.style.left = "auto";
+      tooltip.style.right = "0";
+      tooltip.style.transform = "none";
     }
-    if (openTooltip === tooltip) {
-      openTooltip = null;
-      activeTrigger = null;
-      activeStockNo = "";
+
+    if (rect.left < 8) {
+      tooltip.style.left = "0";
+      tooltip.style.right = "auto";
+      tooltip.style.transform = "none";
     }
   }
 
-  function renderPreview(trigger, stockNo, payload) {
-    if (activeTrigger !== trigger || activeStockNo !== stockNo) return;
-    const tooltip = trigger.querySelector(".model-image-tooltip");
-    const img = tooltip ? tooltip.querySelector(".nickel-preview-img") : null;
-    if (img && payload && payload.preview_image) {
-      img.src = payload.preview_image;
-    } else if (img) {
-      img.removeAttribute("src");
+  function closeTrigger(trigger, force) {
+    if (!trigger) return;
+    if (!force && pinnedTrigger === trigger) return;
+
+    const tooltip = getTooltip(trigger);
+
+    if (tooltip) {
+      tooltip.classList.remove("is-visible", "pinned");
+      tooltip.style.opacity = "0";
+      tooltip.style.visibility = "hidden";
+      tooltip.style.pointerEvents = "none";
+      tooltip.style.display = "none";
+
+      const infoButton = tooltip.querySelector(".info-btn");
+      const closeButton = tooltip.querySelector(".close-btn");
+
+      if (infoButton) infoButton.style.display = "none";
+      if (closeButton) closeButton.style.display = "none";
+    }
+
+    trigger.style.backgroundColor = "";
+    trigger.style.borderRadius = "";
+
+    if (activeTrigger === trigger) activeTrigger = null;
+    if (force && pinnedTrigger === trigger) {
+      pinnedTrigger = null;
     }
   }
 
-  function showTooltip(trigger, pinned) {
-    const tooltip = trigger.querySelector(".model-image-tooltip");
-    const stockNo = stockFromTrigger(trigger);
-    if (!tooltip || !stockNo) return;
-    if (openTooltip && openTooltip !== tooltip) {
-      closeTooltip(openTooltip, openTooltip.closest(".model-hover-trigger"));
-    }
+  function closeOthers(currentTrigger) {
+    triggers.forEach(function (trigger) {
+      if (trigger !== currentTrigger) {
+        closeTrigger(trigger, true);
+      }
+    });
+  }
+
+  function openTrigger(trigger) {
+    window.clearTimeout(hideTimer);
+    closeOthers(trigger);
+
+    const tooltip = getTooltip(trigger);
+    if (!tooltip) return;
+
     activeTrigger = trigger;
-    activeStockNo = stockNo;
-    openTooltip = tooltip;
-    prepareTooltip(tooltip);
+
+    tooltip.classList.add("is-visible");
     tooltip.style.display = "flex";
     tooltip.style.visibility = "visible";
     tooltip.style.opacity = "1";
     tooltip.style.pointerEvents = "auto";
-    if (pinned) {
-      tooltip.classList.add("pinned");
+
+    const infoButton = tooltip.querySelector(".info-btn");
+    const closeButton = tooltip.querySelector(".close-btn");
+
+    if (infoButton) infoButton.style.display = "block";
+    if (closeButton) closeButton.style.display = "block";
+
+    positionTooltip(trigger);
+    loadPreview(trigger);
+  }
+
+  triggers.forEach(function (trigger) {
+    const tooltip = getTooltip(trigger);
+
+    if (
+      !tooltip ||
+      trigger.dataset.nickelAuditHoverBound === "1"
+    ) {
+      return;
+    }
+
+    trigger.dataset.nickelAuditHoverBound = "1";
+
+    const infoButton = tooltip.querySelector(".info-btn");
+    const closeButton = tooltip.querySelector(".close-btn");
+
+    if (infoButton) infoButton.style.display = "none";
+    if (closeButton) closeButton.style.display = "none";
+
+    trigger.addEventListener("mouseenter", function () {
+      if (pinnedTrigger !== trigger) {
+        openTrigger(trigger);
+      }
+    });
+
+    trigger.addEventListener("mouseleave", function () {
+      hideTimer = window.setTimeout(function () {
+        if (
+          pinnedTrigger !== trigger &&
+          !trigger.matches(":hover") &&
+          !tooltip.matches(":hover")
+        ) {
+          closeTrigger(trigger, false);
+        }
+      }, 180);
+    });
+
+    tooltip.addEventListener("mouseenter", function () {
+      window.clearTimeout(hideTimer);
+    });
+
+    tooltip.addEventListener("mouseleave", function () {
+      hideTimer = window.setTimeout(function () {
+        if (
+          pinnedTrigger !== trigger &&
+          !trigger.matches(":hover") &&
+          !tooltip.matches(":hover")
+        ) {
+          closeTrigger(trigger, false);
+        }
+      }, 180);
+    });
+
+    trigger.addEventListener("click", function (event) {
+      if (
+        event.target.closest(".info-btn") ||
+        event.target.closest(".close-btn")
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (pinnedTrigger === trigger) {
+        closeTrigger(trigger, true);
+        return;
+      }
+
+      closeOthers(trigger);
+      pinnedTrigger = trigger;
       trigger.style.backgroundColor = "#e3f2fd";
       trigger.style.borderRadius = "4px";
+      tooltip.classList.add("pinned");
+      openTrigger(trigger);
+    });
+
+    if (infoButton) {
+      infoButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const stockNo = getStockNo(trigger);
+        if (!stockNo) return;
+
+        window.location.href =
+          "/adminportal/dp_visualaid/?plating_stk_no=" +
+          encodeURIComponent(stockNo);
+      });
     }
-    fetchPreview(stockNo).then(function (payload) {
-      renderPreview(trigger, stockNo, payload);
+
+    if (closeButton) {
+      closeButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeTrigger(trigger, true);
+      });
+    }
+  });
+
+  document.addEventListener("click", function (event) {
+    if (
+      pinnedTrigger &&
+      !event.target.closest(".model-image-tooltip") &&
+      !event.target.closest(".model-hover-trigger")
+    ) {
+      closeTrigger(pinnedTrigger, true);
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && pinnedTrigger) {
+      closeTrigger(pinnedTrigger, true);
+    }
+  });
+});
+</script>
+
+<!-- Script for restricting pointer events when modals are open -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  // List all modal IDs you use
+  const modalIds = [
+    "trayScanModal_DayPlanning",
+    "trayScanModal",
+    "newPopupModal",
+    "imageSliderModal",
+    "holdRemarkModal"
+  ];
+
+  function isAnyModalOpen() {
+    return modalIds.some(id => {
+      const el = document.getElementById(id);
+      return el && (el.style.display === "block" || el.classList.contains("open") || el.style.display === "flex");
     });
   }
 
-  document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
-    const tooltip = trigger.querySelector(".model-image-tooltip");
-    if (!tooltip) return;
-    prepareTooltip(tooltip);
-
-    trigger.addEventListener("mouseenter", function () {
-      if (!tooltip.classList.contains("pinned")) showTooltip(trigger, false);
-    });
-    trigger.addEventListener("mouseleave", function () {
-      if (!tooltip.classList.contains("pinned")) closeTooltip(tooltip, trigger);
-    });
-    tooltip.addEventListener("mouseenter", function () {
-      if (openTooltip === tooltip) {
-        tooltip.style.display = "flex";
-        tooltip.style.visibility = "visible";
-        tooltip.style.opacity = "1";
-        tooltip.style.pointerEvents = "auto";
-      }
-    });
-    tooltip.addEventListener("mouseleave", function () {
-      if (!tooltip.classList.contains("pinned")) closeTooltip(tooltip, trigger);
-    });
-    trigger.addEventListener("click", function (e) {
-      e.stopPropagation();
-      showTooltip(trigger, true);
-    });
-
-    const infoBtn = tooltip.querySelector(".info-btn");
-    if (infoBtn) {
-      infoBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const stockNo = activeTrigger ? stockFromTrigger(activeTrigger) : stockFromTrigger(trigger);
-        if (!stockNo) return;
-        window.location.href = "/adminportal/dp_visualaid/?plating_stk_no=" + encodeURIComponent(stockNo);
+  function setBodyModalState(active) {
+    if (active) {
+      document.body.style.overflow = "hidden";
+      document.body.style.pointerEvents = "none";
+      // Allow pointer events for modals only
+      modalIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.pointerEvents = "auto";
+      });
+      // Restrict pointer events for holding rows
+      document.querySelectorAll('tr.row-inactive, tr.row-inactive *').forEach(el => {
+        el.style.pointerEvents = "none";
+      });
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.pointerEvents = "";
+      modalIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.pointerEvents = "";
+      });
+      // Restore pointer events for holding rows
+      document.querySelectorAll('tr.row-inactive, tr.row-inactive *').forEach(el => {
+        el.style.pointerEvents = "";
       });
     }
+  }
 
-    const closeBtn = tooltip.querySelector(".close-btn");
-    if (closeBtn) {
-      closeBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        closeTooltip(tooltip, trigger);
-      });
-    }
+  // Observe modal open/close changes
+  const observer = new MutationObserver(() => {
+    setBodyModalState(isAnyModalOpen());
   });
 
-  document.addEventListener("click", function (e) {
-    if (openTooltip && !e.target.closest(".model-image-tooltip") && !e.target.closest(".model-hover-trigger")) {
-      closeTooltip(openTooltip, openTooltip.closest(".model-hover-trigger"));
-    }
+  modalIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el, { attributes: true, attributeFilter: ["style", "class"] });
   });
 
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && openTooltip) {
-      closeTooltip(openTooltip, openTooltip.closest(".model-hover-trigger"));
-    }
+  // Also check on click (for dynamic changes)
+  document.addEventListener("click", function () {
+    setTimeout(() => setBodyModalState(isAnyModalOpen()), 50);
   });
+
+  // Always restrict pointer events for holding rows, even if no modal is open
+  setTimeout(() => {
+    document.querySelectorAll('tr.row-inactive, tr.row-inactive *').forEach(el => {
+      el.style.pointerEvents = "none";
+    });
+  }, 100);
 });
 </script>
+  <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+      function lockParentActions() {
+        document
+          .querySelectorAll(
+            'img[alt="Edit Disabled"], img[alt="Delete Disabled"], .fa-filter, button:not(#closeTrayScanModal_DayPlanning):not(#trayValidateBtn):not(#trayScanRedoBtn), .hold-toggle-btn, .hold-remark-icon, label.hold-toggle-switch'
+          )
+          .forEach(function (el) {
+            el.style.pointerEvents = "none";
+            el.style.opacity = "0.4";
+            el.style.filter = "grayscale(1)";
+            el.style.cursor = "not-allowed";
+            el.classList.add("locked-action");
+          });
 
-<script nonce="{{ csp_nonce }}">
-document.addEventListener('DOMContentLoaded', function () {
-  'use strict';
+        document
+          .querySelectorAll("a:not(.tray-scan-btn-Jig)")
+          .forEach(function (el) {
+            el.style.pointerEvents = "none";
+            el.style.opacity = "0.4";
+            el.style.cursor = "not-allowed";
+            el.classList.add("locked-action");
+          });
 
-  // Hold/Unhold view icon click handler
-  document.querySelectorAll('.hold-remark-icon').forEach(function(icon) {
-    icon.addEventListener('click', function() {
-      var title = this.getAttribute('data-bs-original-title') || '';
-      if (title) {
-        Swal.fire({ icon: 'info', title: 'Hold / Release Remark', html: '<div style="text-align:left;">' + title.replace(/&#10;/g, '<br>') + '</div>', confirmButtonColor: '#028084' });
+        var menuPanel = document.querySelector(".sidebar");
+        if (menuPanel) {
+          menuPanel.style.pointerEvents = "none";
+          menuPanel.style.cursor = "not-allowed";
+        }
+        var mainPanel = document.querySelector(".main-panel");
+        if (mainPanel) {
+          mainPanel.style.pointerEvents = "auto";
+        }
+        var tableResponsive = document.querySelector(".table-responsive");
+        if (tableResponsive) {
+          tableResponsive.style.pointerEvents = "";
+          tableResponsive.style.overflow = "auto";
+        }
+        var table = document.getElementById("order-listing");
+        if (table) {
+          table.style.pointerEvents = "";
+        }
       }
-    });
-  });
 
-  // Hold / Unhold Toggle with Remark
-  (function initHoldToggle() {
-    const holdModal = document.getElementById('holdRemarkModal');
-    const holdInput = document.getElementById('holdRemarkInput');
-    const holdError = document.getElementById('holdRemarkError');
-    const holdTitle = holdModal ? holdModal.querySelector('h5') : null;
-    const saveBtn = document.getElementById('saveHoldRemarkBtn');
-    const closeBtn = document.getElementById('closeHoldRemarkModal');
+      function unlockParentActions() {
+        document
+          .querySelectorAll(
+            'img[alt="Edit Disabled"], img[alt="Delete Disabled"], .fa-filter, button, .hold-toggle-btn, .hold-remark-icon, label.hold-toggle-switch'
+          )
+          .forEach(function (el) {
+            el.style.pointerEvents = "";
+            el.style.opacity = "";
+            el.style.filter = "";
+            el.style.cursor = "";
+            el.classList.remove("locked-action");
+          });
+        document.querySelectorAll("a").forEach(function (el) {
+          el.style.pointerEvents = "";
+          el.style.opacity = "";
+          el.style.cursor = "";
+          el.classList.remove("locked-action");
+        });
 
-    if (!holdModal || !holdInput || !saveBtn) return;
+        var menuPanel = document.querySelector(".sidebar");
+        if (menuPanel) {
+          menuPanel.style.pointerEvents = "";
+          menuPanel.style.cursor = "";
+        }
+        var mainPanel = document.querySelector(".main-panel");
+        if (mainPanel) {
+          mainPanel.style.pointerEvents = "";
+        }
+        var tableResponsive = document.querySelector(".table-responsive");
+        if (tableResponsive) {
+          tableResponsive.style.pointerEvents = "";
+          tableResponsive.style.overflow = "";
+        }
+        var table = document.getElementById("order-listing");
+        if (table) {
+          table.style.pointerEvents = "";
+        }
+      }
 
-    window.naHoldToggleState = null;
+      var modal = document.getElementById("trayScanModal_DayPlanning");
+      var closeBtn = document.getElementById("closeTrayScanModal_DayPlanning");
 
-    function attachHoldToggleListeners() {
-      document.querySelectorAll('.hold-toggle-btn').forEach(function(toggle) {
-        toggle.addEventListener('change', function(e) {
-          e.preventDefault();
-          const row = this.closest('tr');
-          const lotId = row ? row.getAttribute('data-stock-lot-id') : null;
-          if (!lotId) return;
-
-          // checked = active (not held), unchecked = held
-          const intendedHold = !this.checked;
-          const action = intendedHold ? 'hold' : 'unhold';
-
-          window.naHoldToggleState = {
-            toggle: this,
-            row: row,
-            lotId: lotId,
-            action: action,
-            originalChecked: !intendedHold
-          };
-          // Revert toggle visually until modal confirms
-          this.checked = !intendedHold;
-
-          if (holdTitle) holdTitle.textContent = action === 'hold' ? 'Hold Reason' : 'Release Reason';
-          holdInput.value = '';
-          if (holdError) holdError.textContent = '';
-          holdModal.style.display = 'flex';
-          holdInput.focus();
+      document.querySelectorAll(".tray-scan-btn-Jig").forEach(function (link) {
+        link.addEventListener("click", function () {
+          setTimeout(lockParentActions, 100);
         });
       });
-    }
 
-    saveBtn.addEventListener('click', function() {
-      const state = window.naHoldToggleState;
-      if (!state) return;
-
-      const remark = holdInput.value.trim();
-      if (!remark) {
-        if (holdError) holdError.textContent = 'Remark is required.';
-        return;
-      }
-      if (remark.length > 50) {
-        if (holdError) holdError.textContent = 'Max 50 characters allowed.';
-        return;
-      }
-
-      saveBtn.disabled = true;
-      fetch('/nickel_audit/api/hold-unhold/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify({
-          lot_id: state.lotId,
-          action: state.action,
-          remark: remark
-        })
-      })
-      .then(r => r.json())
-      .then(data => {
-        saveBtn.disabled = false;
-        if (data.success) {
-          holdModal.style.display = 'none';
-          Swal.fire({
-            icon: 'success',
-            title: state.action === 'hold' ? 'Lot Held' : 'Lot Released',
-            text: data.message,
-            timer: 1500,
-            showConfirmButton: false
-          });
-          setTimeout(function() { location.reload(); }, 1500);
-        } else {
-          if (holdError) holdError.textContent = data.error || 'Failed to save.';
-        }
-      })
-      .catch(function(err) {
-        saveBtn.disabled = false;
-        if (holdError) holdError.textContent = 'Network error.';
-        console.error('[NickelAudit] Hold/Unhold error:', err);
-      });
-    });
-
-    if (closeBtn) {
-      closeBtn.addEventListener('click', function() {
-        holdModal.style.display = 'none';
-        window.naHoldToggleState = null;
-        if (typeof window.naRestoreRowPosition === 'function') {
-          window.naRestoreRowPosition();
-        }
-      });
-    }
-
-    holdModal.addEventListener('click', function(e) {
-      if (e.target === holdModal) {
-        holdModal.style.display = 'none';
-        window.naHoldToggleState = null;
-        if (typeof window.naRestoreRowPosition === 'function') {
-          window.naRestoreRowPosition();
-        }
+      if (closeBtn) {
+        closeBtn.addEventListener("click", function () {
+          setTimeout(unlockParentActions, 200);
+        });
       }
     });
+  </script>
 
-    attachHoldToggleListeners();
-  })();
-});
-</script>
 
-{% endblock %}
-{% endblock content %}
+{% endblock %} {% endblock content %}

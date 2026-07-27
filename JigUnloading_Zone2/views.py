@@ -4623,6 +4623,55 @@ class JU_Zone_Completedtable(LoginRequiredMixin, TemplateView):
                         'first_image': "/static/assets/images/imagePlaceholder.jpg"
                     }
 
+        # Detect Nickel Inspection activity in bulk. Zone 2 shares the Nickel
+        # workflow tables and unload-row activity flags with Zone 1, so these
+        # records are the earliest reliable signal that the lot has left Jig
+        # Unloading.
+        from Nickel_Inspection.models import (
+            NickelQcTrayId,
+            Nickel_QC_AutoSave,
+            Nickel_QC_Draft_Store,
+            Nickel_QC_TopTray_Draft_Store,
+            NickelQC_Submission,
+        )
+
+        completed_unload_lot_ids = [
+            unload.lot_id for unload in completed_unloads if unload.lot_id
+        ]
+        nickel_wiping_lot_ids = set(
+            NickelQcTrayId.objects.filter(
+                lot_id__in=completed_unload_lot_ids
+            ).values_list('lot_id', flat=True)
+        )
+        for activity_model in (
+            Nickel_QC_AutoSave,
+            Nickel_QC_Draft_Store,
+            Nickel_QC_TopTray_Draft_Store,
+            NickelQC_Submission,
+        ):
+            nickel_wiping_lot_ids.update(
+                activity_model.objects.filter(
+                    lot_id__in=completed_unload_lot_ids
+                ).values_list('lot_id', flat=True)
+            )
+
+        nickel_activity_fields = (
+            'nq_draft',
+            'nq_onhold_picking',
+            'nq_hold_lot',
+            'nq_release_lot',
+            'nq_qc_accptance',
+            'nq_qc_rejection',
+            'nq_qc_few_cases_accptance',
+            'nq_accepted_tray_scan_status',
+            'nq_rejection_tray_scan_status',
+        )
+        nickel_wiping_lot_ids.update(
+            unload.lot_id
+            for unload in completed_unloads
+            if any(getattr(unload, field, False) for field in nickel_activity_fields)
+        )
+
         # ✅ ENHANCED: Process each unload record using saved list fields (mirroring Zone 1)
         table_data = []
         for idx, unload in enumerate(completed_unloads):
@@ -4960,7 +5009,11 @@ class JU_Zone_Completedtable(LoginRequiredMixin, TemplateView):
                 # Prefer the live current_stage SSOT (modelmasterapp/stage_service.py) so
                 # this stays in sync with downstream modules (e.g. Spider Spindle) that
                 # only update current_stage and not last_process_module.
-                'last_process_module': unload.current_stage or unload.last_process_module,
+                'last_process_module': (
+                    'Nickel Wiping'
+                    if unload.lot_id in nickel_wiping_lot_ids
+                    else unload.current_stage or unload.last_process_module
+                ),
                 'created_at': unload.created_at,
                 'un_loaded_date_time': unload.Un_loaded_date_time,
                 'Un_loaded_date_time': unload.Un_loaded_date_time,

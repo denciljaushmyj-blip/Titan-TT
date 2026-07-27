@@ -60,27 +60,27 @@
 
 /* ...existing code... */
 
-/* Show remark tooltip above the trigger for the last row of the table to prevent cropping */
+/* Show remark tooltip below the trigger for the last row of the table */
 #order-listing tbody tr:last-child .remark-tooltip {
-  top: auto !important;
-  bottom: 110% !important;
+  top: 110% !important;
+  bottom: auto !important;
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
-  margin-top: 0 !important;
-  margin-bottom: 8px !important;
+  margin-top: 8px !important;
+  margin-bottom: 0 !important;
 }
 
-/* Arrow for top tooltip (pointing downwards) for last row */
+/* Arrow for bottom tooltip (pointing upwards) for last row */
 #order-listing tbody tr:last-child .remark-tooltip::before {
   content: "";
   position: absolute;
-  top: 100%;
+  top: -8px;
   left: 50%;
   transform: translateX(-50%);
-  border-width: 8px 8px 0 8px;
+  border-width: 0 8px 8px 8px;
   border-style: solid;
-  border-color: #fff transparent transparent transparent;
+  border-color: transparent transparent #fff transparent;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
   z-index: 1000005;
 }

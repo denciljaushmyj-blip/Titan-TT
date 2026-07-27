@@ -58,16 +58,7 @@
 .rounded-circle{
   padding: 17px !important;
 }
-
-.model-image-tooltip{
-  transform: translateX(-25%) !important;
-  top: 45% !important;
-  z-index: 500000 !important; /* high so it sits above table & scrollbar */
-
-}
-
-
-  /* Core layout blocks */
+/* Core layout blocks */
   .content-wrapper,
   .card, .card-body,
   .table-responsive,
@@ -645,34 +636,6 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   visibility: visible !important;
   pointer-events: auto !important;
 }
-
-.model-hover-trigger .img-gallery {
-  width: 180px !important;
-  min-height: 180px;
-  align-items: center;
-  justify-content: center;
-}
-
-.model-hover-trigger .model-preview-image {
-  width: 180px;
-  height: 180px;
-  display: block;
-  object-fit: contain;
-  object-position: center;
-  border-radius: 6px;
-}
-
-.model-hover-trigger .model-preview-loading,
-.model-hover-trigger .model-preview-error {
-  width: 180px;
-  min-height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  font-size: 12px;
-  text-align: center;
-}
 </style>
 
 <div class="content-wrapper">
@@ -813,36 +776,33 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                         style="cursor: pointer; word-break: break-all;"
                       >
                         {{ data.plating_stk_no|highlight_plating_color|safe_html }}
-                        <div
-                          class="model-image-tooltip"
-                          role="dialog"
-                          aria-hidden="true"
-                          style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; transition: opacity 0.2s; min-width: 220px;"
-                        >
-                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <button
-                              type="button"
-                              class="info-btn"
-                              style="background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;"
-                            >
-                              Info
-                            </button>
-                            <button
-                              type="button"
-                              class="close-btn"
-                              style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;"
-                            >
-                              Close
-                            </button>
+                        <div class="model-image-tooltip" role="dialog" aria-hidden="true"
+
+                             style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 10010; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
+
+                          <button type="button" class="close-btn" style="position:absolute; top:8px; right:8px;">Close</button>
+
+                          <button type="button" class="info-btn" style="position:absolute; top:8px; left:8px;">Info</button>
+
+                          <button type="button" class="img-scroll-left" style="display:none; background:none; border:none; font-size:20px; cursor:pointer;">&#8592;</button>
+
+
+                          <div class="img-gallery"
+
+                               style="display:flex; justify-content:center; align-items:center; gap:6px; overflow:hidden; width:180px; min-height:130px;">
+
+                            <span class="model-preview-loading"
+
+                                  style="font-size:12px;color:#777;text-align:center;">Loading...</span>
+
                           </div>
 
-                          <div style="display: flex; align-items: center; justify-content: center;">
-                            <div class="img-gallery" style="display: flex; overflow: hidden;">
-                              <span class="model-preview-loading">Hover to load image</span>
-                            </div>
-                          </div>
+
+                          <button type="button" class="img-scroll-right" style="display:none; background:none; border:none; font-size:20px; cursor:pointer;">&#8594;</button>
+
                         </div>
-                      </span>
+
+                        </span>
                     </td>
                     
                     <!-- 4. Action (Eye icon + status badges) -->
@@ -1785,7 +1745,7 @@ document.addEventListener("DOMContentLoaded", function () {
               if (previewResp.ok) {
                 const previewPayload = await previewResp.json();
                 if (previewPayload && previewPayload.preview_image) {
-                  modalUserImg.src = previewPayload.preview_image;
+                  modalUserImg.src = window.__normalizeModelMediaUrl ? window.__normalizeModelMediaUrl(previewPayload.preview_image) : previewPayload.preview_image;
                 }
               }
             } catch (previewError) {
@@ -2925,77 +2885,180 @@ document.addEventListener("DOMContentLoaded", function () {
   </script>
 
 <script nonce="{{ csp_nonce }}">
-document.addEventListener('DOMContentLoaded', function () {
-  const triggers = Array.from(document.querySelectorAll('.model-hover-trigger[data-plating-stk-no]'));
+document.addEventListener("DOMContentLoaded", function () {
+  const triggers = Array.from(
+    document.querySelectorAll(
+      ".model-hover-trigger[data-plating-stk-no]"
+    )
+  );
+
+  if (!triggers.length) return;
+
   const previewCache = new Map();
+  const requestCache = new Map();
+
   let activeTrigger = null;
+  let pinnedTrigger = null;
   let hideTimer = null;
-  let requestSerial = 0;
+
+  function getStockNo(trigger) {
+    return String(
+      trigger && trigger.dataset
+        ? trigger.dataset.platingStkNo || ""
+        : ""
+    ).trim();
+  }
 
   function getTooltip(trigger) {
-    return trigger ? trigger.querySelector('.model-image-tooltip') : null;
+    return trigger
+      ? trigger.querySelector(".model-image-tooltip")
+      : null;
   }
 
-  function closeTooltip(trigger) {
+  function getGallery(trigger) {
     const tooltip = getTooltip(trigger);
-    if (!tooltip) return;
-    tooltip.classList.remove('is-open');
-    tooltip.setAttribute('aria-hidden', 'true');
-    if (activeTrigger === trigger) activeTrigger = null;
+    return tooltip ? tooltip.querySelector(".img-gallery") : null;
   }
 
-  function closeAllExcept(exceptTrigger) {
-    triggers.forEach(function (trigger) {
-      if (trigger !== exceptTrigger) closeTooltip(trigger);
-    });
+  function normalizeImageUrl(rawUrl) {
+    const value = String(rawUrl || "").trim();
+    if (!value) return "";
+
+    try {
+      const parsed = new URL(value, window.location.origin);
+
+      // Project media/static must always load from the currently opened
+      // deployment. This corrects localhost, 127.0.0.1, internal IP,
+      // wrong-host and HTTP/HTTPS mismatches returned by the API.
+      if (
+        parsed.pathname.startsWith("/media/") ||
+        parsed.pathname.startsWith("/static/")
+      ) {
+        return parsed.pathname + parsed.search + parsed.hash;
+      }
+
+      return parsed.href;
+    } catch (error) {
+      if (value.startsWith("media/") || value.startsWith("static/")) {
+        return "/" + value;
+      }
+      return value;
+    }
   }
+
+  // Also expose normalization to the tray-detail modal image code.
+  window.__normalizeModelMediaUrl = normalizeImageUrl;
 
   function renderLoading(trigger) {
-    const gallery = trigger.querySelector('.img-gallery');
+    const gallery = getGallery(trigger);
     if (!gallery) return;
-    gallery.replaceChildren();
-    const loading = document.createElement('span');
-    loading.className = 'model-preview-loading';
-    loading.textContent = 'Loading...';
-    gallery.appendChild(loading);
+
+    gallery.innerHTML =
+      '<span style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
   }
 
-  function renderError(trigger, message) {
-    const gallery = trigger.querySelector('.img-gallery');
+  function renderMessage(trigger, message) {
+    const gallery = getGallery(trigger);
     if (!gallery) return;
-    gallery.replaceChildren();
-    const error = document.createElement('span');
-    error.className = 'model-preview-error';
-    error.textContent = message || 'Unable to load image';
-    gallery.appendChild(error);
+
+    gallery.textContent = "";
+
+    const messageElement = document.createElement("span");
+    messageElement.textContent = message;
+    messageElement.style.cssText =
+      "font-size:12px;color:#777;text-align:center;padding:12px;";
+    gallery.appendChild(messageElement);
   }
 
   function renderPreview(trigger, payload) {
-    const gallery = trigger.querySelector('.img-gallery');
+    const gallery = getGallery(trigger);
     if (!gallery) return;
 
-    const previewUrl = payload && payload.preview_image ? payload.preview_image : '';
-    if (!previewUrl) {
-      renderError(trigger, 'Unable to load image');
+    const rawUrl = payload && payload.preview_image;
+    const imageUrl = normalizeImageUrl(rawUrl);
+
+    if (!imageUrl) {
+      renderMessage(trigger, "Image unavailable");
       return;
     }
 
-    gallery.replaceChildren();
-    const image = document.createElement('img');
-    image.className = 'model-preview-image';
-    image.src = previewUrl;
-    image.alt = 'Model preview';
-    image.loading = 'eager';
-    image.addEventListener('error', function () {
-      renderError(trigger, 'Unable to load image');
-    }, { once: true });
+    gallery.textContent = "";
+
+    const image = document.createElement("img");
+    image.alt = "Model IV preview";
+    image.loading = "eager";
+    image.decoding = "async";
+    image.style.cssText =
+      "width:120px;height:120px;object-fit:contain;object-position:center;" +
+      "border-radius:6px;background:#fff;display:block;";
+
+    image.addEventListener("error", function () {
+      console.error(
+        "[Brass Audit] Preview image failed:",
+        rawUrl,
+        "Normalized URL:",
+        imageUrl
+      );
+      renderMessage(trigger, "Image could not be loaded");
+    });
+
     gallery.appendChild(image);
+
+    // Attach the error handler before assigning src.
+    image.src = imageUrl;
   }
 
-  async function loadPreview(trigger) {
-    const stockNo = (trigger.dataset.platingStkNo || '').trim();
+  function requestPreview(stockNo) {
+    if (previewCache.has(stockNo)) {
+      return Promise.resolve(previewCache.get(stockNo));
+    }
+
+    if (requestCache.has(stockNo)) {
+      return requestCache.get(stockNo);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(function () {
+      controller.abort();
+    }, 10000);
+
+    const request = fetch(
+      "/adminportal/api/model-hover-preview/?stock_no=" +
+        encodeURIComponent(stockNo),
+      {
+        method: "GET",
+        credentials: "same-origin",
+        headers: {
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        signal: controller.signal
+      }
+    )
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+        return response.json();
+      })
+      .then(function (payload) {
+        previewCache.set(stockNo, payload);
+        return payload;
+      })
+      .finally(function () {
+        window.clearTimeout(timeoutId);
+        requestCache.delete(stockNo);
+      });
+
+    requestCache.set(stockNo, request);
+    return request;
+  }
+
+  function loadPreview(trigger) {
+    const stockNo = getStockNo(trigger);
+
     if (!stockNo) {
-      renderError(trigger, 'Stock number unavailable');
+      renderMessage(trigger, "Stock number unavailable");
       return;
     }
 
@@ -3005,118 +3068,227 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     renderLoading(trigger);
-    const currentRequest = ++requestSerial;
 
-    try {
-      const response = await fetch(
-        `/adminportal/api/model-hover-preview/?stock_no=${encodeURIComponent(stockNo)}`,
-        {
-          method: 'GET',
-          credentials: 'same-origin',
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    requestPreview(stockNo)
+      .then(function (payload) {
+        // Complete the initiating popup even when the pointer briefly leaves.
+        // This prevents the tooltip remaining permanently on Loading.
+        renderPreview(trigger, payload);
+      })
+      .catch(function (error) {
+        console.error(
+          "[Brass Audit] Model preview request failed:",
+          stockNo,
+          error
+        );
+
+        if (error && error.name === "AbortError") {
+          renderMessage(trigger, "Image request timed out");
+        } else {
+          renderMessage(trigger, "Image unavailable");
         }
-      );
+      });
+  }
 
-      if (!response.ok) {
-        throw new Error(`Preview request failed with status ${response.status}`);
-      }
+  function positionTooltip(trigger) {
+    const tooltip = getTooltip(trigger);
+    if (!tooltip) return;
 
-      const payload = await response.json();
-      previewCache.set(stockNo, payload);
+    tooltip.style.left = "80%";
+    tooltip.style.right = "auto";
+    tooltip.style.top = "110%";
+    tooltip.style.transform = "translateX(-50%)";
 
-      // Do not let an older response replace the latest hovered row.
-      if (currentRequest !== requestSerial || activeTrigger !== trigger) return;
-      renderPreview(trigger, payload);
-    } catch (error) {
-      console.error('[BrassAudit] Model preview error:', error);
-      if (currentRequest === requestSerial && activeTrigger === trigger) {
-        renderError(trigger, 'Unable to load image');
-      }
+    const rect = tooltip.getBoundingClientRect();
+
+    if (rect.right > window.innerWidth - 8) {
+      tooltip.style.left = "auto";
+      tooltip.style.right = "0";
+      tooltip.style.transform = "none";
+    }
+
+    if (rect.left < 8) {
+      tooltip.style.left = "0";
+      tooltip.style.right = "auto";
+      tooltip.style.transform = "none";
     }
   }
 
-  function openTooltip(trigger) {
+  function closeTrigger(trigger, force) {
+    if (!trigger) return;
+    if (!force && pinnedTrigger === trigger) return;
+
+    const tooltip = getTooltip(trigger);
+
+    if (tooltip) {
+      tooltip.classList.remove("is-open", "is-visible", "pinned");
+      tooltip.setAttribute("aria-hidden", "true");
+      tooltip.style.opacity = "0";
+      tooltip.style.visibility = "hidden";
+      tooltip.style.pointerEvents = "none";
+      tooltip.style.display = "none";
+
+      const infoButton = tooltip.querySelector(".info-btn");
+      const closeButton = tooltip.querySelector(".close-btn");
+
+      if (infoButton) infoButton.style.display = "none";
+      if (closeButton) closeButton.style.display = "none";
+    }
+
+    trigger.style.backgroundColor = "";
+    trigger.style.borderRadius = "";
+
+    if (activeTrigger === trigger) activeTrigger = null;
+    if (force && pinnedTrigger === trigger) pinnedTrigger = null;
+  }
+
+  function closeOthers(currentTrigger) {
+    triggers.forEach(function (trigger) {
+      if (trigger !== currentTrigger) {
+        closeTrigger(trigger, true);
+      }
+    });
+  }
+
+  function openTrigger(trigger) {
     window.clearTimeout(hideTimer);
-    closeAllExcept(trigger);
-    activeTrigger = trigger;
+    closeOthers(trigger);
 
     const tooltip = getTooltip(trigger);
     if (!tooltip) return;
 
-    tooltip.classList.add('is-open');
-    tooltip.setAttribute('aria-hidden', 'false');
-    loadPreview(trigger);
-  }
+    activeTrigger = trigger;
 
-  function scheduleClose(trigger) {
-    window.clearTimeout(hideTimer);
-    hideTimer = window.setTimeout(function () {
-      const tooltip = getTooltip(trigger);
-      const hoveringTrigger = trigger.matches(':hover');
-      const hoveringTooltip = tooltip && tooltip.matches(':hover');
-      if (!hoveringTrigger && !hoveringTooltip) closeTooltip(trigger);
-    }, 180);
+    tooltip.classList.add("is-open", "is-visible");
+    tooltip.setAttribute("aria-hidden", "false");
+    tooltip.style.display = "flex";
+    tooltip.style.visibility = "visible";
+    tooltip.style.opacity = "1";
+    tooltip.style.pointerEvents = "auto";
+
+    const infoButton = tooltip.querySelector(".info-btn");
+    const closeButton = tooltip.querySelector(".close-btn");
+
+    if (infoButton) infoButton.style.display = "block";
+    if (closeButton) closeButton.style.display = "block";
+
+    positionTooltip(trigger);
+    loadPreview(trigger);
   }
 
   triggers.forEach(function (trigger) {
     const tooltip = getTooltip(trigger);
-    const infoButton = trigger.querySelector('.info-btn');
-    const closeButton = trigger.querySelector('.close-btn');
 
-    trigger.addEventListener('mouseenter', function () {
-      openTooltip(trigger);
-    });
-
-    trigger.addEventListener('mouseleave', function () {
-      scheduleClose(trigger);
-    });
-
-    if (tooltip) {
-      tooltip.addEventListener('mouseenter', function () {
-        window.clearTimeout(hideTimer);
-      });
-      tooltip.addEventListener('mouseleave', function () {
-        scheduleClose(trigger);
-      });
-      tooltip.addEventListener('click', function (event) {
-        event.stopPropagation();
-      });
+    if (!tooltip || trigger.dataset.brassAuditHoverBound === "1") {
+      return;
     }
 
+    trigger.dataset.brassAuditHoverBound = "1";
+
+    const infoButton = tooltip.querySelector(".info-btn");
+    const closeButton = tooltip.querySelector(".close-btn");
+
+    if (infoButton) infoButton.style.display = "none";
+    if (closeButton) closeButton.style.display = "none";
+
+    trigger.addEventListener("mouseenter", function () {
+      if (pinnedTrigger !== trigger) {
+        openTrigger(trigger);
+      }
+    });
+
+    trigger.addEventListener("mouseleave", function () {
+      hideTimer = window.setTimeout(function () {
+        if (
+          pinnedTrigger !== trigger &&
+          !trigger.matches(":hover") &&
+          !tooltip.matches(":hover")
+        ) {
+          closeTrigger(trigger, false);
+        }
+      }, 180);
+    });
+
+    tooltip.addEventListener("mouseenter", function () {
+      window.clearTimeout(hideTimer);
+    });
+
+    tooltip.addEventListener("mouseleave", function () {
+      hideTimer = window.setTimeout(function () {
+        if (
+          pinnedTrigger !== trigger &&
+          !trigger.matches(":hover") &&
+          !tooltip.matches(":hover")
+        ) {
+          closeTrigger(trigger, false);
+        }
+      }, 180);
+    });
+
+    tooltip.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
+
+    trigger.addEventListener("click", function (event) {
+      if (
+        event.target.closest(".info-btn") ||
+        event.target.closest(".close-btn")
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (pinnedTrigger === trigger) {
+        closeTrigger(trigger, true);
+        return;
+      }
+
+      closeOthers(trigger);
+      pinnedTrigger = trigger;
+      trigger.style.backgroundColor = "#e3f2fd";
+      trigger.style.borderRadius = "4px";
+      tooltip.classList.add("pinned");
+      openTrigger(trigger);
+    });
+
     if (infoButton) {
-      infoButton.addEventListener('click', function (event) {
+      infoButton.addEventListener("click", function (event) {
         event.preventDefault();
         event.stopPropagation();
 
-        const stockNo = (trigger.dataset.platingStkNo || '').trim();
-        if (!stockNo) {
-          console.error('[BrassAudit] Missing plating stock number for Visual Aid');
-          return;
-        }
+        const stockNo = getStockNo(trigger);
+        if (!stockNo) return;
 
-        const visualAidUrl = `/adminportal/dp_visualaid/?plating_stk_no=${encodeURIComponent(stockNo)}`;
-        window.open(visualAidUrl, '_blank', 'noopener');
+        window.location.href =
+          "/adminportal/dp_visualaid/?plating_stk_no=" +
+          encodeURIComponent(stockNo);
       });
     }
 
     if (closeButton) {
-      closeButton.addEventListener('click', function (event) {
+      closeButton.addEventListener("click", function (event) {
         event.preventDefault();
         event.stopPropagation();
-        closeTooltip(trigger);
+        closeTrigger(trigger, true);
       });
     }
   });
 
-  document.addEventListener('click', function (event) {
-    if (!event.target.closest('.model-hover-trigger')) {
-      triggers.forEach(closeTooltip);
+  document.addEventListener("click", function (event) {
+    if (
+      pinnedTrigger &&
+      !event.target.closest(".model-image-tooltip") &&
+      !event.target.closest(".model-hover-trigger")
+    ) {
+      closeTrigger(pinnedTrigger, true);
     }
   });
 
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-      triggers.forEach(closeTooltip);
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && pinnedTrigger) {
+      closeTrigger(pinnedTrigger, true);
     }
   });
 });

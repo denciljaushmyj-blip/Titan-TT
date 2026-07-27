@@ -629,6 +629,71 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   justify-content: center !important;
   z-index: 4 !important;
 }
+
+/* ================================================================
+   INPUT SCREENING COMPLETED — MODEL PREVIEW FINAL OVERRIDE
+   Keeps the hover card compact on desktop/tablet and prevents cropping.
+   ================================================================ */
+.is-pick-table-page .model-hover-trigger {
+  position: relative !important;
+}
+
+.is-pick-table-page .model-image-tooltip {
+  width: 230px !important;
+  min-width: 230px !important;
+  max-width: 230px !important;
+  height: auto !important;
+  min-height: 185px !important;
+  padding: 12px !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border: 1px solid #cfd8dc !important;
+  border-radius: 8px !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18) !important;
+  overflow: hidden !important;
+  z-index: 500000 !important;
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+}
+
+.is-pick-table-page .model-image-tooltip,
+.is-pick-table-page .model-image-tooltip * {
+  font-size: 12px !important;
+}
+
+.is-pick-table-page .model-image-tooltip .info-btn,
+.is-pick-table-page .model-image-tooltip .close-btn {
+  min-width: 48px !important;
+  height: 28px !important;
+  padding: 4px 9px !important;
+  line-height: 18px !important;
+}
+
+.is-pick-table-page .model-image-tooltip .img-gallery {
+  width: 204px !important;
+  height: 135px !important;
+  min-height: 135px !important;
+  max-height: 135px !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #fff !important;
+}
+
+.is-pick-table-page .model-image-tooltip .img-gallery img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 204px !important;
+  max-height: 135px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  background: #fff !important;
+}
+
 </style>
  
 <div class="content-wrapper is-completed-table-page">
@@ -2127,13 +2192,25 @@ document.addEventListener("DOMContentLoaded", function () {
   function normalizeImageUrl(rawUrl) {
     const value = String(rawUrl || "").trim();
     if (!value) return "";
+
     try {
       const parsed = new URL(value, window.location.origin);
-      if (parsed.origin === window.location.origin) {
+
+      // Always load project media/static files through the domain currently
+      // open in the browser. This fixes localhost, 127.0.0.1, internal-IP,
+      // HTTP/HTTPS and deployment-host mismatches returned by the API.
+      if (
+        parsed.pathname.startsWith("/media/") ||
+        parsed.pathname.startsWith("/static/")
+      ) {
         return parsed.pathname + parsed.search + parsed.hash;
       }
+
       return parsed.href;
     } catch (error) {
+      if (value.startsWith("media/") || value.startsWith("static/")) {
+        return "/" + value;
+      }
       return value;
     }
   }
@@ -2141,47 +2218,125 @@ document.addEventListener("DOMContentLoaded", function () {
   function setTooltipLoading(tooltip) {
     const gallery = tooltip ? tooltip.querySelector(".img-gallery") : null;
     if (!gallery) return;
-    gallery.innerHTML = '<span style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
+
+    gallery.innerHTML =
+      '<span style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
   }
 
   function setTooltipMessage(tooltip, message) {
     const gallery = tooltip ? tooltip.querySelector(".img-gallery") : null;
     if (!gallery) return;
+
     gallery.textContent = "";
+
     const messageEl = document.createElement("span");
     messageEl.textContent = message;
-    messageEl.style.cssText = "font-size:12px;color:#777;text-align:center;";
+    messageEl.style.cssText =
+      "font-size:12px;color:#777;text-align:center;padding:12px;";
     gallery.appendChild(messageEl);
   }
 
   function renderPreviewImage(trigger, payload) {
-    const tooltip = trigger ? trigger.querySelector(".model-image-tooltip") : null;
-    const gallery = tooltip ? tooltip.querySelector(".img-gallery") : null;
+    const tooltip = trigger
+      ? trigger.querySelector(".model-image-tooltip")
+      : null;
+    const gallery = tooltip
+      ? tooltip.querySelector(".img-gallery")
+      : null;
+
     if (!gallery) return;
 
-    const imageUrl = normalizeImageUrl(payload && payload.preview_image);
+    const rawUrl = payload && payload.preview_image;
+    const imageUrl = normalizeImageUrl(rawUrl);
+
     if (!imageUrl) {
       setTooltipMessage(tooltip, "Image unavailable");
       return;
     }
 
     gallery.textContent = "";
+
     const image = document.createElement("img");
-    image.src = imageUrl;
     image.alt = "Model image";
     image.decoding = "async";
-    image.loading = "lazy";
+    image.loading = "eager";
     image.style.cssText =
-      "width:100%;height:100%;object-fit:contain;object-position:center;" +
+      "width:100%;height:100%;max-width:204px;max-height:135px;" +
+      "object-fit:contain;object-position:center;" +
       "border-radius:6px;background:#fff;display:block;";
 
+    image.addEventListener("error", function () {
+      console.error(
+        "[IS Completed] Preview image failed:",
+        rawUrl,
+        "Normalized URL:",
+        imageUrl
+      );
+      setTooltipMessage(tooltip, "Image could not be loaded");
+    });
+
     gallery.appendChild(image);
+
+    // Assign src only after error handling is attached.
+    image.src = imageUrl;
+  }
+
+  const previewRequestCache = new Map();
+
+  function requestStockPreview(stockNo) {
+    if (previewCache.has(stockNo)) {
+      return Promise.resolve(previewCache.get(stockNo));
+    }
+
+    if (previewRequestCache.has(stockNo)) {
+      return previewRequestCache.get(stockNo);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(function () {
+      controller.abort();
+    }, 10000);
+
+    const request = fetch(
+      "/adminportal/api/model-hover-preview/?stock_no=" +
+        encodeURIComponent(stockNo),
+      {
+        headers: {
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "same-origin",
+        signal: controller.signal
+      }
+    )
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+        return response.json();
+      })
+      .then(function (payload) {
+        previewCache.set(stockNo, payload);
+        return payload;
+      })
+      .finally(function () {
+        window.clearTimeout(timeoutId);
+        previewRequestCache.delete(stockNo);
+      });
+
+    previewRequestCache.set(stockNo, request);
+    return request;
   }
 
   function loadStockPreview(trigger) {
     const stockNo = getStockNo(trigger);
-    const tooltip = trigger ? trigger.querySelector(".model-image-tooltip") : null;
-    if (!stockNo || !tooltip) return;
+    const tooltip = trigger
+      ? trigger.querySelector(".model-image-tooltip")
+      : null;
+
+    if (!stockNo || !tooltip) {
+      return;
+    }
 
     activeTrigger = trigger;
     activeStockNo = stockNo;
@@ -2192,30 +2347,25 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     setTooltipLoading(tooltip);
-    fetch("/adminportal/api/model-hover-preview/?stock_no=" + encodeURIComponent(stockNo), {
-      headers: {
-        "Accept": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      },
-    })
-      .then(function(response) {
-        if (!response.ok) {
-          throw new Error("HTTP " + response.status);
-        }
-        return response.json();
-      })
-      .then(function(payload) {
-        previewCache.set(stockNo, payload);
-        if (activeTrigger !== trigger || activeStockNo !== stockNo) {
-          return;
-        }
+
+    requestStockPreview(stockNo)
+      .then(function (payload) {
+        // Always complete the tooltip that initiated the request. This avoids
+        // leaving it permanently on "Loading..." when the pointer moves.
         renderPreviewImage(trigger, payload);
       })
-      .catch(function() {
-        if (activeTrigger !== trigger || activeStockNo !== stockNo) {
-          return;
+      .catch(function (error) {
+        console.error(
+          "[IS Completed] Model preview request failed:",
+          stockNo,
+          error
+        );
+
+        if (error && error.name === "AbortError") {
+          setTooltipMessage(tooltip, "Image request timed out");
+        } else {
+          setTooltipMessage(tooltip, "Image unavailable");
         }
-        setTooltipMessage(tooltip, "Image unavailable");
       });
   }
 

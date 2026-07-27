@@ -3229,7 +3229,6 @@ class DPCompletedTableView(APIView):
             # ever opened it.
             data['current_stage_display'] = (
                 data.get('current_stage')
-                or data.get('next_process_module')
                 or data.get('last_process_module')
                 or 'N/A'
             )

@@ -327,6 +327,20 @@
                            >
                            On Hold
                         </div>
+                        {% elif data.all_trays_verified %}
+                        <div
+                          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                          style="
+                          border: 1px solid #4997ac;
+                          background-color: #d1f2f3;
+                          color: #03425d;
+                          font-size: 12px;
+                          white-space: nowrap;
+                          padding: 5px;
+                          "
+                          >
+                          Yet to Release
+                        </div>
                         {% elif data.partial_trays_verified or data.draft_tray_verify or data.has_draft %}
                         <div
                            class="d-inline-block px-3 fw-semibold text-center rounded-pill"
@@ -1195,6 +1209,426 @@
 <script nonce="{{ csp_nonce }}" src="{% static 'js/inputscreening_reject_modal.js' %}" defer></script>
 <script nonce="{{ csp_nonce }}" src="{% static 'js/inputscreening_shortcuts.js' %}" defer></script>
 
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+    let openTooltip = null;
+    let activeTrigger = null;
+    let activeStockNo = "";
+
+    const previewCache = new Map();
+
+    function getStockNo(trigger) {
+        return String(
+            trigger && trigger.dataset
+                ? trigger.dataset.platingStkNo || ""
+                : ""
+        ).trim();
+    }
+
+    function normalizeImageUrl(rawUrl) {
+        const value = String(rawUrl || "").trim();
+
+        if (!value) {
+            return "";
+        }
+
+        try {
+            const parsed = new URL(value, window.location.origin);
+
+            // Force Django media/static files to use the current production host.
+            if (
+                parsed.pathname.startsWith("/media/") ||
+                parsed.pathname.startsWith("/static/")
+            ) {
+                return parsed.pathname + parsed.search + parsed.hash;
+            }
+
+            return parsed.href;
+        } catch (error) {
+            if (value.startsWith("media/")) {
+                return "/" + value;
+            }
+
+            return value;
+        }
+    }
+
+    function setTooltipLoading(tooltip) {
+        const gallery = tooltip
+            ? tooltip.querySelector(".img-gallery")
+            : null;
+
+        if (!gallery) {
+            return;
+        }
+
+        gallery.innerHTML =
+            '<span style="font-size:12px;color:#777;text-align:center;">' +
+            "Loading..." +
+            "</span>";
+    }
+
+    function setTooltipMessage(tooltip, message) {
+        const gallery = tooltip
+            ? tooltip.querySelector(".img-gallery")
+            : null;
+
+        if (!gallery) {
+            return;
+        }
+
+        gallery.textContent = "";
+
+        const messageElement = document.createElement("span");
+        messageElement.textContent = message;
+        messageElement.style.cssText =
+            "font-size:12px;color:#777;text-align:center;";
+
+        gallery.appendChild(messageElement);
+    }
+
+    function renderPreviewImage(trigger, payload) {
+        const tooltip = trigger
+            ? trigger.querySelector(".model-image-tooltip")
+            : null;
+
+        const gallery = tooltip
+            ? tooltip.querySelector(".img-gallery")
+            : null;
+
+        if (!gallery) {
+            return;
+        }
+
+        const rawUrl = payload && payload.preview_image;
+        const imageUrl = normalizeImageUrl(rawUrl);
+
+        if (!imageUrl) {
+            setTooltipMessage(tooltip, "Image unavailable");
+            return;
+        }
+
+        gallery.textContent = "";
+
+        const image = document.createElement("img");
+        image.src = imageUrl;
+        image.alt = "Model image";
+        image.decoding = "async";
+        image.loading = "eager";
+
+        image.style.cssText =
+            "width:120px;" +
+            "height:120px;" +
+            "object-fit:contain;" +
+            "object-position:center;" +
+            "border-radius:6px;" +
+            "background:#fff;" +
+            "display:block;";
+
+        image.onerror = function () {
+            console.error(
+                "[Input Screening] Image failed:",
+                rawUrl,
+                "Normalized:",
+                imageUrl
+            );
+
+            setTooltipMessage(
+                tooltip,
+                "Image could not be loaded"
+            );
+        };
+
+        gallery.appendChild(image);
+    }
+
+    function loadStockPreview(trigger) {
+        const stockNo = getStockNo(trigger);
+
+        const tooltip = trigger
+            ? trigger.querySelector(".model-image-tooltip")
+            : null;
+
+        if (!stockNo || !tooltip) {
+            console.error(
+                "[Input Screening] Missing stock number or tooltip",
+                stockNo,
+                tooltip
+            );
+            return;
+        }
+
+        activeTrigger = trigger;
+        activeStockNo = stockNo;
+
+        if (previewCache.has(stockNo)) {
+            renderPreviewImage(
+                trigger,
+                previewCache.get(stockNo)
+            );
+            return;
+        }
+
+        setTooltipLoading(tooltip);
+
+        const apiUrl =
+            "/adminportal/api/model-hover-preview/?stock_no=" +
+            encodeURIComponent(stockNo);
+
+        console.log(
+            "[Input Screening] Fetching preview:",
+            apiUrl
+        );
+
+        fetch(apiUrl, {
+            headers: {
+                "Accept": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error("HTTP " + response.status);
+            }
+
+            return response.json();
+        })
+        .then(function (payload) {
+            previewCache.set(stockNo, payload);
+
+            if (
+                activeTrigger !== trigger ||
+                activeStockNo !== stockNo
+            ) {
+                return;
+            }
+
+            renderPreviewImage(trigger, payload);
+        })
+        .catch(function (error) {
+            console.error(
+                "[Input Screening] Preview error:",
+                error
+            );
+
+            if (
+                activeTrigger !== trigger ||
+                activeStockNo !== stockNo
+            ) {
+                return;
+            }
+
+            setTooltipMessage(
+                tooltip,
+                "Unable to load image"
+            );
+        });
+    }
+
+    function positionTooltip(tooltip) {
+        if (!tooltip) {
+            return;
+        }
+
+        tooltip.style.left = "80%";
+        tooltip.style.right = "auto";
+        tooltip.style.transform = "translateX(-50%)";
+
+        const rect = tooltip.getBoundingClientRect();
+
+        if (rect.right > window.innerWidth - 8) {
+            tooltip.style.left = "auto";
+            tooltip.style.right = "0";
+            tooltip.style.transform = "none";
+        }
+
+        if (rect.left < 8) {
+            tooltip.style.left = "0";
+            tooltip.style.right = "auto";
+            tooltip.style.transform = "none";
+        }
+    }
+
+    function closeTooltip(tooltip) {
+        if (!tooltip) {
+            return;
+        }
+
+        tooltip.classList.remove("pinned");
+        tooltip.style.opacity = "0";
+        tooltip.style.visibility = "hidden";
+        tooltip.style.pointerEvents = "none";
+        tooltip.style.display = "none";
+
+        const infoButton = tooltip.querySelector(".info-btn");
+        const closeButton = tooltip.querySelector(".close-btn");
+
+        if (infoButton) {
+            infoButton.style.display = "none";
+        }
+
+        if (closeButton) {
+            closeButton.style.display = "none";
+        }
+
+        if (openTooltip === tooltip) {
+            openTooltip = null;
+        }
+    }
+
+    document
+        .querySelectorAll(".model-hover-trigger")
+        .forEach(function (trigger) {
+            const tooltip = trigger.querySelector(
+                ".model-image-tooltip"
+            );
+
+            if (!tooltip) {
+                return;
+            }
+
+            const infoButton = tooltip.querySelector(".info-btn");
+            const closeButton = tooltip.querySelector(".close-btn");
+
+            trigger.addEventListener("mouseenter", function () {
+                if (tooltip.classList.contains("pinned")) {
+                    return;
+                }
+
+                if (
+                    openTooltip &&
+                    openTooltip !== tooltip
+                ) {
+                    closeTooltip(openTooltip);
+                }
+
+                openTooltip = tooltip;
+
+                tooltip.style.display = "flex";
+                tooltip.style.visibility = "visible";
+                tooltip.style.opacity = "1";
+                tooltip.style.pointerEvents = "auto";
+
+                if (infoButton) {
+                    infoButton.style.display = "block";
+                }
+
+                if (closeButton) {
+                    closeButton.style.display = "block";
+                }
+
+                loadStockPreview(trigger);
+                positionTooltip(tooltip);
+            });
+
+            trigger.addEventListener("mouseleave", function () {
+                window.setTimeout(function () {
+                    if (
+                        !tooltip.classList.contains("pinned") &&
+                        !trigger.matches(":hover") &&
+                        !tooltip.matches(":hover")
+                    ) {
+                        closeTooltip(tooltip);
+                    }
+                }, 150);
+            });
+
+            tooltip.addEventListener("mouseleave", function () {
+                window.setTimeout(function () {
+                    if (
+                        !tooltip.classList.contains("pinned") &&
+                        !trigger.matches(":hover") &&
+                        !tooltip.matches(":hover")
+                    ) {
+                        closeTooltip(tooltip);
+                    }
+                }, 150);
+            });
+
+            trigger.addEventListener("click", function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (
+                    openTooltip &&
+                    openTooltip !== tooltip
+                ) {
+                    closeTooltip(openTooltip);
+                }
+
+                openTooltip = tooltip;
+                tooltip.classList.add("pinned");
+
+                tooltip.style.display = "flex";
+                tooltip.style.visibility = "visible";
+                tooltip.style.opacity = "1";
+                tooltip.style.pointerEvents = "auto";
+
+                if (infoButton) {
+                    infoButton.style.display = "block";
+                }
+
+                if (closeButton) {
+                    closeButton.style.display = "block";
+                }
+
+                loadStockPreview(trigger);
+                positionTooltip(tooltip);
+            });
+
+            if (closeButton) {
+                closeButton.addEventListener(
+                    "click",
+                    function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        closeTooltip(tooltip);
+                    }
+                );
+            }
+
+            if (infoButton) {
+                infoButton.addEventListener(
+                    "click",
+                    function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        const stockNo = getStockNo(trigger);
+
+                        if (!stockNo) {
+                            return;
+                        }
+
+                        window.location.href =
+                            "/adminportal/dp_visualaid/" +
+                            "?plating_stk_no=" +
+                            encodeURIComponent(stockNo);
+                    }
+                );
+            }
+        });
+
+    document.addEventListener("click", function (event) {
+        if (
+            openTooltip &&
+            !event.target.closest(".model-hover-trigger")
+        ) {
+            closeTooltip(openTooltip);
+        }
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && openTooltip) {
+            closeTooltip(openTooltip);
+        }
+    });
+
+    console.log(
+        "[Input Screening] Dynamic model hover initialized"
+    );
+});
+</script>
 
 {% endblock %} {% endblock content %}
 
