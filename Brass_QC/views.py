@@ -479,9 +479,16 @@ class BrassCompletedView(APIView):
             # actually started work.  Routing a lot to Brass Audit/IQF alone
             # must remain "Yet to Release"; current_stage changes only after
             # a real action is saved in that destination module.
-            current_stage_display = (
-                stock_obj.current_stage
-                or _compute_brass_qc_display_stage(stock_obj)
+            #
+            # A PARTIAL split freezes the parent row's own current_stage at the
+            # moment of split; the real progress lives on the accepted child lot
+            # (own lot_id, keeps advancing through Brass Audit/Jig Loading/etc).
+            # Compare both and show whichever is further along so the parent row
+            # never displays a stale stage once its child has moved on.
+            from modelmasterapp.stage_service import most_advanced_stage
+            current_stage_display = most_advanced_stage(
+                stock_obj.current_stage or _compute_brass_qc_display_stage(stock_obj),
+                getattr(stock_obj, 'child_accept_stage', None),
             )
             lot_status = (
                 'Released'
@@ -504,9 +511,9 @@ class BrassCompletedView(APIView):
                 'tray_capacity': batch.tray_capacity,
                 'stock_lot_id': stock_obj.lot_id,
                 'last_process_module': stock_obj.last_process_module,
-                # Use current_stage when set (new data); fall back to dynamic computation
-                # for legacy lots that pre-date the current_stage field.
-                'next_process_module': stock_obj.current_stage or _compute_brass_qc_display_stage(stock_obj),
+                # Same stale-vs-child-progress resolution as current_stage_display above —
+                # this is the field the template actually renders as "Current Stage".
+                'next_process_module': current_stage_display,
                 'brass_qc_accepted_qty_verified': stock_obj.brass_qc_accepted_qty_verified,
                 'brass_qc_accepted_qty': stock_obj.brass_qc_accepted_qty,
                 'brass_rejection_qty': stock_obj.brass_rejection_qty,

@@ -4025,6 +4025,11 @@ background: linear-gradient(135deg, #e0f7fa, #e8f5e9) !important;
   /* Content area */
   .add-jig-window .jig-modal-content {
     flex: 1;
+    min-height: 0; /* flex items default to min-height:auto, which lets tall content
+                      (chips, stat cards, header meta, etc.) overflow this flex child
+                      instead of scrolling inside it — that pushed .jig-modal-footer
+                      (Submit/Draft/Clear/Cancel) below the window's own max-height,
+                      making it look like the footer rendered "outside" the modal. */
     padding: 24px 28px;
     overflow-y: auto;
     box-sizing: border-box;

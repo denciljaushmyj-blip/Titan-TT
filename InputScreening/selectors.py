@@ -391,6 +391,13 @@ def _enrich_from_batch(batch) -> Dict[str, Any]:
     }
 
 
+def _current_stage_display(stock) -> str:
+    """Live current-stage label for a TotalStockModel row (SSOT-backed)."""
+    from modelmasterapp.stage_service import get_stock_current_stage
+
+    return get_stock_current_stage(stock)
+
+
 def _enrich_from_stock(stock) -> Dict[str, Any]:
     """Return template-compatible flags from a TotalStockModel row."""
     if not stock:
@@ -413,7 +420,7 @@ def _enrich_from_stock(stock) -> Dict[str, Any]:
         "rejected_ip_stock": bool(stock.rejected_ip_stock),
         "few_cases_accepted_Ip_stock": bool(stock.few_cases_accepted_Ip_stock),
         "brass_qc_accepted_qty_verified": bool(stock.brass_qc_accepted_qty_verified),
-        "last_process_module": stock.last_process_module or "",
+        "last_process_module": _current_stage_display(stock),
         "last_process_date_time": stock.last_process_date_time,
         "IP_pick_remarks": stock.IP_pick_remarks or "",
         "lot_rejected_comment": "",

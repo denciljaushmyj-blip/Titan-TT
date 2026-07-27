@@ -30,6 +30,7 @@ STAGE_ORDER = [
     'Jig Loading',
     'Jig Unloading',
     'Nickel Inspection',
+    'Nickel Wiping',
     'Nickel Audit',
     'Spider Spindle',
     'Inprocess Inspection',
@@ -115,6 +116,37 @@ def get_stock_current_stage(stock_obj) -> str:
         or stock_obj.last_process_module
         or ''
     )
+
+
+def most_advanced_stage(*stages) -> str:
+    """
+    Given candidate stage-name strings (any may be None/blank), returns
+    whichever is furthest along STAGE_ORDER.
+
+    Used by completed-table views where a row's own current_stage can go
+    stale: e.g. a Brass QC/Brass Audit PARTIAL split freezes the parent
+    row's current_stage at the moment of split, while the real progress
+    lives on the accepted child lot (which keeps advancing through Jig
+    Loading, Nickel Wiping, etc. under its own lot_id). Comparing the
+    parent's own stage against the child's live stage and keeping the
+    more advanced one prevents the completed table from showing a stale
+    stage once the child has moved further.
+
+    Values not found in STAGE_ORDER are treated as least advanced (but
+    still returned if they're the only non-empty candidate). On a rank
+    tie, the first candidate given wins — callers should pass the row's
+    own stage first so it wins ties over a same-stage child.
+    """
+    best = ''
+    best_rank = -2
+    for stage in stages:
+        if not stage:
+            continue
+        rank = STAGE_ORDER.index(stage) if stage in STAGE_ORDER else -1
+        if rank > best_rank:
+            best = stage
+            best_rank = rank
+    return best
 
 
 def get_juat_current_stage(juat_obj) -> str:

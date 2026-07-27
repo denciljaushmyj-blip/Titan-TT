@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from django.db.models import OuterRef, Subquery, Q
+from django.db.models import OuterRef, Subquery, Q, Case, When, Value, IntegerField
 from django.db.models.functions import Trim, Upper
 from django.db import transaction, IntegrityError
 from django.utils.timezone import now
@@ -1959,6 +1959,7 @@ class TrayIdScanAPIView(APIView):
                     ip_draft_screening=False,  # ✅ Initialize IS draft flag
                     last_process_module="DayPlanning",
                     next_process_module="IP Screening",
+                    current_stage="Day Planning",
                 )
 
                 # Process each tray - ONLY UPDATE EXISTING TRAYS
@@ -3138,9 +3139,26 @@ class DPCompletedTableView(APIView):
         # Live "current stage" SSOT — updated on real downstream processing
         # (draft/verify/submit), so this reflects where the lot actually IS now
         # rather than where Day Planning last touched it (last_process_module).
+        #
+        # A batch_id can have multiple TotalStockModel rows once a lot is split
+        # (parent row + excess/accept/reject child rows), and each row advances
+        # independently. Picking "-id" (most recently created row) is wrong here:
+        # a split child row created early (e.g. an excess lot that stalls at
+        # "Jig Loading") would forever mask a sibling row that has genuinely
+        # progressed further (e.g. the parent lot reaching "Nickel Wiping").
+        # Rank rows by their position in STAGE_ORDER instead, so the batch
+        # always displays whichever sibling row is furthest along; "-id" is
+        # kept only as the tie-breaker for equal-stage rows.
+        from modelmasterapp.stage_service import STAGE_ORDER
+        stage_rank_whens = [
+            When(current_stage=stage, then=Value(idx))
+            for idx, stage in enumerate(STAGE_ORDER)
+        ]
         current_stage_subquery = TotalStockModel.objects.filter(
             batch_id=OuterRef('pk'),
-        ).order_by('-id').values('current_stage')[:1]
+        ).annotate(
+            _stage_rank=Case(*stage_rank_whens, default=Value(-1), output_field=IntegerField())
+        ).order_by('-_stage_rank', '-id').values('current_stage')[:1]
 
         queryset = ModelMasterCreation.objects.filter(
             total_batch_quantity__gt=0,

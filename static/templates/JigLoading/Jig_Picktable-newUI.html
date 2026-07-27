@@ -240,6 +240,12 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
   transition: transform 0.1s ease;
 }
 
+/* ===== Delink Tray ID Chips (tappable, same pattern as Brass QC) ===== */
+.delink-tray-chip:not(.used):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.16);
+}
+
 /* ===== Compact header meta fields (Nickel Bath Type / Tray Type / Lot Qty / Jig Capacity) =====
    Styled as horizontal pill chips, same look as the tappable delink Tray ID chips
    (.delink-tray-chip), just read-only and not clickable. */
@@ -264,7 +270,7 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 .jig-header-meta-chip label {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
   color: #00897b;
   text-transform: uppercase;
@@ -276,7 +282,7 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
   border: none !important;
   background: transparent !important;
   padding: 0 !important;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #00695c;
   width: 62px;
@@ -285,213 +291,6 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
 .jig-header-meta-chip.jig-header-meta-green { border-color: #a5d6a7; background: #f1f9f2; }
 .jig-header-meta-chip.jig-header-meta-green label,
 .jig-header-meta-chip.jig-header-meta-green input { color: #2e7d32; }
-
-/* ===== Single merged row: Jig ID / Empty Hooks / Loaded Cases Qty / Total Delink Qty /
-   Broken-Buildup Hooks. Field boxes and stat cards now sit in the same flex row, so
-   equalize their sizing and padding. ===== */
-.jig-field-strip-single {
-  align-items: stretch;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.jig-field-strip-single .jig-field-box,
-.jig-field-strip-single .jig-stat-card {
-  flex: 1 1 150px;
-  min-width: 140px;
-  padding: 9px 14px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.jig-field-strip-single .jig-stat-label { margin-bottom: 4px; }
-/* Jig Composition button as the last item of the same row */
-.jig-field-strip-single .jig-composition-btn {
-  flex: 0 0 auto;
-  align-self: stretch;
-  white-space: nowrap;
-}
-
-/* ============================================================
-   DELINK PANEL — flat, borderless table look (UI only)
-   ============================================================ */
-/* Header bar and table read as ONE continuous card: the bar carries the top
-   corners, the table wrapper carries the bottom ones and drops its own top border. */
-.delink-panel-head {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  background: #eaf7f0 !important;
-  border: 1px solid #e4eee9;
-  border-bottom: none;
-  border-radius: 10px 10px 0 0;
-  padding: 11px 16px !important;
-  margin-bottom: 0 !important;
-}
-.delink-head-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #2fa96b;
-  flex: none;
-}
-.delink-head-text {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #14795a;
-  letter-spacing: 0.1px;
-}
-.delink-head-count {
-  margin-left: auto;
-  background: #ffffff;
-  border: 1px solid #e6ebef;
-  border-radius: 20px;
-  padding: 5px 15px;
-  font-size: 11.5px;
-  font-weight: 500;
-  color: #6b7885;
-  white-space: nowrap;
-  line-height: 1;
-}
-#splitPanelLeft .table-responsive {
-  border: 1px solid #e4eee9;
-  border-top: none;
-  border-radius: 0 0 10px 10px;
-}
-
-/* Borderless rows: kill the Bootstrap .table-bordered grid lines and keep only the
-   horizontal separators. */
-#delinkPanelTable,
-#delinkPanelTable thead th,
-#delinkPanelTable tbody td {
-  border-left: 0 !important;
-  border-right: 0 !important;
-  border-top: 0 !important;
-}
-/* Header row: ~34px tall, warm off-white, uppercase grey labels */
-#delinkPanelTable thead th {
-  background: #fdfbf7;
-  border-bottom: 1px solid #f0eeea !important;
-  height: 34px;
-  padding: 0 14px !important;
-  vertical-align: middle;
-  font-size: 10.5px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.6px;
-  color: #7a8794 !important;
-  white-space: nowrap;
-}
-/* Body rows: fixed 44px pitch, matching the reference grid */
-#delinkPanelTable tbody tr { height: 44px; }
-#delinkPanelTable tbody td {
-  height: 44px;
-  padding: 0 14px !important;
-  vertical-align: middle;
-  border-bottom: 1px solid #f1f4f6 !important;
-  color: #33404d;
-}
-/* White canvas comes from the table itself so row state colours (scanned green,
-   disabled grey, multi-model tints) still paint over it */
-#delinkPanelTable { background: #ffffff; }
-#delinkPanelTable tbody tr:last-child td { border-bottom: 0 !important; }
-
-/* ONE type scale for the whole grid — every cell, pill, badge, input and the
-   "Pending scan" default render at the same 12px so no column looks bigger or
-   smaller than its neighbours. */
-#delinkPanelTable tbody td,
-#delinkPanelTable tbody .delink-sno-badge,
-#delinkPanelTable tbody .delink-model-pill,
-#delinkPanelTable tbody .delink-orig-qty-pill,
-#delinkPanelTable tbody .delink-qty-pill,
-#delinkPanelTable tbody .delink-excess-qty-pill,
-#delinkPanelTable tbody .unified-status-badge,
-#delinkPanelTable tbody .split-scan-input,
-#delinkPanelTable tbody td:last-child:empty::before {
-  font-size: 12px !important;
-  line-height: 1.35;
-}
-#delinkPanelTable tbody .delink-sno-badge,
-#delinkPanelTable tbody .delink-model-pill,
-#delinkPanelTable tbody .delink-orig-qty-pill,
-#delinkPanelTable tbody .delink-qty-pill,
-#delinkPanelTable tbody .delink-excess-qty-pill {
-  font-weight: 600;
-}
-
-/* Scan box fills its column: ~28px tall, pale blue fill, hairline border */
-#delinkPanelTable .split-scan-input {
-  width: 100%;
-  max-width: 100%;
-  height: 28px;
-  padding: 0 12px;
-  border: 1px solid #e3edf2;
-  border-radius: 8px;
-  background: #f5fbfd;
-}
-/* Pills sized to sit centred on the 44px row */
-#delinkPanelTable tbody .delink-sno-badge {
-  width: 24px;
-  height: 24px;
-}
-#delinkPanelTable tbody .delink-model-pill {
-  padding: 4px 11px;
-  border-radius: 9px;
-}
-#delinkPanelTable tbody .delink-orig-qty-pill,
-#delinkPanelTable tbody .delink-qty-pill,
-#delinkPanelTable tbody .delink-excess-qty-pill {
-  min-width: 26px;
-  padding: 4px 9px;
-  border-radius: 9px;
-}
-/* Tray ID reads as plain text, no pill */
-#delinkPanelTable tbody td:nth-child(4) { font-weight: 500; }
-/* Status default sits italic grey, same as the reference */
-#delinkPanelTable tbody td:last-child:empty::before { font-style: italic; }
-#delinkPanelTable .split-scan-input::placeholder {
-  color: #a3adb8;
-  font-weight: 500;
-  opacity: 1;
-}
-
-/* --- Row-click artefacts (bug fix, display only) ---------------------------
-   1) The delink grid lives inside the modal but its <tr>s are still `tbody tr`,
-      so the page-level yellow row-highlight classes could paint over it. Scope
-      them out here — the row's own state colour (scanned / disabled / model
-      tint) stays in charge.
-   2) Keep the checkbox rendered no matter which highlight/filter class lands on
-      the row, so clicking Status can never make it disappear.
-   3) Clicking a cell must not drag-select the row text (that grey/yellow smear);
-      the scan input itself stays fully selectable. */
-/* Cells always drop the imported highlight so the row's own colour shows through */
-#delinkPanelTable tbody tr.active-row td,
-#delinkPanelTable tbody tr.jig-row-action-highlight td,
-#delinkPanelTable tbody tr.dp-row-action-highlight td,
-#delinkPanelTable tbody tr.gs-active-scan td,
-#delinkPanelTable tbody tr.gs-hi td,
-#delinkPanelTable tbody tr.gkb-row-focus td {
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-/* Row-level highlight is cleared only when the row has no state colour of its own
-   (scanned / disabled / multi-model tint must still win) */
-#delinkPanelTable tbody tr.active-row:not(.delink-row-scanned):not(.delink-row-disabled):not([class*="model-bg-"]),
-#delinkPanelTable tbody tr.jig-row-action-highlight:not(.delink-row-scanned):not(.delink-row-disabled):not([class*="model-bg-"]),
-#delinkPanelTable tbody tr.dp-row-action-highlight:not(.delink-row-scanned):not(.delink-row-disabled):not([class*="model-bg-"]),
-#delinkPanelTable tbody tr.gs-active-scan:not(.delink-row-scanned):not(.delink-row-disabled):not([class*="model-bg-"]),
-#delinkPanelTable tbody tr.gs-hi:not(.delink-row-scanned):not(.delink-row-disabled):not([class*="model-bg-"]),
-#delinkPanelTable tbody tr.gkb-row-focus:not(.delink-row-scanned):not(.delink-row-disabled):not([class*="model-bg-"]) {
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-#delinkPanelTableBody td:nth-child(2) input[type="checkbox"] {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  filter: none !important;
-}
-#delinkPanelTable tbody td { user-select: none; }
-#delinkPanelTable tbody td input { user-select: text; }
 </style>
 
 <div class="content-wrapper">
@@ -1258,14 +1057,12 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
           </span>
           <h3 id="jigAddModalTitle" class="jig-header-title">
             Jig Loading
-            
+
             <span id="modalPlatingStockNo" style="display: none"></span>
           </h3>
         </div>
         <!-- Nickel Bath Type / Tray Type / Lot Qty / Jig Capacity — moved up next to the
-             title (in place of the header subtitle), styled as horizontal pill chips
-             (same look as the delink Tray ID chips). Same element ids as before, so all
-             existing JS reads/writes keep working. -->
+             title, styled as horizontal pill chips (same look as the delink Tray ID chips) -->
         <div class="jig-header-meta">
           <span class="jig-header-meta-chip">
             <label for="nickelBathTypeInput">Nickel Bath</label>
@@ -1284,6 +1081,10 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
             <input type="number" id="jigCapacityInput" readonly />
           </span>
         </div>
+        <!-- JIG COMPOSITION BUTTON — moved up to the top header, before the Cycle badge -->
+        <button type="button" id="jigCompositionBtn" style="margin-left:auto; padding:4px 12px; font-size:11px; background:linear-gradient(135deg,#028084,#014d4e); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; box-shadow:0 2px 4px rgba(2,128,132,0.2); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(2,128,132,0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 4px rgba(2,128,132,0.2)';">
+          <i class="fa fa-cogs" style="margin-right:5px;"></i> Jig Composition
+        </button>
       </div>
       <!-- Cycle Badge (pinned top-right) -->
       <div class="jig-header-cycle-pill">
@@ -1309,7 +1110,7 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
            is kept as a hidden element only — JS elsewhere (row-count badges, resets)
            still reads/writes it. -->
       <b id="delinkTrayCount" style="display:none;">0</b>
-      <div class="jig-field-strip jig-field-strip-single">
+      <div class="jig-field-strip">
         <div class="jig-field-box jig-field-box-active">
           <label for="jigIdInput">Jig ID</label>
           <input type="text" id="jigIdInput" maxlength="9" required placeholder="J144-0000" />
@@ -1339,11 +1140,6 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
             </select>
           </div>
         </div>
-        <!-- JIG COMPOSITION BUTTON — sits at the end of this same row, after
-             Broken / Buildup Hooks (moved from the removed .delink-header strip) -->
-        <button type="button" id="jigCompositionBtn" class="jig-composition-btn" style="padding:4px 12px; font-size:11px; background:linear-gradient(135deg,#028084,#014d4e); color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:600; box-shadow:0 2px 4px rgba(2,128,132,0.2); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(2,128,132,0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 4px rgba(2,128,132,0.2)';">
-          <i class="fa fa-cogs" style="margin-right:5px;"></i> Jig Composition
-        </button>
       </div>
     </form>
 
@@ -1351,38 +1147,60 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
          SPLIT LAYOUT: Delink (LEFT) + Excess/Partial (RIGHT)
          ============================================================ -->
 <div class="delink-section">
-  <!-- The old .delink-header strip is removed: the Jig Composition button moved to the
-       modal top header, and Jig Cap is already shown there as the Jig Capacity chip.
-       unifiedJigCapBadge is kept as a hidden element only — JS still writes to it. -->
-  <b id="unifiedJigCapBadge" style="display:none;">0</b>
+  <!-- HEADER - Subtle Inline Stats (Jig Composition button moved to the top header) -->
+  <div class="delink-header" style="background:rgba(250,250,252,0.6); padding:8px 14px; border-radius:4px; margin-bottom:8px; border:1px solid #eceff1;">
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+      <div style="font-size:12px; color:#546e7a; font-weight:600; letter-spacing:0.3px;">
+        Tray Allocation
+      </div>
+      <!-- Inline Stats -->
+      <div style="display:flex; gap:12px; align-items:center; font-size:11px; color:#78909c;">
+        <span style="font-weight:500;">Jig Cap: <b style="color:#26a69a; font-size:12px;" id="unifiedJigCapBadge">0</b></span>
+        <span id="delinkStatsBadge" style="display:none; color:#43a047; font-weight:600; margin-left:8px; padding:2px 8px; background:rgba(200,230,201,0.3); border-radius:3px;"></span>
+      </div>
+    </div>
+  </div>
 
-  <!-- User Insights Banner -->
-
+  <!-- User Insights Banner removed per request (jigCurrentAction/jigNextStep elements
+       gone — _updateInfoBanner() already no-ops when it can't find them via
+       getElementById, so nothing else needed changing). -->
 
   <!-- 2-COLUMN SPLIT CONTENT -->
   <div class="split-panel-container" id="splitPanelContainer" style="display:flex; flex-direction:column; gap:12px; margin-top:10px; padding-bottom:10px;">
 
+    <!-- Tray ID tapping chips — small tappable pills (Tray ID + Qty), same tap
+         action as the Placeholder boxes in the cards below. Sits above the
+         split-panel-left / split-panel-right columns. -->
+    <div id="delinkTrayPillsContainer" style="display:flex; flex-wrap:wrap; gap:6px;">
+      <!-- Pills rendered by JS from split_panel.delink_panel.trays -->
+    </div>
+
     <!-- LEFT COLUMN: DELINK -->
     <div class="split-panel-left" id="splitPanelLeft" style="flex:1; min-width:0;">
-      <div class="split-panel-title split-panel-title-v2 delink-panel-head">
-        <span class="delink-head-dot" aria-hidden="true"></span>
-        <span class="delink-head-text">Delink Trays</span>
-        <!-- Delink summary — relocated here from the removed .delink-header strip -->
-        <span id="delinkStatsBadge" style="display:none; color:#43a047; font-weight:600; padding:1px 8px; background:rgba(200,230,201,0.3); border-radius:3px;"></span>
-        <span id="delinkPanelCount" class="delink-head-count"></span>
+      <div class="split-panel-title split-panel-title-v2">
+        <i class="fa fa-refresh" style="margin-right:6px;"></i> DELINK TRAYS
+        <span id="delinkPanelCount" style="float:right; font-weight:500; color:#64748b;"></span>
       </div>
-      <div class="table-responsive">
+      <!-- Tray slot cards — tap the Placeholder box to delink, same as scanning/typing
+           the Tray ID. Each card shows Placeholder + Qty side by side, Plating Stock
+           No below (replaces the separate chip strip + scanned-trays summary card). -->
+      <div id="delinkTraysChipsContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:8px; margin:6px 0 8px;">
+        <!-- Slot cards rendered by JS from split_panel.delink_panel.trays -->
+      </div>
+      <!-- Grid replaced by the compact chip strip above (per-tray tap-to-delink UI).
+           Table itself stays in the DOM (hidden) — submit validation, snapshot
+           collection, draft restore, etc. all still read #delinkPanelTableBody. -->
+      <div class="table-responsive" style="display:none;">
         <table class="table table-bordered table-sm" id="delinkPanelTable" style="margin-bottom:0; font-size:13px;">
           <thead style="position:sticky; top:0; z-index:2;">
             <tr class="delink-thead-row">
-              <th style="width:46px; text-align:center;">S.No</th>
+              <th style="width:36px; text-align:center;">#</th>
               <th style="width:36px; text-align:center;"><!-- <input type="checkbox" id="delinkSelectAll" disabled style="width:14px;height:14px;accent-color:#028084;cursor:pointer;opacity:0.5;" title="Select All Delink" /> --></th>
               <th style="min-width:90px;">Model</th>
-              <th style="min-width:80px;">Tray ID</th>
-              <th style="width:70px; text-align:center;">Orig Qty</th>
-              <th style="width:75px; text-align:center;">Delink Qty</th>
-              <th style="width:75px; text-align:center;">Excess Qty</th>
-              <th style="min-width:150px;">Scan Tray ID</th>
+              <th style="width:50px; text-align:center;">Orig</th>
+              <th style="width:55px; text-align:center;">Delink</th>
+              <th style="width:55px; text-align:center;">Excess</th>
+              <th style="min-width:130px;">Scan Tray</th>
               <th style="min-width:120px;">Status</th>
             </tr>
           </thead>
@@ -2363,7 +2181,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===== LEFT: DELINK PANEL =====
     var dBody = document.getElementById('delinkPanelTableBody');
     var dCountEl = document.getElementById('delinkPanelCount');
-    if (dCountEl) dCountEl.innerText = delinkTrays.length + ' trays / ' + (delinkPanel.total_delink_qty || 0) + ' qty';
+    if (dCountEl) dCountEl.innerText = delinkTrays.length + ' trays · ' + (delinkPanel.total_delink_qty || 0) + ' qty';
     // Mirror the same plan total into the "Total Delink Qty" stat card (same number, second display target)
     var plannedQtyStatEl = document.getElementById('delinkPlannedQtyStat');
     if (plannedQtyStatEl) plannedQtyStatEl.innerText = delinkPanel.total_delink_qty || 0;
@@ -2371,7 +2189,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (dBody) {
       dBody.innerHTML = '';
       if (!delinkTrays.length) {
-        dBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#888;padding:14px;">No delink trays</td></tr>';
+        dBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:14px;">No delink trays</td></tr>';
       } else {
         delinkTrays.forEach(function(row, idx) {
           var tr = document.createElement('tr');
@@ -2398,11 +2216,14 @@ document.addEventListener('DOMContentLoaded', function () {
           td1.appendChild(snoBadge);
           tr.appendChild(td1);
 
-          // 2. Checkbox
+          // 2. Checkbox — commented out for now; tapping the Tray ID chip above the
+          // table does the same job (see _tapDelinkTrayChip). Set DELINK_CHECKBOX_ENABLED
+          // back to true to restore the checkbox UI.
+          var DELINK_CHECKBOX_ENABLED = false;
           var td2 = document.createElement('td');
           td2.style.textAlign = 'center';
           td2.style.pointerEvents = 'none'; // Disable cell-level clicks
-          if (row.is_checkbox_enabled) {
+          if (DELINK_CHECKBOX_ENABLED && row.is_checkbox_enabled) {
             var cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.className = 'delink-row-checkbox';
@@ -2414,7 +2235,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (row.checked) { cb.checked = true; }
             if (row.locked) { cb.disabled = true; cb.classList.add('locked'); }
             if (row.selectable === false) { cb.disabled = true; }
-            
+
             // Add click event listener with stopPropagation to prevent cell-level interference
             cb.addEventListener('click', function(e) {
               e.stopPropagation();
@@ -2424,7 +2245,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return false;
               }
             });
-            
+
             td2.appendChild(cb);
           }
           tr.appendChild(td2);
@@ -2441,14 +2262,7 @@ document.addEventListener('DOMContentLoaded', function () {
           td3.appendChild(modelPill);
           tr.appendChild(td3);
 
-          // 4. Tray ID (same font as the rest of the table — no monospace override,
-          // so this column no longer looks visually different from Model/Qty/etc.)
-          var td4 = document.createElement('td');
-          td4.style.cssText = 'font-weight:500;';
-          td4.innerText = row.tray_id || '';
-          tr.appendChild(td4);
-
-          // 5. Original Qty
+          // 4. Original Qty
           var td5 = document.createElement('td');
           td5.style.cssText = 'text-align:center;';
           var origQtyPill = document.createElement('span');
@@ -2457,7 +2271,7 @@ document.addEventListener('DOMContentLoaded', function () {
           td5.appendChild(origQtyPill);
           tr.appendChild(td5);
 
-          // 6. Delink Qty
+          // 5. Delink Qty
           var td6 = document.createElement('td');
           td6.style.cssText = 'text-align:center;';
           var delinkQtyPill = document.createElement('span');
@@ -2466,7 +2280,7 @@ document.addEventListener('DOMContentLoaded', function () {
           td6.appendChild(delinkQtyPill);
           tr.appendChild(td6);
 
-          // 7. Excess Qty
+          // 6. Excess Qty
           var td7 = document.createElement('td');
           td7.style.cssText = 'text-align:center;';
           var excessQtyPill = document.createElement('span');
@@ -2475,7 +2289,7 @@ document.addEventListener('DOMContentLoaded', function () {
           td7.appendChild(excessQtyPill);
           tr.appendChild(td7);
 
-          // 8. Scan Tray ID
+          // 7. Scan Tray ID
           var td8 = document.createElement('td');
           if (row.is_scannable) {
             var inp = document.createElement('input');
@@ -2508,7 +2322,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }
           tr.appendChild(td8);
 
-          // 9. Status (empty by default — filled by user action)
+          // 8. Status (empty by default — filled by user action)
           var td9 = document.createElement('td');
           tr.appendChild(td9);
 
@@ -2639,6 +2453,282 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         });
       }
+
+      // ===== TRAY SLOT CARDS (tappable, Placeholder + Qty + Plating Stock No) =====
+      // Tray ID is no longer shown as its own table column, and there's no separate
+      // chip strip / scanned-trays card either — this single grid of cards is now
+      // the whole visual for the delink section. Each card's Placeholder box IS a
+      // tap target: tapping an unfilled one fills that tray's OWN scan box with its
+      // tray_id and fires the exact same 'input' event the box's own listener
+      // (_attachSplitScanHandlers) reacts to for a manually typed/scanned value —
+      // no separate validation path, so behavior stays identical to typing or
+      // scanning. Once filled, the Placeholder box shows the actual scanned value
+      // (green, like the underlying input already does) instead of "Placeholder".
+      // Same per-model colors the delink table rows already use (row.color_class,
+      // model-bg-1..5) — applied to the card too, so multi-model lots can tell
+      // trays apart by color the same way the rows below already do.
+      var CHIP_MODEL_COLORS = {
+        'model-bg-1': { bg: '#e0f7fa', border: '#80cbc4', text: '#00695c', qty: '#00897b' },
+        'model-bg-2': { bg: '#e8ecfb', border: '#9fa8da', text: '#283593', qty: '#3949ab' },
+        'model-bg-3': { bg: '#e8f5e9', border: '#a5d6a7', text: '#2e7d32', qty: '#43a047' },
+        'model-bg-4': { bg: '#f3e5f5', border: '#ce93d8', text: '#6a1b9a', qty: '#8e24aa' },
+        'model-bg-5': { bg: '#fff3e0', border: '#ffcc80', text: '#e65100', qty: '#f57c00' }
+      };
+
+      // ===== SINGLE SOURCE OF TRUTH FOR TRAY BLOCKING =====
+      // A tray is blocked if — and ONLY if — that exact tray_id has its own entry in
+      // window._trayAllocations. That map is written by exactly one key per physical
+      // tray, only at the moment that tray is successfully scanned / tapped / typed:
+      //   _validateSplitScan  -> {type:'delink'|'excess'|'top_tray'}
+      //   _applyRowAllocation -> {type:'top_tray'|'excess'}
+      //   _autoLockDelinkForTopTray / _lockDelinkRowForExcess -> keyed by that tray only
+      // and cleared per-tray by _undoTrayAllocation / _unlockRowForEdit.
+      //
+      // Blocking MUST NOT be derived from allocation order, array/loop index, slot
+      // position, running/consumed/remaining qty, or any row-level DOM state
+      // (input.disabled, .delink-row-disabled, .delink-row-scanned). Those row classes
+      // are applied by loops that legitimately touch OTHER rows — backend row.state,
+      // the reconcile pass, and the excess/top-tray lock helpers — so consulting them
+      // here made one tap grey out unrelated trays. Exactly one tray may change state
+      // per user action; keep it that way.
+      function _isTrayBlocked(trayId) {
+        if (!trayId) return false;
+        var map = window._trayAllocations;
+        if (!map) return false;
+        return !!map[String(trayId).trim().toUpperCase()];
+      }
+
+      function _renderDelinkTrayChips(trays) {
+        var cardsContainer = document.getElementById('delinkTraysChipsContainer');
+        if (!cardsContainer) return;
+        cardsContainer.innerHTML = '';
+        if (!trays || !trays.length) {
+          cardsContainer.innerHTML = '<span style="font-size:11px; color:#999; font-style:italic;">No delink trays</span>';
+          return;
+        }
+
+        trays.forEach(function(row) {
+          var trayId = row.tray_id || '';
+          if (!trayId) return;
+          var tr = dBody ? dBody.querySelector('tr[data-tray-id="' + trayId + '"]') : null;
+          var inp = tr ? tr.querySelector('.split-scan-input') : null;
+          var scannedValue = (inp && inp.value.trim()) || '';
+          var filled = !!scannedValue;
+          // BLOCKING IS EXACT-TRAY_ID ONLY. _trayAllocations is keyed by tray_id and
+          // written ONLY for the one tray actually scanned/tapped/typed, so a tray can
+          // never be blocked because of its position, its neighbours, allocation order,
+          // running qty, or any row-level DOM state. Do NOT reintroduce inp.disabled /
+          // delink-row-disabled / delink-row-scanned here — those classes are applied by
+          // row-state loops (backend row.state, reconcile pass, excess/top-tray locks)
+          // that legitimately touch OTHER rows, and reading them here is exactly what
+          // caused tapping one tray to grey out the trays before it.
+          var used = _isTrayBlocked(trayId);
+          var colors = CHIP_MODEL_COLORS[row.color_class] || { bg: '#fff', border: '#80cbc4', text: '#00695c', qty: '#00897b' };
+          var modelLabel = (row.model_code || '').replace(/\s*\[.*\]$/, '');
+
+          // Card container is ALWAYS fully visible — no opacity reduction, no
+          // disabling. Only the Placeholder box (the actual tap target) changes
+          // state, and only between two looks: active (white) and consumed (grey).
+          var card = document.createElement('div');
+          card.className = 'delink-tray-chip' + (used ? ' used' : '');
+          card.dataset.trayId = trayId;
+          card.style.cssText = 'border-radius:8px; padding:8px 10px; font-size:12px; box-shadow:0 1px 3px rgba(0,0,0,0.08); border:1px solid ' + colors.border + '; background:' + colors.bg + ';';
+
+          // Row 1: Placeholder box + Qty, side by side. The box never pre-reveals
+          // this slot's own tray_id — it shows generic "Tray ID" until the user
+          // actually scans/taps a tray in, then shows exactly what was scanned
+          // (never the answer handed to them upfront).
+          var topRow = document.createElement('div');
+          topRow.style.cssText = 'display:flex; align-items:center; gap:8px;';
+
+          // Grey is a visual hint only — tapping is never CSS-blocked (no
+          // pointer-events:none), even on a card already marked used. The click
+          // always reaches _tapDelinkTrayChip(), whose own validated/allocation
+          // checks are the actual (safe) gate on whether a repeat tap does anything.
+          var placeholderBox = document.createElement('div');
+          placeholderBox.style.cssText = 'flex:1; min-width:0; padding:5px 8px; border-radius:6px; font-weight:600; overflow-wrap:break-word; cursor:pointer;' +
+            (used ? 'background:#e0e0e0; border:1px solid #bdbdbd; color:#616161;' : 'background:#ffffff; border:1px dashed ' + colors.border + '; color:' + colors.text + ';');
+          placeholderBox.innerText = filled ? scannedValue : 'Tray ID';
+          placeholderBox.addEventListener('click', function() { _tapDelinkTrayChip(trayId); });
+          topRow.appendChild(placeholderBox);
+
+          // QTY SHOWN HERE IS delink_qty — the portion of this tray that actually goes
+          // onto the jig — NOT original_qty. Backend caps sum(delink_qty) at the jig's
+          // effective capacity and pushes the remainder into excess_qty (see
+          // compute_jig_loading -> all_trays). A capacity-split tray therefore shows its
+          // delink portion here and its excess portion in the EXCESS panel.
+          // INVARIANT: sum of the qty shown on these cards === delink_panel.total_delink_qty
+          // === the "N trays · X qty" header. Rendering original_qty broke that invariant
+          // (e.g. last tray displayed 16 instead of 5, so cards summed to lot qty 155
+          // while the header correctly read 144).
+          var qtyBox = document.createElement('div');
+          qtyBox.style.cssText = 'padding:5px 8px; border-radius:6px; font-weight:700; color:' + colors.qty + '; background:rgba(255,255,255,0.5); white-space:nowrap;';
+          qtyBox.innerText = row.delink_qty != null ? row.delink_qty : 0;
+          topRow.appendChild(qtyBox);
+
+          card.appendChild(topRow);
+
+          // Row 2: Plating Stock No only — no TOP badge here (avoids implying
+          // multiple "top trays"; the Excess panel already shows the one real top tray).
+          var bottomRow = document.createElement('div');
+          bottomRow.style.cssText = 'font-size:10.5px; color:' + colors.text + '; opacity:0.85; margin-top:6px;';
+          bottomRow.innerText = modelLabel || '-';
+          card.appendChild(bottomRow);
+
+          // Row 3: status — ONLY "Delinked" or "Allocated to Excess", nothing else,
+          // and only shown once the slot is actually consumed.
+          if (used) {
+            var alloc = window._trayAllocations && window._trayAllocations[trayId.toUpperCase()];
+            var statusText = (alloc && (alloc.type === 'excess' || alloc.type === 'top_tray')) ? 'Allocated to Excess' : 'Delinked';
+            var statusRow = document.createElement('div');
+            statusRow.style.cssText = 'margin-top:5px; font-size:10px; font-weight:600; color:#155724;';
+            statusRow.innerText = statusText;
+            card.appendChild(statusRow);
+          }
+
+          cardsContainer.appendChild(card);
+        });
+      }
+
+      // ===== TRAY ALLOCATION SUMMARY (top pills, sit above split-panel-left) =====
+      // Info strip for each tray_id — Tray ID and Qty, greyed out once that
+      // physical tray has actually been scanned/tapped/typed in (same "used"
+      // signal the Delink cards use). Greying is a visual hint only: tapping is
+      // never CSS-blocked here either — _tapDelinkTrayChip's own checks are the
+      // real, safe gate on whether a repeat tap does anything.
+      function _renderDelinkTrayPills(trays) {
+        var pillsContainer = document.getElementById('delinkTrayPillsContainer');
+        if (!pillsContainer) return;
+        pillsContainer.innerHTML = '';
+        if (!trays || !trays.length) return;
+
+        trays.forEach(function(row) {
+          var trayId = row.tray_id || '';
+          if (!trayId) return;
+          // Exact-tray_id blocking only — same single source of truth the cards use.
+          // See the comment in _renderDelinkTrayChips for why row/DOM state must never
+          // be consulted here.
+          var used = _isTrayBlocked(trayId);
+          var colors = CHIP_MODEL_COLORS[row.color_class] || { bg: '#fff', border: '#80cbc4', text: '#00695c', qty: '#00897b' };
+
+          var pill = document.createElement('span');
+          pill.dataset.trayId = trayId;
+          pill.style.cssText = 'display:inline-flex; align-items:center; gap:5px; padding:6px 14px; border-radius:20px; font-size:12px; box-shadow:0 1px 3px rgba(0,0,0,0.08); cursor:pointer;' +
+            (used ? 'border:1px solid #bdbdbd; background:#e0e0e0;' : 'border:1px solid ' + colors.border + '; background:' + colors.bg + ';');
+
+          var idSpan = document.createElement('span');
+          idSpan.style.cssText = 'font-weight:600; color:' + (used ? '#616161' : colors.text) + ';';
+          idSpan.innerText = trayId;
+          pill.appendChild(idSpan);
+
+          // delink_qty, not original_qty — see the invariant note in _renderDelinkTrayChips.
+          if (row.delink_qty != null) {
+            var qtySpan = document.createElement('span');
+            qtySpan.style.color = used ? '#757575' : colors.qty;
+            qtySpan.innerText = '(' + row.delink_qty + ')';
+            pill.appendChild(qtySpan);
+          }
+
+          // Tappable — picks this specific physical tray and fills the next open
+          // Delink slot with it (same routing as the card Placeholder box).
+          pill.addEventListener('click', function() { _tapDelinkTrayChip(trayId); });
+
+          pillsContainer.appendChild(pill);
+        });
+      }
+
+      // Tapping a chip routes the SAME phase-aware way the checkbox already does
+      // (Top Tray → Excess → Delink order): if the excess/top-tray steps aren't
+      // done yet, the tap fills THAT slot with the tapped tray instead of erroring
+      // "Scan Top Tray first" — it only lands in the tray's own delink box once the
+      // delink phase is actually reached. Defined below _getJigPhase/_applyRowAllocation/
+      // _copyRowScanContext/_validateSplitScan (hoisted, so declaration order here is fine).
+      //
+      // Dims the tapped chip immediately (optimistic UI) instead of waiting for the
+      // scan's network round-trip + the 300ms applyResponseToUI debounce — the tap
+      // felt slow because nothing visible happened until that finished. Once
+      // _validateSplitScan resolves, chips are re-rendered from the real row/input
+      // state, so a failed scan reverts the dim automatically.
+      async function _tapDelinkTrayChip(trayId) {
+        // One tap in flight at a time — a second tap fired before this one's
+        // fetch/re-render finishes could read a stale _getJigPhase() (excess not
+        // yet marked full) and misroute into the wrong slot. Blocking overlap
+        // also guarantees the tapped Placeholder box greys out on the very first
+        // click, since nothing else can slip in and change its state mid-flight.
+        if (window._delinkTapInFlight) return;
+        window._delinkTapInFlight = true;
+        try {
+          if (!dBody) return;
+          var tr = dBody.querySelector('tr[data-tray-id="' + trayId + '"]');
+          if (!tr) return;
+          var inp = tr.querySelector('.split-scan-input');
+          if (!inp) return;
+          // Same exact-tray_id test the chips/pills render from, so the guard and the
+          // visual can never disagree. Deliberately NOT gated on inp.disabled or the
+          // row's classes — those can be set by row-state loops for other reasons and
+          // would silently swallow a legitimate tap on an untouched tray.
+          if (_isTrayBlocked(trayId)) return;
+
+          // Only the tappable Placeholder box (inside the Delink card) changes look —
+          // the Tray Allocation Summary pills above never grey out (see _renderDelinkTrayPills),
+          // and the card itself stays fully visible (see _renderDelinkTrayChips).
+          var tappedCard = document.querySelector('#delinkTraysChipsContainer [data-tray-id="' + trayId + '"]');
+          var tappedBox = tappedCard && tappedCard.firstElementChild ? tappedCard.firstElementChild.firstElementChild : null;
+          if (tappedBox) {
+            tappedBox.style.background = '#e0e0e0';
+            tappedBox.style.borderColor = '#bdbdbd';
+            tappedBox.style.color = '#616161';
+            tappedBox.style.pointerEvents = 'none';
+          }
+
+          var phase = typeof _getJigPhase === 'function' ? _getJigPhase() : 'delink';
+          var cb = tr.querySelector('.delink-row-checkbox');
+
+          if (phase === 'top_tray') {
+            var topInp = document.getElementById('excessTopTrayScanInput');
+            if (topInp && !topInp.readOnly) {
+              topInp.value = trayId;
+              _copyRowScanContext(topInp, tr);
+              await _validateSplitScan(trayId, topInp, true);
+            }
+            _applyRowAllocation(tr, cb, trayId, 'top_tray');
+          } else if (phase === 'excess') {
+            var eBodyTap = document.getElementById('excessPanelTableBody');
+            var nextExcessInp = eBodyTap ? Array.from(eBodyTap.querySelectorAll('.split-scan-input')).find(function(i) { return !i.value.trim(); }) : null;
+            if (nextExcessInp) {
+              nextExcessInp.value = trayId;
+              _copyRowScanContext(nextExcessInp, tr);
+              await _validateSplitScan(trayId, nextExcessInp, true);
+            }
+            _applyRowAllocation(tr, cb, trayId, 'excess');
+          } else {
+            // Phase = delink → SEQUENTIAL FILL: slots are consumed top-down (slot 1,
+            // then slot 2, ...), never "the tapped tray's own positional slot". The
+            // value written is always the tray the user actually tapped/scanned, so
+            // what they picked is exactly what appears — just in the next free slot.
+            // Falls back to this tray's own box only if no free slot remains.
+            //
+            // Safe now that blocking is exact-tray_id keyed (_isTrayBlocked): landing
+            // in another row's slot marks ONLY the tapped tray as used, and
+            // _validateSplitScan's DELINK_LOCK branch still attaches the "Delinked"
+            // badge to the row that genuinely owns the scanned tray_id.
+            var targetRow = _getNextSequentialDelinkRow() || tr;
+            var targetInp = targetRow.querySelector('.split-scan-input') || inp;
+            targetInp.value = trayId;
+            targetInp.style.background = '#f0fff4';
+            await _validateSplitScan(trayId, targetInp, false);
+          }
+
+          _renderDelinkTrayChips(delinkTrays);
+          _renderDelinkTrayPills(delinkTrays);
+        } finally {
+          window._delinkTapInFlight = false;
+        }
+      }
+
+      _renderDelinkTrayChips(delinkTrays);
+      _renderDelinkTrayPills(delinkTrays);
+
       // ===== PHASE-AWARE CHECKBOX ROUTING with allocation persistence =====
       // Phase: top_tray → excess → delink (based on excess panel state)
       function _getJigPhase() {
@@ -2680,6 +2770,7 @@ document.addEventListener('DOMContentLoaded', function () {
           if (lastCell) lastCell.innerHTML = '<span class="unified-status-badge status-excess-allocated" style="background:#fff4e6;color:#e67e22;border:1px solid #e67e22;">Allocated to Excess Lot</span>';
         }
         // For 'delink' type, the _validateSplitScan success handler does the status update
+        _updatePhaseMessage();
       }
 
       function _copyRowScanContext(targetInput, sourceRow) {
@@ -2702,6 +2793,40 @@ document.addEventListener('DOMContentLoaded', function () {
         if (sourceModelCode) targetInput.dataset.modelCode = sourceModelCode;
       }
 
+      // Phase message display
+      function _updatePhaseMessage() {
+        var msgEl = document.getElementById('jigPhaseMessage');
+        if (!msgEl) {
+          msgEl = document.createElement('div');
+          msgEl.id = 'jigPhaseMessage';
+          msgEl.style.cssText = 'font-size:11px;font-weight:600;padding:6px 12px;border-radius:6px;margin-top:6px;text-align:center;';
+          var totalBar = document.getElementById('delinkTotalBar');
+          if (totalBar) totalBar.parentNode.insertBefore(msgEl, totalBar);
+        }
+        var phase = _getJigPhase();
+        if (phase === 'top_tray') {
+          // Instructional "Step 1" banner removed — tapping a Tray ID chip already
+          // makes the Top Tray step self-evident, no banner needed.
+          msgEl.style.display = 'none';
+        } else if (phase === 'excess') {
+          var eBodyP = document.getElementById('excessPanelTableBody');
+          var remaining = eBodyP ? Array.from(eBodyP.querySelectorAll('.split-scan-input')).filter(function(i) { return !i.value.trim(); }).length : 0;
+          msgEl.style.display = '';
+          msgEl.style.background = '#fff4e6'; msgEl.style.color = '#e67e22'; msgEl.style.border = '1px solid #e67e22';
+          msgEl.innerHTML = '&#9888; Step 2: Scan or select <b>' + remaining + '</b> more tray(s) for <b>Excess Lot</b>';
+        } else {
+          var anyUnscanned = document.querySelector('#delinkPanelTableBody .split-scan-input:not(.validated):not(:disabled)');
+          if (anyUnscanned) {
+            msgEl.style.display = '';
+            msgEl.style.background = '#d4edda'; msgEl.style.color = '#155724'; msgEl.style.border = '1px solid #28a745';
+            msgEl.innerHTML = '&#10003; Excess complete &mdash; scan or select remaining trays for <b>Delink</b>';
+          } else {
+            msgEl.style.display = 'none';
+          }
+        }
+      }
+      // Expose for _validateSplitScan (outer scope)
+      window._updatePhaseMessage = _updatePhaseMessage;
       // Expose so _attachSplitScanHandlers (outer scope) can gate manual typed/pasted
       // scans the same way checkbox routing already does — without this, typing a
       // tray ID straight into a Delink box bypasses the Top Tray → Excess → Delink
@@ -2712,14 +2837,34 @@ document.addEventListener('DOMContentLoaded', function () {
       // Sequential scan order must hold regardless of which row's checkbox the
       // operator happens to click: the physical tray actually being loaded is
       // always the NEXT one in row order, not necessarily the one whose box got
-      // checked. Returns the next not-yet-filled, non-disabled ROW (in row/DOM
-      // order), or null if none remain.
-      function _getNextSequentialDelinkRow() {
+      // checked. Returns the next not-yet-filled, non-disabled row's OWN
+      // designated Tray ID (in row/DOM order), or null if none remain.
+      function _getNextSequentialDelinkTrayId() {
         var allDelinkRows = Array.from(dBody.querySelectorAll('tr[data-tray-id]'));
-        return allDelinkRows.find(function(candidate) {
+        var nextRow = allDelinkRows.find(function(candidate) {
           if (candidate.classList.contains('delink-row-disabled')) return false;
           var candidateInp = candidate.querySelector('.split-scan-input');
           return candidateInp && !candidateInp.classList.contains('validated') && !candidateInp.value.trim();
+        });
+        return nextRow ? (nextRow.dataset.trayId || null) : null;
+      }
+
+      // Returns the FIRST still-open delink slot in row order (slot 1, then slot 2, ...),
+      // used by _tapDelinkTrayChip() so the physically tapped/scanned tray always lands
+      // in the next free slot from the top — never in "its own" positional slot.
+      //
+      // Occupancy is judged from the slot's INPUT only (disabled / already validated /
+      // already has a value). Deliberately not from row classes: those are set by
+      // row-state loops for other reasons and must never influence which slot is next
+      // (that coupling is what previously made one tap disturb neighbouring trays).
+      function _getNextSequentialDelinkRow() {
+        var allDelinkRows = Array.from(dBody.querySelectorAll('tr[data-tray-id]'));
+        return allDelinkRows.find(function(candidate) {
+          var candidateInp = candidate.querySelector('.split-scan-input');
+          if (!candidateInp) return false;
+          if (candidateInp.disabled) return false;
+          if (candidateInp.classList.contains('validated')) return false;
+          return !candidateInp.value.trim();
         }) || null;
       }
 
@@ -2759,29 +2904,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Phase = delink
-        // Scanning always progresses in row order even when the operator checks
-        // boxes out of order, so the tray being loaded is the next-in-sequence
-        // row's own tray. That value must go into THAT row's own box — writing it
-        // into the checked row's box instead left the sequential row permanently
-        // empty, so every later checkbox re-issued the same tray ID (duplicate
-        // scan → backend 400). Falls back to the checked row when it IS the next
-        // one in sequence, or when nothing else is left to sequence from.
-        var seqRow = _getNextSequentialDelinkRow() || tr;
-        var seqInp = seqRow.querySelector('.split-scan-input');
-        if (seqInp && !seqInp.classList.contains('validated')) {
-          var sequentialTrayId = seqRow.dataset.trayId || trayId;
-          // The check belongs to the row actually being scanned — move it there so
-          // row state (checkbox / value / status) stays on one row.
-          if (seqRow !== tr) {
-            cb.checked = false;
-            var seqCb = seqRow.querySelector('.delink-row-checkbox');
-            if (seqCb && !seqCb.disabled && !seqCb.classList.contains('locked')) seqCb.checked = true;
-          }
-          seqInp.value = sequentialTrayId;
-          seqInp.style.background = '#f0fff4';
-          _validateSplitScan(sequentialTrayId, seqInp, false);
+        var inp = tr.querySelector('.split-scan-input');
+        if (inp && !inp.classList.contains('validated')) {
+          // Use the next-in-sequence row's own designated tray ID, not this
+          // checked row's own ID — scanning must always progress in row order
+          // even when the operator checks boxes out of order. Falls back to
+          // this row's own ID only if no other row is left to sequence from.
+          var sequentialTrayId = _getNextSequentialDelinkTrayId() || trayId;
+          inp.value = sequentialTrayId;
+          inp.style.background = '#f0fff4';
+          _validateSplitScan(sequentialTrayId, inp, false);
           // Delink allocation saved in _validateSplitScan success handler
-          console.log('[CB_ROUTE] Tray', sequentialTrayId, '(sequential) → its own DELINK box; checkbox clicked on row', trayId);
+          console.log('[CB_ROUTE] Tray', sequentialTrayId, '(sequential) → DELINK box for checked row', trayId);
         }
       }
 
@@ -3086,6 +3220,11 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }, 150);  // Wait for DOM to fully stabilize after re-render
 
+    // Update phase message after render
+    if (typeof window._updatePhaseMessage === 'function') {
+      setTimeout(function() { window._updatePhaseMessage(); }, 60);
+    }
+
     console.log('[SPLIT_PANEL] Rendered — delink:', delinkTrays.length, 'excess:', excessTrays.length, 'topTray:', !!topTray);
   }
 
@@ -3140,34 +3279,28 @@ document.addEventListener('DOMContentLoaded', function () {
     var normalized = topTrayId.trim().toUpperCase();
     var dBody = document.getElementById('delinkPanelTableBody');
     if (!dBody) return;
-    dBody.querySelectorAll('.delink-row-checkbox').forEach(function(cb) {
-      if ((cb.dataset.trayId || '').trim().toUpperCase() === normalized) {
-        cb.checked = true;
-        cb.disabled = true;
-        cb.classList.add('locked');
-        // Lock the scan input too
-        var tr = cb.closest('tr');
-        if (tr) {
-          tr.classList.remove('delink-row-scanned');
-          tr.classList.add('delink-row-disabled');
-          tr.dataset.allocLocked = 'confirmed';
-          tr.title = 'Allocated as top tray — locked';
-          // Disable the scan input
-          var scanInp = tr.querySelector('.split-scan-input');
-          if (scanInp && !scanInp.classList.contains('validated')) {
-            scanInp.disabled = true;
-            scanInp.style.opacity = '0.6';
-            scanInp.title = 'Allocated as top tray';
-          }
-          // Add "Verified for Top Tray" status badge to last cell
-          var lastCell = tr.cells[tr.cells.length - 1];
-          if (lastCell) {
-            lastCell.innerHTML = '<span class="unified-status-badge status-top-tray" style="background:#d0f0f2;color:#014d4e;border:1px solid #028084;">Verified for Top Tray</span>';
-          }
+    // Match by the row's OWN data-tray-id — NOT via .delink-row-checkbox, which no
+    // longer exists now that tapping chips/cards replaced the checkbox UI. Matching
+    // via checkbox silently found nothing and skipped locking this row entirely.
+    dBody.querySelectorAll('tr[data-tray-id]').forEach(function(tr) {
+      if ((tr.dataset.trayId || '').trim().toUpperCase() === normalized) {
+        tr.classList.remove('delink-row-scanned');
+        tr.classList.add('delink-row-disabled');
+        tr.dataset.allocLocked = 'confirmed';
+        tr.title = 'Allocated as top tray — locked';
+        var scanInp = tr.querySelector('.split-scan-input');
+        if (scanInp && !scanInp.classList.contains('validated')) {
+          scanInp.disabled = true;
+          scanInp.style.opacity = '0.6';
+          scanInp.title = 'Allocated as top tray';
+        }
+        var lastCell = tr.cells[tr.cells.length - 1];
+        if (lastCell) {
+          lastCell.innerHTML = '<span class="unified-status-badge status-top-tray" style="background:#d0f0f2;color:#014d4e;border:1px solid #028084;">Verified for Top Tray</span>';
         }
         if (!window._trayAllocations) window._trayAllocations = {};
         window._trayAllocations[normalized] = { type: 'top_tray' };
-        console.log('[TOP_TRAY_LOCK] Locked delink checkbox for:', topTrayId);
+        console.log('[TOP_TRAY_LOCK] Locked delink row for:', topTrayId);
       }
     });
   }
@@ -3178,27 +3311,22 @@ document.addEventListener('DOMContentLoaded', function () {
     var normalized = excessTrayId.trim().toUpperCase();
     var dBody = document.getElementById('delinkPanelTableBody');
     if (!dBody) return;
-    dBody.querySelectorAll('.delink-row-checkbox').forEach(function(cb) {
-      if ((cb.dataset.trayId || '').trim().toUpperCase() === normalized) {
-        cb.checked = true;
-        cb.disabled = true;
-        cb.classList.add('locked');
-        var tr = cb.closest('tr');
-        if (tr) {
-          tr.classList.remove('delink-row-scanned');
-          tr.classList.add('delink-row-disabled');
-          tr.dataset.allocLocked = 'confirmed';
-          tr.title = 'Allocated to Excess Lot';
-          var scanInp = tr.querySelector('.split-scan-input');
-          if (scanInp && !scanInp.classList.contains('validated')) {
-            scanInp.disabled = true;
-            scanInp.style.opacity = '0.6';
-            scanInp.title = 'Allocated to Excess Lot';
-          }
-          var lastCell = tr.cells[tr.cells.length - 1];
-          if (lastCell) {
-            lastCell.innerHTML = '<span class="unified-status-badge status-excess-allocated" style="background:#fff4e6;color:#e67e22;border:1px solid #e67e22;">Allocated to Excess Lot</span>';
-          }
+    // Match by the row's OWN data-tray-id — see _autoLockDelinkForTopTray above.
+    dBody.querySelectorAll('tr[data-tray-id]').forEach(function(tr) {
+      if ((tr.dataset.trayId || '').trim().toUpperCase() === normalized) {
+        tr.classList.remove('delink-row-scanned');
+        tr.classList.add('delink-row-disabled');
+        tr.dataset.allocLocked = 'confirmed';
+        tr.title = 'Allocated to Excess Lot';
+        var scanInp = tr.querySelector('.split-scan-input');
+        if (scanInp && !scanInp.classList.contains('validated')) {
+          scanInp.disabled = true;
+          scanInp.style.opacity = '0.6';
+          scanInp.title = 'Allocated to Excess Lot';
+        }
+        var lastCell = tr.cells[tr.cells.length - 1];
+        if (lastCell) {
+          lastCell.innerHTML = '<span class="unified-status-badge status-excess-allocated" style="background:#fff4e6;color:#e67e22;border:1px solid #e67e22;">Allocated to Excess Lot</span>';
         }
         if (!window._trayAllocations) window._trayAllocations = {};
         window._trayAllocations[normalized] = { type: 'excess' };
@@ -3227,6 +3355,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var phaseLabel = currentPhase === 'top_tray' ? 'Top Tray' : 'Excess Lot';
             this.value = '';
             _showSplitScanMsg(this, 'Scan ' + phaseLabel + ' first', false);
+            if (typeof window._updatePhaseMessage === 'function') window._updatePhaseMessage();
             return;
           }
           _validateSplitScan(raw, this, false);
@@ -3456,6 +3585,9 @@ document.addEventListener('DOMContentLoaded', function () {
           _checkExcessCompleteAndUnlockDelink();
         }
 
+        // Update phase message after every successful scan
+        if (typeof window._updatePhaseMessage === 'function') window._updatePhaseMessage();
+
         // Update global state (loaded_cases_qty from backend — delink-only by design)
         window.BACKEND_LOADED_CASES = parseInt(data.loaded_cases_qty || 0) || 0;
         window.BACKEND_EMPTY_HOOKS = parseInt(data.empty_hooks || 0) || 0;
@@ -3568,6 +3700,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     });
+    if (typeof window._updatePhaseMessage === 'function') window._updatePhaseMessage();
     console.log('[UNDO_ALLOC] Rolled back allocation for:', trayId);
   }
 
@@ -3710,9 +3843,11 @@ document.addEventListener('DOMContentLoaded', function () {
       var isAllocated = tr.classList.contains('delink-row-disabled') || tr.classList.contains('delink-row-scanned');
       // Count rows that are either validated (delinked) or allocated (excess/top/matched)
       if (!inp && !isAllocated) return;
-      var origQtyCell = tr.cells[4]; // Original Qty column (index 4)
+      // Column layout (Tray ID no longer its own column — shown as chips/cards instead):
+      // 0=#, 1=checkbox, 2=Model, 3=Orig, 4=Delink, 5=Excess, 6=Scan Tray, 7=Status
+      var origQtyCell = tr.cells[3]; // Original Qty column (index 3)
       var origQty = origQtyCell ? parseInt(origQtyCell.innerText || 0) || 0 : 0;
-      var delinkQtyCell = tr.cells[5]; // Delink Qty column (index 5)
+      var delinkQtyCell = tr.cells[4]; // Delink Qty column (index 4)
       var delinkQty = delinkQtyCell ? parseInt(delinkQtyCell.innerText || 0) || 0 : 0;
       if (delinkQty <= 0) return; // Skip rows with 0 delink qty (pure excess)
       totalDelinkQty += delinkQty;
@@ -3749,11 +3884,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var valEl = document.getElementById('delinkTotalQtyValue');
     if (!bar || !valEl) return;
     var totalQty = 0;
+    // Column layout: 0=#, 1=checkbox, 2=Model, 3=Orig, 4=Delink, 5=Excess, 6=Scan Tray, 7=Status
     // Sum delink_qty from validated (scanned) rows
     document.querySelectorAll('#delinkPanelTableBody .split-scan-input.validated').forEach(function(inp) {
       var tr = inp.closest('tr');
-      if (tr && tr.cells && tr.cells[5]) {
-        totalQty += parseInt(tr.cells[5].innerText || 0) || 0;
+      if (tr && tr.cells && tr.cells[4]) {
+        totalQty += parseInt(tr.cells[4].innerText || 0) || 0;
       } else {
         totalQty += parseInt(inp.dataset.expectedQty || 0) || 0;
       }
@@ -3762,7 +3898,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('#delinkPanelTableBody tr.delink-row-disabled').forEach(function(tr) {
       // Skip if already has a validated input (already counted above)
       if (tr.querySelector('.split-scan-input.validated')) return;
-      var delinkQtyCell = tr.cells && tr.cells[5];
+      var delinkQtyCell = tr.cells && tr.cells[4];
       var delinkQty = delinkQtyCell ? parseInt(delinkQtyCell.innerText || 0) || 0 : 0;
       if (delinkQty > 0) totalQty += delinkQty;
     });
@@ -4242,7 +4378,8 @@ document.addEventListener('DOMContentLoaded', function () {
             var inp = tr.querySelector('.split-scan-input.validated');
             var isAllocated = tr.classList.contains('delink-row-disabled');
             if (!inp && !isAllocated) return;
-            var delinkQtyCell = tr.cells && tr.cells[5]; // Delink Qty column (index 5)
+            // Column layout: 0=#, 1=checkbox, 2=Model, 3=Orig, 4=Delink, 5=Excess, 6=Scan Tray, 7=Status
+            var delinkQtyCell = tr.cells && tr.cells[4]; // Delink Qty column (index 4)
             var delinkQty = delinkQtyCell ? parseInt(delinkQtyCell.innerText || 0) || 0 : 0;
             if (delinkQty > 0) domLoaded += delinkQty;
           });
@@ -5608,13 +5745,8 @@ document.addEventListener('DOMContentLoaded', function () {
 function clearJigUserInputs() {
   console.log('[CLEAR] Starting full state reset...');
 
-  // 1. Jig ID (user types this)
-  var jigIdInput = document.getElementById('jigIdInput');
-  if (jigIdInput) { jigIdInput.value = ''; jigIdInput.classList.remove('jig-id-error', 'jig-id-valid'); }
-  // Also purge the value stashed for Add-Model round trips — otherwise a stale
-  // (or invalid) Jig ID saved before Clear was clicked gets silently restored
-  // into the now-empty field the next time the Add Model flow returns.
-  try { sessionStorage.removeItem('jig_id_add_model'); } catch (e) {}
+  // 1. Jig ID — Clear resets trays/quantities only; the Jig ID the user already
+  // entered/scanned must stay untouched (and its Add-Model round-trip stash with it).
   // Reset cycle count display
   var cycleEl = document.getElementById('modalNoOfCycle');
   if (cycleEl) cycleEl.textContent = '1';
@@ -5689,6 +5821,8 @@ function clearJigUserInputs() {
   // 5. Clear excess badges and messages (keep tray list panels visible — inputs cleared above)
   var excessPanelQtyBadge = document.getElementById('excessPanelQtyBadge');
   if (excessPanelQtyBadge) excessPanelQtyBadge.innerText = '';
+  var jigPhaseMessage = document.getElementById('jigPhaseMessage');
+  if (jigPhaseMessage) jigPhaseMessage.style.display = 'none';
 
   // 6. Clear excess message
   var excessMsg = document.getElementById('excessMessage');
@@ -5885,7 +6019,9 @@ function clearCurrentEditingSession() {
     });
   }
 
-  // 11. Clear status badges
+  // 11. Clear phase message and status badges
+  const phaseMsg = document.getElementById('jigPhaseMessage');
+  if (phaseMsg) phaseMsg.innerHTML = '';
   const delinkStatsEl = document.getElementById('delinkStatsMessage');
   if (delinkStatsEl) delinkStatsEl.innerHTML = '';
 
@@ -6878,7 +7014,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const resolved = resolvePreviewImage(payload);
     if (!gallery) return;
     if (!resolved || !resolved.url) {
-      renderMessage(trigger, "Coming Soon");
+      renderMessage(trigger, "Image unavailable");
       return;
     }
     gallery.textContent = "";
@@ -6888,7 +7024,7 @@ document.addEventListener("DOMContentLoaded", function () {
     image.decoding = "async";
     image.style.cssText = "width:120px;height:120px;object-fit:contain;object-position:center;display:block;";
     image.addEventListener("error", function() {
-      renderMessage(trigger, "Coming Soon");
+      renderMessage(trigger, "Image unavailable");
     }, { once: true });
     gallery.appendChild(image);
   }
@@ -6921,7 +7057,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch(function(error) {
         console.error("[Jig Loading Pick] Model preview failed:", error);
-        renderMessage(trigger, "Coming Soon");
+        renderMessage(trigger, "Image unavailable");
       });
   }
 
@@ -8329,15 +8465,16 @@ if (window.jQuery) {
       var isTop = row.dataset.topTray === 'true';
 
       // Fallback: read from cells if data attrs not set
+      // Column layout (no Tray ID column — that's rendered as chips above the table):
+      // 0=#, 1=checkbox, 2=Model, 3=Orig, 4=Delink, 5=Excess, 6=Scan Tray, 7=Status
       if (origQty === 0 && delinkQty === 0) {
         var cells = row.querySelectorAll('td');
-        if (cells.length >= 7) {
-          origQty = parseInt(cells[4] ? cells[4].textContent : 0) || 0;
-          delinkQty = parseInt(cells[5] ? cells[5].textContent : 0) || 0;
-          excessQty = parseInt(cells[6] ? cells[6].textContent : 0) || 0;
+        if (cells.length >= 6) {
+          origQty = parseInt(cells[3] ? cells[3].textContent : 0) || 0;
+          delinkQty = parseInt(cells[4] ? cells[4].textContent : 0) || 0;
+          excessQty = parseInt(cells[5] ? cells[5].textContent : 0) || 0;
         }
         if (!modelCode && cells[2]) modelCode = (cells[2].textContent || '').trim();
-        if (!trayId && cells[3]) trayId = (cells[3].textContent || '').trim();
       }
 
       if (!trayId) return;
@@ -8803,6 +8940,7 @@ if (window.jQuery) {
       });
 
     // Update UI elements after full restore
+    if (typeof window._updatePhaseMessage === 'function') window._updatePhaseMessage();
     if (typeof window._updateDelinkTotalBar === 'function') window._updateDelinkTotalBar();
     if (typeof window._updateDelinkStatsBadge === 'function') window._updateDelinkStatsBadge();
     if (typeof window.updateLoadedDisplay === 'function') window.updateLoadedDisplay();

@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 from django.shortcuts import render
 from django.db.models import OuterRef, Subquery, Exists, F, Sum, Count
+from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator
 from django.templatetags.static import static
 import math
@@ -449,9 +450,14 @@ class BrassAuditCompletedView(APIView):
 
             # Subquery: live next_process_module of the accepted child lot (PARTIAL splits)
             # For FULL_ACCEPT/FULL_REJECT: brass_audit_transition_accept_lot_id is NULL → returns None → falls back to own next_process_module
+            # Prefer the child's current_stage SSOT (kept live by every downstream module)
+            # so a child that progressed past Jig Loading (e.g. Nickel Wiping) is reflected
+            # here, not just its routing hint (next_process_module).
             child_accept_stage_subquery = TotalStockModel.objects.filter(
                 lot_id=OuterRef('brass_audit_transition_accept_lot_id')
-            ).values('next_process_module')[:1]
+            ).annotate(
+                _live_stage=Coalesce('current_stage', 'next_process_module', 'last_process_module')
+            ).values('_live_stage')[:1]
 
             # Subquery: has the child accept lot (PARTIAL) actually been worked on in Jig Loading?
             # Combined with own-lot check covers FULL_ACCEPT case too.
@@ -542,9 +548,15 @@ class BrassAuditCompletedView(APIView):
                 # A completed Brass Audit row is released only after the
                 # destination module has actually started work.  Merely routing
                 # it to Jig Loading (or back to Brass QC) remains Yet to Release.
-                current_stage_display = (
-                    stock_obj.current_stage
-                    or _compute_brass_audit_display_stage(stock_obj)
+                # A PARTIAL split freezes the parent row's own current_stage at the
+                # moment of split; the real progress lives on the accepted child lot
+                # (own lot_id, keeps advancing through Jig Loading/Nickel Wiping/etc).
+                # Compare both and show whichever is further along so the parent row
+                # never displays a stale stage once its child has moved on.
+                from modelmasterapp.stage_service import most_advanced_stage
+                current_stage_display = most_advanced_stage(
+                    stock_obj.current_stage or _compute_brass_audit_display_stage(stock_obj),
+                    getattr(stock_obj, 'child_accept_stage', None),
                 )
                 if getattr(stock_obj, 'brass_audit_hold_lot', False):
                     lot_status = 'On Hold'

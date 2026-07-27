@@ -813,6 +813,17 @@ def nq_toggle_verified(request):
                 return Response({'success': False, 'error': 'Lot not found'}, status=404)
             obj.nq_qc_accepted_qty_verified = True
             obj.save(update_fields=['nq_qc_accepted_qty_verified'])
+            # Qty verification is the real processing action for this stage —
+            # update the shared current_stage SSOT so all completed tables
+            # (Day Planning, Jig Loading, etc.) reflect "Nickel Wiping".
+            # obj.lot_id is this JigUnloadAfterTable row's own ID (UNLOT...),
+            # which never exists in TotalStockModel — the original lot IDs
+            # tracked by Day Planning/TotalStockModel are in combine_lot_ids
+            # (a jig can combine multiple original lots).
+            from modelmasterapp.stage_service import update_stock_stage, update_juat_stage
+            for original_lot_id in (obj.combine_lot_ids or []):
+                update_stock_stage(original_lot_id, 'Nickel Wiping')
+            update_juat_stage(lot_id, 'Nickel Wiping')
         logger.info("[nq_toggle_verified] lot=%s user=%s", lot_id, request.user)
         return Response({'success': True, 'last_process_module': obj.last_process_module or ''})
     except Exception as e:
