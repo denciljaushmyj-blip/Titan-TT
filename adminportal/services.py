@@ -25,7 +25,10 @@ USER_GROUP_NAMES_CACHE_TTL = 300
 # process via DatabaseCache (see CACHES['permissions'] in settings.py) — the
 # 'default' LocMemCache is per-process and would let one worker's
 # invalidate_user_modules_cache() call go unseen by the others.
-_permissions_cache = caches['permissions']
+try:
+    _permissions_cache = caches['permissions']
+except Exception:
+    _permissions_cache = cache
 MODULE_REGISTRY_CACHE_KEY = 'adminportal_module_registry_seeded_v4'
 MODULE_REGISTRY_NAMES = [entry['name'] for entry in MODULE_REGISTRY]
 
