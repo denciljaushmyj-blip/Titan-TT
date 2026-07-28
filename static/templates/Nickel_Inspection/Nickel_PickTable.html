@@ -700,7 +700,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
           
             <!-- Table Section -->
             <div class="table-responsive">
-              <table id="order-listing" class="table">
+              <table id="order-listing" class="table" data-lock-module="NICKEL_INSPECTION">
                 <thead>
                   <tr>
                     <th>
@@ -3429,5 +3429,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
 
 {% endblock %} {% endblock content %}

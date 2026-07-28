@@ -17,7 +17,7 @@
 .model-image-tooltip{
   transform: translateX(-25%) !important;
   top: 45% !important;
-  z-index: 500000 !important; /* high so it sits above table & scrollbar */
+  z-index: 10010 !important; /* high so it sits above table & scrollbar */
 
 }
 
@@ -157,8 +157,7 @@
     display: none !important;
   }
 }
-
- /* Add to your CSS file for Excel-like grid lines */
+/* Add to your CSS file for Excel-like grid lines */
 .table-bordered th, .table-bordered td {
   border: 1px solid #d9dedf !important;
 }
@@ -214,19 +213,19 @@ thead th {
   max-width: 100px;
 } /* Plating Color */
 #order-listing th:nth-child(6) {
-  min-width: 100px;
-  max-width: 110px;
+  min-width: 75px;
+  max-width: 80px;
 } /* Category */
 #order-listing th:nth-child(7) {
   min-width: 85px;
   max-width: 95px;
 } /* Polish Finish */
 #order-listing th:nth-child(8) {
-  min-width: 110px;
+  min-width: 85px;
   max-width: 110px;
 } /* Version */
 #order-listing th:nth-child(9) {
-  min-width: 105px;
+  min-width: 80px;
   max-width: 105px;
 } /* Tray Cate-Capacity */
 #order-listing th:nth-child(10) {
@@ -262,7 +261,7 @@ thead th {
   max-width: 100px;
 } /* Remarks */
 #order-listing th:nth-child(18) {
-  min-width: 100px;
+  min-width: 110px;
   max-width: 110px;
 }
 
@@ -453,6 +452,8 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   max-width: 140px; /* Increased width  110 - old value*/
 }
 
+/* ...existing code... */
+
 /* Prevent sticky columns from overlapping sticky header */
 #order-listing th:nth-child(-n + 3) {
   z-index: 12;
@@ -565,6 +566,10 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
     grid-template-columns: 30px 1fr 70px 90px !important;
   }
 }
+
+/* ====================================================
+   UNIFIED Nickel Wiping Zone I ACTION BUTTON THEME (matches Brass QC)
+   ==================================================== */
 .btn-accept-is {
   background-color: #1ba878 !important;
   color: #ffffff !important;
@@ -591,6 +596,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   cursor: not-allowed !important;
   pointer-events: none !important;
 }
+
 .btn-reject-is {
   background-color: #e57373 !important;
   color: #ffffff !important;
@@ -617,6 +623,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   cursor: not-allowed !important;
   pointer-events: none !important;
 }
+
 .nq-reject-modal-shell {
   width: 1120px;
   max-width: 98vw;
@@ -659,6 +666,17 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
   min-width: 0;
   width: 100%;
 }
+
+/* ================================================================
+   NICKEL WIPING ZONE 1 — model hover trigger positioning context
+   (Trigger must stay position:relative so the tooltip's position:
+   absolute anchors correctly. Appearance now matches Day Planning
+   via inline styles on the tooltip markup itself — see below.)
+   ================================================================ */
+.content-wrapper .model-hover-trigger {
+  position: relative !important;
+}
+
 </style>
 
 <div class="content-wrapper">
@@ -668,21 +686,21 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
       <div class="card">
         <div class="card-body" style="padding-bottom:12px;">
           <div class="mb-4" style="position: relative;">
-            <h5 class="text-left mt-0 mb-0 d-inline-block" style="font-weight:700;">Nickel Audit Pick Table - Zone II
-              <!--<button type="button" class="btn btn-primary btn-sm ms-3" id="scanButton"
+            <h5 class="text-left mt-0 mb-0 d-inline-block" style="font-weight:700;">Nickel Wiping Pick Table Zone I
+              <button type="button" class="btn btn-primary btn-sm ms-3" id="scanButton"
                       style="background-color: #028084; border-color: #028084; font-weight: 600; vertical-align: middle;">
                 <i class="fa fa-qrcode" style="margin-right: 6px;"></i>
                 Scan
-              </button> -->
+              </button>
               <span id="scanStatusMessage" style="display: none; margin-left: 12px; vertical-align: middle; color: #28a745; font-size: 15px; font-weight: 700;">PLEASE SCAN</span>
             </h5>
             <input type="text" id="scanHiddenInput" style="position: absolute; left: -9999px; opacity: 0;" autocomplete="off" />
           </div>
 
-         
+          
             <!-- Table Section -->
             <div class="table-responsive">
-              <table id="order-listing" class="table" data-lock-module="NICKEL_AUDIT_Z2">
+              <table id="order-listing" class="table">
                 <thead>
                   <tr>
                     <th>
@@ -693,7 +711,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Plating <br> Stk No
+                      Plating <br>Stk No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -751,35 +769,33 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                     <th style="display:none;">
                       Version <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
+                   
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- Row 1 - Highlighted -->
+                  <!-- Data rows -->
                    {% for data in master_data %}
-<tr class="highlighted-tray-scan" 
-    data-batch-id="{{data.batch_id}}" 
-    data-stock-lot-id="{{ data.stock_lot_id }}"
-    data-model-no="{{ data.plating_stk_no }}"
-    data-available-qty="{{ data.available_qty }}" 
-    data-brass-onhold-picking="{{ data.na_onhold_picking }}"
-    data-brass-batch-rejection="{{ data.na_qc_rejection|yesno:'True,False' }}"
-    data-brass-qc-accptance="{{ data.na_qc_acceptance|yesno:'True,False' }}"
-    data-brass-qc-rejection="{{ data.na_qc_rejection|yesno:'True,False' }}"
-    data-brass-qc-few-cases-accptance="{{ data.na_qc_few_cases_accptance|yesno:'True,False' }}"
-    data-accepted-ip-stock="{{ data.accepted_Ip_stock|yesno:'True,False' }}"
-    data-rejected-ip-stock="{{ data.rejected_ip_stock|yesno:'True,False' }}"
-    data-few-cases-accepted-ip-stock="{{ data.few_cases_accepted_Ip_stock|yesno:'True,False' }}"
-    data-brass-physical-qty="{{ data.na_physical_qty|default:0 }}"
-    data-brass-missing-qty="{{ data.na_missing_qty|default:0 }}"
-    data-brass-qc-accepted-qty-verified="{{ data.na_ac_accepted_qty_verified|yesno:'True,False' }}"
-    data-aql-limit="{{ data.aql_limit }}"
-    data-sample-qty="{{ data.sample_qty }}">
-                      <td {% if data.na_hold_lot %} class="row-inactive-blur"{% endif %}>
+                  <tr 
+                      data-stock-lot-id="{{ data.lot_id }}"
+                      data-model-no="{{ data.plating_stk_no }}"
+                      data-available-qty="{{ data.available_qty }}" 
+                      data-brass-onhold-picking="{{ data.nq_onhold_picking }}"
+                      data-brass-batch-rejection="{{ data.nq_qc_rejection|yesno:'True,False' }}"
+                      data-brass-qc-accptance="{{ data.nq_qc_accptance|yesno:'True,False' }}"
+                      data-brass-qc-rejection="{{ data.nq_qc_rejection|yesno:'True,False' }}"
+                      data-brass-qc-few-cases-accptance="{{ data.nq_qc_few_cases_accptance|yesno:'True,False' }}"
+                      data-accepted-ip-stock="{{ data.accepted_Ip_stock|yesno:'True,False' }}"
+                      data-rejected-ip-stock="{{ data.rejected_ip_stock|yesno:'True,False' }}"
+                      data-few-cases-accepted-ip-stock="{{ data.few_cases_accepted_Ip_stock|yesno:'True,False' }}"
+                      data-brass-physical-qty="{{ data.nq_physical_qty|default:0 }}"
+                      data-brass-missing-qty="{{ data.nq_missing_qty|default:0 }}"
+                      data-brass-qc-accepted-qty-verified="{{ data.nq_qc_accepted_qty_verified|yesno:'True,False' }}">
+                      <td {% if data.nq_hold_lot %} class="row-inactive-blur"{% endif %}>
                     <span style="display:flex; align-items:center; gap:3px;">
                       {% if can_hold_release %}
                         <!-- Admin users: Show toggle switch -->
                         <label class="hold-toggle-switch" style="margin-bottom:0;">
-                          {% if not data.na_hold_lot %}
+                          {% if not data.nq_hold_lot %}
                             <input type="checkbox" class="hold-toggle-btn" checked />
                             <span class="hold-slider"></span>
                           {% else %}
@@ -789,317 +805,454 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                         </label>
                         <!-- Hold remark icon -->
                         <span class="hold-remark-icon" 
-                              style="display:{% if data.na_hold_lot or data.na_release_lot or data.na_holding_reason or data.brass_audit_release_reason %}inline-block{% else %}none{% endif %}; cursor:pointer;" 
-                              title="{% if data.na_holding_reason %}Holding Reason: {{ data.na_holding_reason }}{% endif %}{% if data.na_holding_reason and data.brass_audit_release_reason %}&#10;{% endif %}{% if data.brass_audit_release_reason %}Release Reason: {{ data.brass_audit_release_reason }}{% endif %}">
-                          {% if data.na_hold_lot or data.na_release_lot or data.na_holding_reason or data.brass_audit_release_reason %}
+                              style="display:{% if data.nq_hold_lot or data.nq_release_lot or data.nq_holding_reason or data.nq_release_reason %}inline-block{% else %}none{% endif %}; cursor:pointer;" 
+                              title="{% if data.nq_holding_reason %}Holding Reason: {{ data.nq_holding_reason }} (by {{ data.nq_hold_by }} on {{ data.nq_hold_at }}){% endif %}{% if data.nq_holding_reason and data.nq_release_reason %}&#10;{% endif %}{% if data.nq_release_reason %}Release Reason: {{ data.nq_release_reason }} (by {{ data.nq_release_by }} on {{ data.nq_release_at }}){% endif %}">
+                          {% if data.nq_hold_lot or data.nq_release_lot or data.nq_holding_reason or data.nq_release_reason %}
                             <img src="{% static 'assets/icons/view2.png' %}" alt="Remark" style="width:12px; height:12px;" />
                           {% endif %}
                         </span>
                       {% else %}
                         <!-- Non-admin: Only show view icon if there's a holding/release reason -->
-                        {% if data.na_hold_lot or data.na_release_lot or data.na_holding_reason or data.brass_audit_release_reason %}
+                        {% if data.nq_hold_lot or data.nq_release_lot or data.nq_holding_reason or data.nq_release_reason %}
                           <span class="hold-remark-icon" 
                                 style="display:inline-block; cursor:pointer;" 
-                                title="{% if data.na_holding_reason %}Holding Reason: {{ data.na_holding_reason }}{% endif %}{% if data.na_holding_reason and data.brass_audit_release_reason %}&#10;{% endif %}{% if data.brass_audit_release_reason %}Release Reason: {{ data.brass_audit_release_reason }}{% endif %}">
+                                title="{% if data.nq_holding_reason %}Holding Reason: {{ data.nq_holding_reason }} (by {{ data.nq_hold_by }} on {{ data.nq_hold_at }}){% endif %}{% if data.nq_holding_reason and data.nq_release_reason %}&#10;{% endif %}{% if data.nq_release_reason %}Release Reason: {{ data.nq_release_reason }} (by {{ data.nq_release_by }} on {{ data.nq_release_at }}){% endif %}">
                             <img src="{% static 'assets/icons/view2.png' %}" alt="View Reason" style="width:18px; height:18px;" />
                           </span>
                         {% endif %}
                       {% endif %}
                       <span class="sno-value">{{ page_obj.start_index|add:forloop.counter0 }}</span>
                     </span>
-                    {% if data.na_qc_acceptance or data.send_brass_qc %}
-                      <i class="fa fa-info-circle" style="color: #028084; font-size:13px;" data-bs-toggle="tooltip" data-placement="right" data-bs-original-title="IQF"></i>
+                    {% if data.send_to_nickel_brass %}
+                      <i class="fa fa-times-circle" style="color: #028084; font-size:13px;" data-bs-toggle="tooltip" data-placement="right" data-bs-original-title="Audit"></i>
                       {% endif %}
                   </td>                     
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %} style="white-space:normal;word-break:break-all;">
-                        {{ data.nq_last_process_date_time|date:"d-M-y" }}<br>
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %} style="white-space:normal;word-break:break-all;">
+                      {% if data.send_to_nickel_brass %}
+                        {{ data.na_last_process_date_time|date:"d-M-y" }}<br>
                         <span style="display:inline-block; margin-top:4px;word-break: break-all;">
-                          {{ data.nq_last_process_date_time|date:"h:i A" }}
+                          {{ data.na_last_process_date_time|date:"h:i A" }}
                         </span>
-                     
+                      {% else %}
+                        {{ data.last_process_date_time|date:"d-M-y" }}<br>
+                        <span style="display:inline-block; margin-top:4px;word-break: break-all;">
+                          {{ data.last_process_date_time|date:"h:i A" }}
+                        </span>
+                      {% endif %}
                     </td>
-        <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
+                    <!-- Col 3: Plating Stk No -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
                       <span class="model-hover-trigger" data-plating-stk-no="{{ data.plating_stk_no }}" style="cursor: pointer; word-break: break-all;">
                         {{ data.plating_stk_no|highlight_plating_color|safe_html }}
-                        <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s; min-width: 220px;">
-                          
-                          <!-- Header with Info and Close buttons -->
-                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <button type="button" class="info-btn" style="background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
-                               Info
-                            </button>
-                            <button type="button" class="close-btn" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
-                               Close
-                            </button>
+                        <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 48px 18px 18px; z-index: 10010; display: flex; justify-content:center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; box-sizing:border-box;">
+
+                          <button class="close-btn" type="button" style="position:absolute; top:14px; right:16px; z-index:2; background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                             Close
+                          </button>
+
+                          <button type="button" class="info-btn" style="position:absolute; top:14px; left:16px; z-index:2; background: #007bff; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                             Info
+                          </button>
+
+                          <button class="img-scroll-left" style="display:none; background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
+
+                          <div class="img-gallery" style="display: flex; justify-content: center; align-items: center; overflow: hidden; width: 260px; height: 210px; min-height: 210px; box-sizing:border-box;">
+                            <span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>
                           </div>
-                          <!-- Image gallery section -->
-                          <div style="display: flex; align-items: center; gap: 8px;">
-                            <!-- Hide scroll buttons since only one image is shown -->
-                            <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px; justify-content: center; align-items: center;">
-                              <span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>
-                            </div>
-                          </div>
+
+                          <button class="img-scroll-right" style="display:none; background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
                         </div>
                       </span>
                     </td>
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                      {% if not data.na_qc_acceptance and not data.na_qc_rejection and not data.na_accepted_tray_scan_status and not data.na_qc_few_cases_accptance and data.na_ac_accepted_qty_verified %}
-                        <a href="#" class="delete-batch-btn" title="Delete" data-batch-id="{{ data.batch_id }}" data-stock-lot-id="{{ data.stock_lot_id }}">
-                          <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 20px; margin-right: 8px; height: auto" />
-                        </a>
+                    <!-- Col 4: Action -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
+                      
+                      {% if not data.nq_qc_accptance and not data.nq_qc_rejection and not data.nq_accepted_tray_scan_status and not data.nq_qc_few_cases_accptance and data.nq_qc_accepted_qty_verified %}                       
+
+                      <a href="#" class="delete-batch-btn" title="Delete" data-batch-id="{{ data.batch_id }}" data-stock-lot-id="{{ data.lot_id }}">
+                        <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 20px; margin-right: 8px; height: auto" />
+                      </a>
                       {% else %}
+
                         <span title="Delete Disabled" style="opacity: 0.5; pointer-events: none;">
                           <img src="{% static 'assets/icons/bin.png' %}" alt="Delete Disabled" style="width: 20px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);" />
                         </span>
                       {% endif %}
-                      {% if data.na_onhold_picking or data.na_draft %}
-                        <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
-                                style="opacity: 0.6; cursor: not-allowed; pointer-events: none;"
-                                disabled>Accept</button>
-                        {% if data.is_delink_only %}
-                          <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is{% if data.na_draft %} draft-resume-btn{% endif %}"
-                                  data-stock-lot-id="{{ data.stock_lot_id }}"
-                                  data-batch-id="{{ data.batch_id }}"
-                                  data-is-delink-only="false">Set Delink</button>
-                        {% else %}
-                          <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is{% if data.na_draft %} draft-resume-btn{% endif %}"
-                                  data-stock-lot-id="{{ data.stock_lot_id }}"
-                                  data-batch-id="{{ data.batch_id }}"
-                                  data-is-delink-only="false">Set Top Tray</button>
-                        {% endif %}
-                      {% elif data.na_qc_rejection or data.na_qc_few_cases_accptance %}
-                        <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
-                                style="opacity: 0.6; cursor: not-allowed; pointer-events: none;" disabled>Accept</button>
-                        <span class="btn btn-social-icon-text btn-youtube btn-reject-is"
-                              style="opacity: 0.8; cursor: not-allowed; pointer-events: none;">Rejected</span>
-                      {% else %}
+                      {% if data.iqf_acceptance %}
+                        <!-- IQF Acceptance - Show buttons as ACTIVE/CLICKABLE -->
                         <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
                                 data-lot-id="{{ data.stock_lot_id }}"
-                                {% if not data.na_ac_accepted_qty_verified %}disabled{% endif %}>Accept</button>
-                        <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is"
-                                data-stock-lot-id="{{ data.stock_lot_id }}"
+                          {% if not data.nq_qc_accepted_qty_verified %}disabled{% endif %}>
+                         Accept
+                        </button>
+                        <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is{% if data.nq_draft %} draft-resume-btn{% endif %}"
+                                data-stock-lot-id="{{ data.lot_id }}"
+                                data-batch-id="{{ data.batch_id }}">
+                          Reject
+                        </button>
+                        {% elif data.nq_onhold_picking %}
+                          <!-- Brass Draft Picking -->
+                          <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
+                                  style="opacity: 0.6; cursor: not-allowed; pointer-events: none;"
+                                  data-lot-id="{{ data.stock_lot_id }}"
+                                  disabled>
+                           Accept
+                          </button>
+                          <!-- ✅ UPDATED: Conditional button text and styling -->
+                        {% if data.nq_onhold_picking %}
+                          {% if data.is_delink_only %}
+                            <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn{% if data.nq_draft %} draft-resume-btn{% endif %}"
+                                    style="background-color: #e57373;"
+                                    data-stock-lot-id="{{ data.lot_id }}"
+                                    data-batch-id="{{ data.batch_id }}"
+                                    data-is-delink-only="false">
+                              Set Delink
+                            </button>
+                          {% else %}
+                            <!-- Normal case: Some pieces available for top tray -->
+                            <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn{% if data.nq_draft %} draft-resume-btn{% endif %}"
+                                    style="background-color: #e57373;"
+                                    data-stock-lot-id="{{ data.lot_id }}"
+                                    data-batch-id="{{ data.batch_id }}"
+                                    data-is-delink-only="false">
+                              Set Top Tray
+                            </button>
+                          {% endif %}
+                        {% endif %}
+
+                      {% elif data.send_to_nickel_ip %}
+                        <!-- Brass QC Acceptance (disabled) -->
+                        <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
+                                data-lot-id="{{ data.stock_lot_id }}"
+                          {% if not data.nq_qc_accepted_qty_verified %}disabled{% endif %}>
+                         Accept
+                        </button>
+                        <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is{% if data.nq_draft %} draft-resume-btn{% endif %}"
+                                data-stock-lot-id="{{ data.lot_id }}"
                                 data-batch-id="{{ data.batch_id }}"
-                                {% if not data.na_ac_accepted_qty_verified %}disabled{% endif %}>Reject</button>
+                                {% if not data.nq_qc_accepted_qty_verified and not data.nq_draft %}disabled{% endif %}>
+                          Reject
+                        </button>
+
+                      {% elif data.nq_onhold_picking %}
+                        <!-- Brass Draft Picking -->
+                        <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
+                                style="opacity: 0.6; cursor: not-allowed; pointer-events: none;"
+                                data-lot-id="{{ data.stock_lot_id }}"
+                                disabled>
+                         Accept
+                        </button>
+                        <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is{% if data.nq_draft %} draft-resume-btn{% endif %}"
+                                data-stock-lot-id="{{ data.lot_id }}"
+                                data-batch-id="{{ data.batch_id }}">
+                          Reject
+                        </button>
+
+                      {% elif data.nq_qc_rejection or data.nq_qc_few_cases_accptance %}
+                        <!-- Brass QC Rejection or Few Cases Acceptance (disabled) -->
+                        <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
+                                style="opacity: 0.6; cursor: not-allowed; pointer-events: none;"
+                                disabled>
+                         Accept
+                        </button>
+                        <span class="btn btn-social-icon-text btn-youtube btn-reject-is"
+                              style="opacity: 0.8; cursor: not-allowed; pointer-events: none;">
+                          Rejected
+                        </span>
+
+                      {% else %}
+                        <!-- Default state - Both buttons enabled -->
+                        <button type="button" class="btn btn-social-icon-text btn-twitter btn-accept-is"
+                                data-lot-id="{{ data.lot_id }}"
+                                {% if not data.nq_qc_accepted_qty_verified %}disabled{% endif %}>
+                         Accept
+                        </button>
+                        <button type="button" class="btn btn-social-icon-text btn-youtube tray-scan-btn btn-reject-is{% if data.nq_draft %} draft-resume-btn{% endif %}"
+                                data-stock-lot-id="{{ data.lot_id }}"
+                                data-batch-id="{{ data.batch_id }}"
+                                {% if not data.nq_qc_accepted_qty_verified and not data.nq_draft %}disabled{% endif %}>
+                          Reject
+                        </button>
                       {% endif %}
-                      <a href="#"
-                         title="View"
-                         class="text-primary tray-scan-btn-BQ-view tray-scan-btn-Jig"
-                         style="text-decoration: underline"
-                         data-stock-lot-id="{{ data.stock_lot_id }}"
-                         data-batch-id="{{ data.batch_id }}"
-                         data-model-no="{{ data.plating_stk_no }}"
-                         data-plating-stk-no="{{ data.plating_stk_no }}"
-                         data-no-of-trays="{{ data.no_of_trays }}"
-                         data-tray-capacity="{{ data.tray_capacity|default:'0' }}"
-                         data-total-batch-quantity="{{ data.display_accepted_qty|default:0 }}"
-                         data-brass-missing-qty="{{ data.na_missing_qty|default:0 }}">
-                        <img src="{% static 'assets/icons/view.png' %}" alt="View" style="width: 20px; margin-right: 8px; height: auto; cursor:pointer;" />
-                      </a>
+                      <!-- Eye icon to view submitted "Tray Scan Table" -->
+                          <a href="#"
+                          title="View"
+                          class="text-primary tray-scan-btn-BQ-view tray-scan-btn-Jig"
+                          style="text-decoration: underline"
+                          data-stock-lot-id="{{ data.lot_id }}"
+                          data-batch-id="{{ data.batch_id }}"
+                          data-model-no="{{ data.plating_stk_no }}"
+                          data-no-of-trays="{{ data.no_of_trays }}"
+                          data-tray-capacity="{{ data.tray_capacity|default:'0' }}"
+                          data-moved-to-d-picker="{{ data.Moved_to_D_Picker }}"
+                          data-model-image="{{ data.model_images.0|default:'' }}"
+                          data-plating-stk-no="{{ data.plating_stk_no }}"
+                          data-tray-qty-list="{{ data.tray_qty_list|default:'[]'|safe }}"
+                            data-total-batch-quantity="{{ data.display_accepted_qty|default:0 }}"
+                            data-brass-missing-qty="{{ data.nq_missing_qty|default:0 }}">
+
+                          <img src="{% static 'assets/icons/view.png' %}"
+                              alt="View"
+                              style="width: 20px; margin-right: 8px; height: auto; cursor:pointer;" />
+                        </a>
                     </td>
-                    <!-- No of Trays -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{data.no_of_trays}}</td>
-                    <!-- Lot Qty -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
+                    <!-- Col 6: No of Trays -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>{{data.no_of_trays}}</td>
+                    <!-- Col 7: Lot Qty -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
                       <span class="lot-qty" style="min-width: 30px; text-align: right">{{ data.display_accepted_qty }}</span>
                       <span style="display: inline-flex; align-items: center; gap: 4px;">
-                        {% if not data.na_ac_accepted_qty_verified %}
+                        {% if not data.nq_qc_accepted_qty_verified %}
+                          <!-- Show checkbox before save -->
                           <input type="checkbox"
                             class="brass-checkbox"
-                            data-lot-id="{{ data.lot_id }}"
-                            style="width: 15px; height: 15px" />
-                        {% else %}
-                          <span style="display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:#0c8249;color:white;font-size:14px;font-weight:bold;margin-left:2px;">&#10003;</span>
+                            data-lot-id="{{ data.stock_lot_id }}"
+                            style="width: 15px; height: 15px"
+                            {% if data.nq_qc_accepted_qty_verified %}checked disabled{% endif %} />
+                          {% else %}
+                          <!-- Show green tick after save -->
+                          <span style="
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 19px;
+                            height: 19px;
+                            border-radius: 50%;
+                            background: #0c8249;
+                            color: white;
+                            font-size: 14px;
+                            font-weight: bold;
+                            margin-left: 2px;
+                          ">
+                            &#10003;
+                          </span>
                         {% endif %}
+                        <!-- <input type="text"
+                          class="missing-qty-input"
+                          value="{{ data.nq_missing_qty|default_if_none:'' }}"
+                          style="width: 36px; padding: 1px 3px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px;"
+                          {% if data.nq_qc_accepted_qty_verified %}disabled{% endif %} /> -->
                       </span>
                     </td>
-                    <!-- Accept Qty -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                        {{ data.na_qc_accepted_qty|default:0 }}
+                    <!-- Physical Qty column hidden per requirement
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
+                        {{ data.nq_physical_qty|default:0 }}
                     </td>
-                    <!-- Reject Qty -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
+                    -->
+                    <!-- Col 8: Accept Qty -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
+                        {{ data.nq_qc_accepted_qty|default:0 }}    
+                    </td>
+                    <!-- Col 9: Reject Qty -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
                         {{ data.brass_rejection_total_qty|default:0 }}
                     </td>
-                    <!-- Lot Status -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                      {% if data.na_onhold_picking %}
-                        <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-                            style="border: 1px solid #4997ac; background-color: #d1f2f3; color: #03425d; font-size: clamp(0.75rem, 2vw, 0.875rem); white-space: nowrap; padding: 5px;">
+                    <!-- Col 10: Lot Status -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
+                      {% if data.nq_onhold_picking or data.nq_draft %}
+                        <div
+                          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                          style="
+                            border: 1px solid #4997ac;
+                            background-color: #d1f2f3;
+                            color: #03425d;
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            white-space: nowrap;
+                            padding: 5px;
+                          "
+                        >
                           Draft
                         </div>
-                      {% elif data.na_hold_lot %}
-                        <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-                            style="border: 1px solid #dc3545; background-color: #f8d7da; color: #721c24; font-size: 13px; white-space: nowrap; padding: 5px;">
+                      {% elif data.nq_hold_lot %}
+                       <div
+                          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                          style="
+                            border: 1px solid #dc3545;
+                            background-color: #f8d7da;
+                            color: #721c24;
+                            font-size: 13px;
+                            white-space: nowrap;
+                            padding: 5px;
+                          "
+                        >
                           On Hold
                         </div>
-                      {% elif data.na_qc_rejection or data.na_qc_few_cases_accptance or data.na_qc_acceptance %}
+
+                      {% elif data.nq_qc_rejection or data.nq_qc_few_cases_accptance or data.nq_qc_accptance %}
                         <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                             style="border: 1px solid #0d5d17; background-color: #c5f9c2; color: #2f801b; font-size: 13px; white-space: nowrap; padding: 5px;">
                           Yet to Release
                         </div>
+                      
                       {% else %}
                         <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                             style="border: 1px solid #f9a825; background-color: #fff8e1; color: #b26a00; font-size:13px; white-space: nowrap; padding: 5px;">
                           Yet to Start
                         </div>
-                      {% endif %}
+                      {% endif %} 
                     </td>
-                    <!-- Current Stage -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
+                    <!-- Col 11: Current Stage -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
                       <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                            style="border: 1px solid #d1edf3; background-color: #d1edf3; color: #033b5d; font-size: 13px; white-space: nowrap; padding: 5px;">
                         {{ data.last_process_module|default:"N/A" }}
                       </div>
                     </td>
-                    <!-- Process Status -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
+                    <!-- Col 12: Process Status -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
                       <div class="d-flex">
-                        <div title="Qty Verify"
+                        <!-- Q: Green if nq_qc_accepted_qty_verified, else gray -->
+                        <div
+                          title="Tray Scan"
                           class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-                          style="width:25px;height:25px;background-color:{% if data.na_ac_accepted_qty_verified %}#0c8249{% else %}#bdbdbd{% endif %};color:white;font-weight:bold;line-height:20px;text-align:center;padding-top:1px;padding-right:1px;">
+                          style="
+                            width: 25px;
+                            height: 25px;
+                            background-color: {% if data.nq_qc_accepted_qty_verified %}#0c8249{% else %}#bdbdbd{% endif %};
+                            color: white;
+                            font-weight: bold;
+                            line-height: 20px;
+                            text-align: center;
+                            padding-top: 1px;
+                            padding-right: 1px;
+                          "
+                        >
                           Q
                         </div>
-                        <div title="QC"
+                        <!-- QC: Green if nq_qc_rejection or nq_qc_accptance, else gray -->
+                        <div
+                          title="Tray Scan"
                           class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-                          style="width:25px;height:25px;background:{% if data.na_onhold_picking or data.na_draft %}linear-gradient(to right, #0c8249 50%, #bdbdbd 50%){% elif data.na_qc_rejection or data.na_qc_acceptance or data.na_qc_few_cases_accptance %}#0c8249{% else %}#bdbdbd{% endif %};color:white;font-weight:bold;line-height:20px;text-align:center;padding-top:1px;padding-right:1px;">
+                          style="
+                            width: 25px;
+                            height: 25px;
+                            background:
+                              {% if data.nq_onhold_picking or data.nq_draft %}
+                                linear-gradient(to right, #0c8249 50%, #bdbdbd 50%);
+                              {% elif data.nq_qc_rejection or data.nq_qc_accptance or data.nq_qc_few_cases_accptance %}
+                                #0c8249;
+                              {% else %}
+                                #bdbdbd;
+                              {% endif %}
+                            color: white;
+                            font-weight: bold;
+                            line-height: 20px;
+                            text-align: center;
+                            padding-top: 1px;
+                            padding-right: 1px;
+                          "
+                        >
                           QC
                         </div>
                       </div>
                     </td>
-                    <!-- Polishing Stk No -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}</td>
-                    <!-- Plating Color -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{ data.plating_color }}</td>
-                    <!-- Polish Finish -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{data.polish_finish}}</td>
-                    <!-- Input Source -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{{data.location__location_name}}</td>
+                    <!-- Col 13: Polishing Stk No -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>{{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}</td>
+                    <!-- Col 14: Plating Color -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>{{ data.plating_color }}</td>
+                    <!--<td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>{{ data.category }}</td>-->
+                    <!-- Col 15: Polish Finish -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>{{data.polish_finish}}</td>
+                    <!-- Hidden Version -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %} style="display:none">{{data.version__version_name}}</td>
+                    <!-- Col 16: Input Source -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>{{data.location__location_name}}</td>
                     <!-- Type of Input -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>{% include 'partials/_type_of_input_cell.html' with type_of_input=data.type_of_input %}</td>
-                    <!-- Remarks -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %}>
-                      <a href="#" title="Add Remark" class="remark-tooltip-trigger"
-                        style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: pointer;">
-                        <img src="{% static 'assets/icons/chat_icon.png' %}" alt="Chat"
-                          style="width: 20px; height: 20px; {% if data.na_pick_remarks %}filter: grayscale(0) brightness(1.1) sepia(1) hue-rotate(80deg) saturate(3) contrast(1.2); opacity: 1;{% endif %}" />
-                        <div class="remark-tooltip"
-                          style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;">
-                          <textarea placeholder="Type your remark..."
-                            style="width: 85%; height: 40px; resize: vertical; border: 1px solid #ccc; padding: 5px; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px;"
-                            {% if data.na_pick_remarks %}readonly{% endif %}>{{ data.na_pick_remarks|default_if_none:"" }}</textarea>
-                          <div style="text-align: right; margin-top: -35px">
-                            {% if not data.na_pick_remarks %}
-                              <button type="button" class="remark-send-btn" style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;"><i class="fa fa-send"></i></button>
-                            {% else %}
-                              <div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;">
-                                <i class="fa fa-info-circle" style="margin-right: 6px;"></i>Remark already saved and cannot be edited.
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>{% include 'partials/_type_of_input_cell.html' with type_of_input=data.type_of_input %}</td>
+                    <!-- Col 17: Remarks -->
+                    <td {% if data.nq_hold_lot %} class="row-inactive-blur" {% endif %}>
+
+                      <!-- VoiceRec with tooltip (audio remark) -->
+                          <a href="#" title="Add Audio Remark" class="remark-tooltip-trigger" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; position: relative; cursor: pointer;">
+                            <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec" style="width: 20px; height: 20px"/>
+                            <div class="remark-tooltip" style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 265px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 10px; z-index: 1000;">
+                              <!-- Audio recording UI placeholder -->
+                              <div style="display: flex; align-items: center; gap: 10px;">
+                                <button type="button" style="background: #28a745; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; display: flex; align-items: center; justify-content: center;">
+                                  <i class="fa fa-microphone"></i>
+                                </button>
+                                <span style="font-size: 14px; color: #333;">Hold to record audio</span>
+                                  <div style="text-align: right; margin-top: 10px;">
+                                <button type="button" style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                  <i class="fa fa-send"></i>
+                                </button>
                               </div>
-                            {% endif %}
-                          </div>
-                        </div>
-                      </a>
-                      <a href="#"
-                         title="{{ data.nq_pick_remarks|default:'No previous remark available.' }}"
-                         class="prev-remark-tooltip-trigger"
-                         style="margin-left: 5px; color: #007bff; font-size: 16px; display: inline-flex; align-items: center;">
-                        <i class="fa fa-info-circle"></i>
-                      </a>
+                              </div>
+                            
+                            </div>
+                          </a>
+                          <a
+                              href="#"
+                              title="{% if data.nq_pick_remarks %}{% else %}Add Remark{% endif %}"
+                              class="remark-tooltip-trigger"
+                              data-jig-lot-id="{{ data.lot_id }}"
+                              style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: pointer;"
+                            >
+                              <img
+                                src="{% static 'assets/icons/chat_icon.png' %}"
+                                alt="Chat"
+                                style="width: 20px; height: 20px; {% if data.nq_pick_remarks %}filter: grayscale(0) brightness(1.1) sepia(1) hue-rotate(80deg) saturate(3) contrast(1.2); opacity: 1;{% endif %}"
+                              />
+                              <div
+                                class="remark-tooltip"
+                                style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;"
+                              >
+                                <textarea
+                                  placeholder="Type your remark..."
+                                  style="width: 85%; height: 40px; resize: vertical; border: 1px solid #ccc; padding: 5px; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px;"
+                                  {% if data.nq_pick_remarks %}readonly{% endif %}
+                                >{{ data.nq_pick_remarks|default_if_none:"" }}</textarea>
+                                <div style="text-align: right; margin-top: -35px">
+                                  {% if not data.nq_pick_remarks %}
+                                  <button
+                                    type="button"
+                                    class="remark-send-btn"
+                                    style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;"
+                                  >
+                                    <i class="fa fa-send"></i>
+                                  </button>
+                                  {% else %}
+                                  <div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;">
+                                    <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
+                                    Remark already saved and cannot be edited.
+                                  </div>
+                                  {% endif %}
+                                </div>
+                              </div>
+                          </a>
+                          <a href="#"
+                             title="{{ data.previous_module_remark|default:'No previous remark available.' }}"
+                             class="prev-remark-tooltip-trigger"
+                             style="margin-left: 5px; color: #007bff; font-size: 16px; display: inline-flex; align-items: center;">
+                            <i class="fa fa-info-circle"></i>
+                          </a>
+                          <a href="#" class="remark-history-btn" data-lot-id="{{ data.stock_lot_id }}" title="View full remark history" style="margin-left: 5px; color: #6c757d; font-size: 15px; display: inline-flex; align-items: center;">
+                            <i class="fa fa-history"></i>
+                          </a>
+                 
                     </td>
-                    <!-- Version (hidden) -->
-                    <td {% if data.na_hold_lot %} class="row-inactive-blur" {% endif %} style="display:none">{{data.version__version_name}}</td>
+                   
                   </tr>
                   {% endfor%}
               
                 </tbody>
               </table>
-              <!-- ══════════ Nickel Audit Zone I REJECTION MODAL ══════════ -->
-              <div id="nickelAuditRejectModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:20000; align-items:center; justify-content:center;">
-                <div class="nq-reject-modal-shell" style="background:#fff; border-radius:12px; width:1120px; max-width:98vw; max-height:90vh; overflow:auto; box-shadow:0 8px 32px rgba(0,0,0,0.22); position:relative;">
-                  <!-- Header -->
-                  <div style="padding:18px 24px 12px; border-bottom:1px solid #e8edf2;">
-                    <span id="nickelAuditRejectModalClose" style="position:absolute; top:10px; right:18px; font-size:22px; font-weight:bold; color:#d9534f; cursor:pointer;">&times;</span>
-                    <h5 style="margin:0 0 8px; color:#028084; font-weight:700;">Nickel Audit Zone II - Rejection Window</h5>
-                    <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; font-size:13px;">
-                      <span>Plating Stk No: <strong id="naRejectModalPlatingStk" style="color:#028084;"></strong></span>
-                      <span>Total Lot Qty: <strong id="naRejectModalTotalQty" style="color:#e67e22;"></strong></span>
-                      <label style="margin-left:auto; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                        <input type="checkbox" id="naFullLotRejectionCb" />
-                        <span style="font-weight:600; color:#c62828;">Full Lot Rejection</span>
-                      </label>
-                    </div>
-                  </div>
-                  <!-- Rejection Reasons -->
-                  <div style="padding:14px 24px 0;">
-                    <h6 style="margin:0 0 8px; font-weight:600; color:#444;">Rejection Reasons</h6>
-                    <div id="naRejectReasonsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:0 16px;"></div>
-                    <div style="margin-top:10px; background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 14px; display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
-                      <span style="font-size:13px;">Total Reject Qty: <strong id="naRejectTotalQtyDisplay" style="color:#c62828; font-size:15px;">0</strong></span>
-                      <span style="font-size:13px;">Accept Qty: <strong id="naRejectRemainingQtyDisplay" style="color:#388e3c; font-size:15px;">0</strong></span>
-                      <span style="font-size:12px; color:#555; margin-left:auto;">Original Trays <span style="font-size:11px; color:#888;">(click to assign)</span></span>
-                      <button type="button" id="naGlobalClearAllBtn" style="background:#f5f5f5; border:1px solid #ccc; border-radius:4px; padding:3px 12px; font-size:11px; color:#666; cursor:pointer;">Clear All</button>
-                    </div>
-                  </div>
-                  <!-- Tray Allocation Section -->
-                  <div id="naTrayAllocationSection" style="display:none; padding:10px 24px;">
-                    <div style="margin-bottom:10px;">
-                      <div id="naOriginalTraysContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-                    </div>
-                    <div class="nq-alloc-grid">
-                      <div class="nq-alloc-col nq-alloc-reject">
-                        <h6 style="margin:0 0 4px; font-weight:600; color:#c62828; font-size:13px;">
-                          Reject Trays
-                          <span style="float:right; font-size:12px; color:#b71c1c;">Qty: <strong id="naRejectTotalQtyLabel">0</strong></span>
-                        </h6>
-                        <p style="margin:0 0 6px; font-size:10px; color:#999; font-style:italic;">Rejected -> Reports</p>
-                        <div id="naRejectSlotsContainer" class="nq-alloc-body"></div>
-                      </div>
-                      <div id="naDelinkSection" class="nq-alloc-col nq-alloc-delink" style="display:none;">
-                        <h6 style="margin:0 0 6px; font-weight:600; color:#f57c00; font-size:13px;">
-                          <i class="fa fa-unlink"></i> Delink Trays
-                        </h6>
-                        <p id="naRejectReuseInfo" style="margin:0 0 6px; font-size:11px; color:#e65100; display:none;"></p>
-                        <div id="naDelinkListContainer" class="nq-alloc-body" style="font-size:12px;"></div>
-                      </div>
-                      <div class="nq-alloc-col nq-alloc-accept">
-                        <h6 style="margin:0 0 4px; font-weight:600; color:#388e3c; font-size:13px;">
-                          Accept Trays (Scan only Top Tray)
-                          <span style="float:right; font-size:12px; color:#2e7d32;">Qty: <strong id="naAcceptTotalQtyLabel">0</strong></span>
-                        </h6>
-                        <p style="margin:0 0 6px; font-size:10px; color:#999; font-style:italic;">Accepted → Complete</p>
-                        <div id="naAcceptSlotsContainer" class="nq-alloc-body"></div>
-                      </div>
-                    </div>
-                    <div style="margin-top:8px; font-size:12px; display:flex; gap:16px; color:#555;">
-                      <span>Accepted: <strong id="naCombinedAcceptQty" style="color:#388e3c;">0</strong></span>
-                      <span>Rejected: <strong id="naCombinedRejectQty" style="color:#c62828;">0</strong></span>
-                      <span>Delinked: <strong id="naCombinedDelinkQty" style="color:#f57c00;">0</strong></span>
-                    </div>
-                  </div>
-                  <!-- Footer -->
-                  <div style="padding:12px 24px 18px; border-top:1px solid #e8edf2;">
-                    <textarea id="naRejectRemarksInput" maxlength="255" rows="2" placeholder="Enter remarks (optional, mandatory for full lot rejection)" style="width:100%; border:1px solid #ccc; border-radius:6px; padding:8px; font-size:13px; resize:none; margin-bottom:10px;" autocomplete="off"></textarea>
-                    <div id="naRejectModalError" style="color:#c62828; font-size:13px; min-height:18px; margin-bottom:6px;"></div>
-                    <div style="display:flex; justify-content:flex-end; gap:10px;">
-                      <button id="naDraftSaveBtn" type="button" style="background:#f0ad4e; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; font-weight:600; cursor:pointer;"><i class="fa fa-save"></i> Draft</button>
-                      <button id="naRejectSubmitBtn" type="button" style="background:#28a745; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; font-weight:600; cursor:pointer;">Submit</button>
-                      <button id="naRejectCancelBtn" type="button" style="background:#6c757d; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; cursor:pointer;">Cancel</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- ══════════ END Nickel Audit Zone I REJECTION MODAL ══════════ -->
 
-              <div
-                id="trayScanModal_DayPlanning"
-                class="tray-scan-modal-DayPlanning"
-                style="display:none"
-              >
+
+                                    <div
+  id="trayScanModal_DayPlanning"
+  class="tray-scan-modal-DayPlanning"
+  style="display:none"
+>
   <div class="tray-scan-modal-DayPlanning-content">
     <span id="closeTrayScanModal_DayPlanning" class="tray-scan-close-readonly">&times;</span>
     
     <div class="modal-top-header" style="display: flex; align-items: center; gap: 20px; padding-bottom: 10px;">
       <div class="user-profile" style="display: flex; align-items: center; gap: 8px">
-        <img id="modalUserImg_DayPlanning" src="/static/assets/images/imagePlaceholder.png" alt="Model Image" style="border-radius: 50%; width: 50px; height: 50px; object-fit: contain; object-position: center;" />
+        <div id="modalModelImages_DayPlanning" style="display: flex; gap: 6px;">
+            <!-- Model images will be injected here by JS -->
+            <img id="modalUserImg_DayPlanning" src="{% static 'assets/images/imagePlaceholder.png' %}" alt="Model Image" style="border-radius: 50%; width: 50px; height: 50px; object-fit: contain; object-position: center;" />
+          </div>  
         <!-- Model No and Lot Qty in same line -->
         <div style="display: flex; flex-direction: column; gap: 2px;">
           <div style="display: flex; align-items: center; gap: 15px;">
@@ -1110,19 +1263,17 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 
           </div>
                       <p style="margin: 0 0 0 2px;">
-              Lot Qty: <span id="modalLotQty" style="font-weight:bold; color:#e67e22;"></span> /
-              Missing Qty: <span id="modalMissingQty" style="font-weight:bold; color:#d32f2f;"></span> /
-              Physical Qty: <span id="modalPhysicalQty" style="font-weight:bold; color:#388e3c;"></span>
+              Lot Qty: <span id="modalLotQty" style="font-weight:bold; color:#e67e22;"></span>
+            
             </p>
         </div>
       </div>
     </div>
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
       <h5 style="text-align: center; margin: 0; flex: 1; font-weight: 600; color:#595959">
-        Nickel Audit - Tray Scan 
+        Nickel Wiping Zone I - Tray Scan 
       </h5>
       <button id="trayValidateBtn" type="button" style="display: flex; align-items: center; gap: 6px; background: #f5faff; border: 1px solid #023E4DCC; color: #023E4DCC; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 500; cursor: pointer;">
-        
         Tray Validate
       </button>
       <input id="trayValidateInput" type="text" placeholder="Enter validation info..." style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
@@ -1139,32 +1290,113 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
               <!-- Tray Scan Details Modal (Left Popup) -->
               <div id="trayScanModal" class="tray-scan-modal">
                 <div class="tray-scan-modal-content">
-                  <span id="closeTrayScanModal" class="tray-scan-close-readonly">&times;</span>
+                  <span id="closeTrayScanModal" class="tray-scan-close-readonly"
+                    >&times;</span
+                  >
                   <h3>
-                    Nickel Audit / <span id="trayScanModalHeaderModelNo" style="font-weight:bold; color:#028084;"></span> / Rejection Window
+                    Nickel Wiping Zone I / <span id="trayScanModalHeaderModelNo" style="font-weight:bold; color:#028084;"></span> / Rejection Window
                   </h3>
                   <p style="margin: 0 0 0 2px;">
                     Lot Qty: <span id="trayScanModalLotQty" style="font-weight:bold; color:#e67e22;"></span> /
                     Missing Qty: <span id="trayScanModalMissingQty" style="font-weight:bold; color:#d32f2f;"></span> /
                     Physical Qty: <span id="trayScanModalPhysicalQty" style="font-weight:bold; color:#388e3c;"></span>
-                  </p>
-                  <!-- ADD HERE -->
-                  <div class="aql-info" style="margin-bottom: 10px;">
-                    <span style="font-weight:600; color:#028084; font-size:13px;">AQL Limit:</span>
-                    <span id="trayScanModalAqlLimit" style="font-weight:bold; color:#e67e22; font-size:13px;"></span>
-                    &nbsp;|&nbsp;
-                    <span style="font-weight:600; color:#028084; font-size:13px;">Sample Qty:</span>
-                    <span id="trayScanModalSampleQty" style="font-weight:bold; color:#388e3c; font-size:13px;"></span>
-                  </div>
-                  <div id="trayScanDetails">
+                  </p>       
+                             <div id="trayScanDetails">
                     <!-- Dynamic content will be loaded here -->
                   </div>
                 </div>
               </div>
+              <!-- ══════════ Nickel Wiping Zone I REJECTION MODAL (Brass QC Style) ══════════ -->
+              <div id="nickelRejectModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:20000; align-items:center; justify-content:center;">
+                <div class="nq-reject-modal-shell" style="background:#fff; border-radius:12px; width:1120px; max-width:98vw; max-height:90vh; overflow:auto; box-shadow:0 8px 32px rgba(0,0,0,0.22); position:relative;">
+
+                  <!-- Header -->
+                  <div style="padding:18px 24px 12px; border-bottom:1px solid #e8edf2;">
+                    <span id="nickelRejectModalClose" style="position:absolute; top:10px; right:18px; font-size:22px; font-weight:bold; color:#d9534f; cursor:pointer;">&times;</span>
+                    <h5 style="margin:0 0 8px; color:#028084; font-weight:700;">Nickel Wiping Zone I - Rejection Window</h5>
+                    <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; font-size:13px;">
+                      <span>Plating Stk No: <strong id="nqRejectModalPlatingStk" style="color:#028084;"></strong></span>
+                      <span>Total Lot Qty: <strong id="nqRejectModalTotalQty" style="color:#e67e22;"></strong></span>
+                      <label style="margin-left:auto; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                        <input type="checkbox" id="nqFullLotRejectionCb" />
+                        <span style="font-weight:600; color:#c62828;">Full Lot Rejection</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Rejection Reasons — 2-column layout -->
+                  <div style="padding:14px 24px 0;">
+                    <h6 style="margin:0 0 8px; font-weight:600; color:#444;">Rejection Reasons</h6>
+                    <div id="nqRejectReasonsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:0 16px;">
+                    </div>
+                    <div style="margin-top:10px; background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 14px; display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+                      <span style="font-size:13px;">Total Reject Qty: <strong id="nqRejectTotalQtyDisplay" style="color:#c62828; font-size:15px;">0</strong></span>
+                      <span style="font-size:13px;">Accept Qty: <strong id="nqRejectRemainingQtyDisplay" style="color:#388e3c; font-size:15px;">0</strong></span>
+                      <span style="font-size:12px; color:#555; margin-left:auto;">Original Trays <span style="font-size:11px; color:#888;">(click to assign)</span></span>
+                    </div>
+                  </div>
+
+                  <!-- Tray Allocation Section (Reject + Delink + Accept) -->
+                  <div id="nqTrayAllocationSection" style="display:none; padding:10px 24px;">
+                    <div style="margin-bottom:10px;">
+                      <div id="nqOriginalTraysContainer" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+                    </div>
+                    <div class="nq-alloc-grid">
+                      <!-- REJECT Section -->
+                      <div class="nq-alloc-col nq-alloc-reject">
+                        <h6 style="margin:0 0 4px; font-weight:600; color:#c62828; font-size:13px;">
+                           Reject Trays
+                          <span style="float:right; font-size:12px; color:#b71c1c;">Qty: <strong id="nqRejectTotalQtyLabel">0</strong></span>
+                        </h6>
+                        <p style="margin:0 0 6px; font-size:10px; color:#999; font-style:italic;">Rejected -> Nickel Audit</p>
+                        <div id="nqRejectSlotsContainer" class="nq-alloc-body"></div>
+                      </div>
+                      <!-- Delink Section -->
+                      <div id="nqDelinkSection" class="nq-alloc-col nq-alloc-delink" style="display:none;">
+                        <h6 style="margin:0 0 6px; font-weight:600; color:#f57c00; font-size:13px;">
+                          <i class="fa fa-unlink"></i> Delink Trays
+                        </h6>
+                        <p id="nqRejectReuseInfo" style="margin:0 0 6px; font-size:11px; color:#e65100; display:none;"></p>
+                        <div id="nqDelinkListContainer" class="nq-alloc-body" style="font-size:12px;"></div>
+                      </div>
+                      <!-- ACCEPT Section -->
+                      <div class="nq-alloc-col nq-alloc-accept">
+                        <h6 style="margin:0 0 4px; font-weight:600; color:#388e3c; font-size:13px;">
+                          Accept Trays (Scan only Top Tray)
+                          <span style="float:right; font-size:12px; color:#2e7d32;">Qty: <strong id="nqAcceptTotalQtyLabel">0</strong></span>
+                        </h6>
+                        <p style="margin:0 0 6px; font-size:10px; color:#999; font-style:italic;">Accepted -> Nickel Audit</p>
+                        <div id="nqAcceptSlotsContainer" class="nq-alloc-body"></div>
+                      </div>
+                    </div>
+                    <!-- Summary -->
+                    <div style="margin-top:8px; font-size:12px; display:flex; gap:16px; color:#555;">
+                      <span>Accepted: <strong id="nqCombinedAcceptQty" style="color:#388e3c;">0</strong></span>
+                      <span>Rejected: <strong id="nqCombinedRejectQty" style="color:#c62828;">0</strong></span>
+                      <span>Delinked: <strong id="nqCombinedDelinkQty" style="color:#f57c00;">0</strong></span>
+                    </div>
+                  </div>
+
+                  <!-- Footer: Remarks + Buttons -->
+                  <div style="padding:12px 24px 18px; border-top:1px solid #e8edf2;">
+                    <textarea id="nqRejectRemarksInput" maxlength="255" rows="2" placeholder="Enter remarks (optional, mandatory for full lot rejection)" style="width:100%; border:1px solid #ccc; border-radius:6px; padding:8px; font-size:13px; resize:none; margin-bottom:10px;" autocomplete="off"></textarea>
+                    <div id="nqRejectModalError" style="color:#c62828; font-size:13px; min-height:18px; margin-bottom:6px;"></div>
+                    <div style="display:flex; justify-content:flex-end; gap:10px;">
+                      <button id="nqDraftSaveBtn" type="button" style="background:#f0ad4e; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; font-weight:600; cursor:pointer;"><i class="fa fa-save"></i> Draft</button>
+                      <button id="nqRejectSubmitBtn" type="button" style="background:#28a745; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; font-weight:600; cursor:pointer;">Submit</button>
+                      <button type="button" id="nqGlobalClearAllBtn" style="background:#f5f5f5; border:1px solid #ccc; border-radius:20px; padding:8px 22px; font-size:14px; color:#666; cursor:pointer;">Clear All</button>
+                      <button id="nqRejectCancelBtn" type="button" style="background:#6c757d; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; cursor:pointer;">Cancel</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <!-- ══════════ END Nickel Wiping Zone I REJECTION MODAL ══════════ -->
+
               <!-- New Popup Modal (Right Popup) -->
               <div id="newPopupModal" class="new-popup-modal">
                 <div class="tray-scan-modal-content">
-                  <span id="closeNewPopupModal" class="tray-scan-close-readonly"
+                  <span id="closeNewPopupModal" class="tray-scan-close"
                     >&times;</span
                   >
                   <!-- New top header container: title + user profile aligned left -->
@@ -1183,7 +1415,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                   <!-- Redo icon for clearing "tray ID" -->
                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                     <h5 style="text-align: center; margin: 0; flex: 1; font-weight: 600; color:#595959">
-                      Brass Qc - Accepted case tray scan table
+                      Nickel Wiping Zone I - Accepted case tray scan table
                     </h5>
                     <img
                       src="{% static 'assets/icons/redo2.png' %}"
@@ -1327,14 +1559,12 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 </div>
 </div>
        
-  {% block script %}
+{% block script %}
 
 
 <!-- Active table row highlight -->
 <script nonce="{{ csp_nonce }}">
-// Row highlight & position swap for tray-scan-btn-Jig (like DP_PickTable.html)
 document.addEventListener("DOMContentLoaded", function() {
-  // Add highlight style if not present
   if (!document.getElementById('dp-row-action-highlight-style')) {
     var style = document.createElement('style');
     style.id = 'dp-row-action-highlight-style';
@@ -1348,25 +1578,20 @@ document.addEventListener("DOMContentLoaded", function() {
     document.head.appendChild(style);
   }
 
-  let originalRowIndex = null;
   let movedRow = null;
   let placeholderRow = null;
 
-  // Function to restore row to original position
   function restoreRowPosition() {
     if (movedRow && placeholderRow && placeholderRow.parentNode) {
       placeholderRow.parentNode.insertBefore(movedRow, placeholderRow);
       placeholderRow.parentNode.removeChild(placeholderRow);
-      movedRow.classList.remove('dp-row-action-highlight');
-      movedRow = null;
-      placeholderRow = null;
-      originalRowIndex = null;
     }
-    // Also remove highlight from any row just in case
     document.querySelectorAll('tbody tr').forEach(function(row) {
       row.classList.remove('dp-row-action-highlight');
       row.classList.remove('highlighted-tray-scan');
     });
+    movedRow = null;
+    placeholderRow = null;
     if (window.GlobalShortcutManager && typeof window.GlobalShortcutManager.clear === 'function') {
       window.GlobalShortcutManager.clear();
     }
@@ -1377,90 +1602,587 @@ document.addEventListener("DOMContentLoaded", function() {
     } catch (e) {}
   }
 
-  document.querySelectorAll('.tray-scan-btn-Jig').forEach(function(link) {
-    link.addEventListener('click', function(event) {
-      // Remove highlight from all rows
-      document.querySelectorAll('tbody tr').forEach(function(row) {
-        row.classList.remove('dp-row-action-highlight');
-      });
-      // Move the clicked row to the top and highlight
-      var row = event.target.closest('tr');
-      if (row && row.parentNode) {
-        const tbody = row.parentNode;
-        // Only move if not already at top
-        if (tbody.firstElementChild !== row) {
-          // If a previous move exists, restore it first
-          if (movedRow && placeholderRow && placeholderRow.parentNode) {
-            placeholderRow.parentNode.insertBefore(movedRow, placeholderRow);
-            placeholderRow.parentNode.removeChild(placeholderRow);
-            movedRow.classList.remove('dp-row-action-highlight');
-            movedRow = null;
-            placeholderRow = null;
-            originalRowIndex = null;
-          }
-          // Store original index and row
-          originalRowIndex = Array.from(tbody.children).indexOf(row);
-          movedRow = row;
-          // Insert a placeholder at the original position
-          placeholderRow = document.createElement('tr');
-          placeholderRow.style.display = 'none';
-          tbody.insertBefore(placeholderRow, tbody.children[originalRowIndex]);
-          // Move row to top
-          tbody.insertBefore(row, tbody.firstElementChild);
-        }
-        row.classList.add('dp-row-action-highlight');
+  function highlightRow(row) {
+    if (!row || !row.parentNode) return;
+    restoreRowPosition();
+    var tbody = row.parentNode;
+    movedRow = row;
+    if (tbody.firstElementChild !== row) {
+      placeholderRow = document.createElement('tr');
+      placeholderRow.style.display = 'none';
+      for (var i = 0; i < row.children.length; i += 1) {
+        placeholderRow.appendChild(document.createElement('td'));
       }
-    });
-  });
-
-  // Handle multiple modal close buttons
-  const closeButtons = [
-    'closeTrayScanModal_DayPlanning',
-    'closeTrayScanModal', 
-    'closeNewPopupModal',
-    'closetrayScanModal_Jig'
-  ];
-
-  closeButtons.forEach(function(buttonId) {
-    const closeBtn = document.getElementById(buttonId);
-    if (closeBtn) {
-      closeBtn.addEventListener('click', restoreRowPosition);
+      tbody.insertBefore(placeholderRow, row);
+      tbody.insertBefore(row, tbody.firstElementChild);
     }
+    row.classList.add('dp-row-action-highlight');
+  }
+
+  function actionTarget(target) {
+    return target.closest(
+      '.hold-toggle-btn, .hold-remark-icon, .tray-scan-btn, .tray-scan-btn-Jig, .tray-scan-btn-BQ-view, .btn-accept-is:not(:disabled), .btn-reject-is:not(:disabled), .delete-batch-btn, .remark-send-btn, .rejection-popup-trigger, #delink-selected-btn'
+    );
+  }
+
+  document.addEventListener('click', function(event) {
+    if (event.target.closest('.model-hover-trigger') || event.target.closest('.model-image-tooltip')) return;
+    var action = actionTarget(event.target);
+    if (!action) return;
+    highlightRow(action.closest('tr'));
+  }, true);
+
+  document.addEventListener('change', function(event) {
+    if (event.target.matches('.hold-toggle-btn')) {
+      highlightRow(event.target.closest('tr'));
+    }
+  }, true);
+
+  [
+    'closeTrayScanModal',
+    'closeTrayScanModal_DayPlanning',
+    'closeNewPopupModal',
+    'closetrayScanModal_Jig',
+    'closeHoldRemarkModal',
+    'closeRejectionPopup'
+  ].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', restoreRowPosition);
   });
 
-  // Also handle modal backdrop clicks to restore position
-  const modals = [
-    'trayScanModal_DayPlanning',
+  [
     'trayScanModal',
-    'newPopupModal'
-  ];
-
-  modals.forEach(function(modalId) {
-    const modal = document.getElementById(modalId);
+    'trayScanModal_DayPlanning',
+    'newPopupModal',
+    'holdRemarkModal',
+    'rejectionPopupModal'
+  ].forEach(function(id) {
+    var modal = document.getElementById(id);
     if (modal) {
       modal.addEventListener('click', function(event) {
-        if (event.target === modal) {
-          restoreRowPosition();
-        }
+        if (event.target === modal) restoreRowPosition();
       });
     }
   });
 
-  // Handle ESC key to restore position
-  document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
+  document.addEventListener('click', function(event) {
+    if (
+      event.target &&
+      (event.target.classList.contains('swal2-cancel') ||
+       event.target.classList.contains('swal2-close') ||
+       event.target.id === 'cancelButton')
+    ) {
       restoreRowPosition();
     }
   });
-  window.naRestoreRowPosition = restoreRowPosition;
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') restoreRowPosition();
+  });
+
+  window.nqRestoreRowPosition = restoreRowPosition;
 });
 </script>
 
-<!-- NA Checkbox + Reject Modal JS -->
+<!-- Plating Stk - Image hover - fixed position while hitting the Plating Stk No -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  "use strict";
+
+  const triggers = Array.from(
+    document.querySelectorAll(
+      ".model-hover-trigger[data-plating-stk-no]"
+    )
+  );
+
+  if (!triggers.length) return;
+
+  const previewCache =
+    window.NickelModelPreviewCache instanceof Map
+      ? window.NickelModelPreviewCache
+      : new Map();
+
+  const requestCache =
+    window.NickelModelPreviewRequestCache instanceof Map
+      ? window.NickelModelPreviewRequestCache
+      : new Map();
+
+  window.NickelModelPreviewCache = previewCache;
+  window.NickelModelPreviewRequestCache = requestCache;
+
+  let openTooltip = null;
+  let pinnedTrigger = null;
+  let hideTimer = null;
+
+  function getStockNo(trigger) {
+    return String(
+      trigger && trigger.dataset
+        ? trigger.dataset.platingStkNo || ""
+        : ""
+    ).trim();
+  }
+
+  function getStockCacheKey(stockNo) {
+    return String(stockNo || "").trim().toUpperCase();
+  }
+
+  function getTooltip(trigger) {
+    return trigger
+      ? trigger.querySelector(".model-image-tooltip")
+      : null;
+  }
+
+  function normalizeImageUrl(rawUrl) {
+    const value = String(rawUrl || "").trim();
+    if (!value) return "";
+
+    try {
+      const parsed = new URL(value, window.location.origin);
+      const hostname = String(parsed.hostname || "").toLowerCase();
+      const isLoopbackHost =
+        hostname === "127.0.0.1" ||
+        hostname === "localhost" ||
+        hostname === "::1" ||
+        hostname === "[::1]";
+      const isApplicationAsset =
+        parsed.pathname.startsWith("/media/") ||
+        parsed.pathname.startsWith("/static/");
+
+      if (
+        parsed.origin === window.location.origin ||
+        (isLoopbackHost && isApplicationAsset)
+      ) {
+        return parsed.pathname + parsed.search + parsed.hash;
+      }
+
+      return parsed.href;
+    } catch (error) {
+      return value;
+    }
+  }
+
+  function normalizePreviewPayload(payload) {
+    if (!payload) return null;
+    payload.preview_image = normalizeImageUrl(payload.preview_image);
+    if (Array.isArray(payload.images)) {
+      payload.images = payload.images.map(function (image) {
+        if (!image) return image;
+        return Object.assign({}, image, {
+          url: normalizeImageUrl(image.url || image.image_url || image.src || image.image || "")
+        });
+      });
+    }
+    return payload;
+  }
+
+  function getPlaceholderImageUrl(payload) {
+    const images = Array.isArray(payload && payload.images) ? payload.images : [];
+    const placeholder = images.find(function (image) {
+      const viewCode = String(image && image.view_code || "").toUpperCase();
+      return viewCode === "NO_IMAGE" || image && image.is_placeholder === true;
+    });
+    return normalizeImageUrl(placeholder && (placeholder.url || placeholder.image_url || placeholder.src || placeholder.image));
+  }
+
+  window.normalizeStockImageUrl = normalizeImageUrl;
+  window.NickelNormalizeImageUrl = normalizeImageUrl;
+
+  function getDefaultVisualAidUrl(stockNo) {
+    return "/adminportal/dp_visualaid/?plating_stk_no=" + encodeURIComponent(stockNo);
+  }
+
+  function setTriggerVisualAidUrl(trigger, stockNo, payload) {
+    if (!trigger || !stockNo) return;
+    trigger.dataset.visualAidUrl = payload && payload.visual_aid_url
+      ? payload.visual_aid_url
+      : getDefaultVisualAidUrl(stockNo);
+  }
+
+  function prepareTooltip(tooltip) {
+    if (!tooltip || tooltip.dataset.dynamicPreviewReady === "1") return;
+
+    tooltip.dataset.dynamicPreviewReady = "1";
+    tooltip.innerHTML =
+      '<button class="close-btn" type="button" style="position:absolute;top:14px;right:16px;z-index:2;background:#dc3545;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Close</button>' +
+      '<button type="button" class="info-btn" style="position:absolute;top:14px;left:16px;z-index:2;background:#007bff;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;">Info</button>' +
+      '<button class="img-scroll-left" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;">&#8592;</button>' +
+      '<div class="img-gallery" style="display:flex;justify-content:center;align-items:center;overflow:hidden;width:260px;height:210px;min-height:210px;box-sizing:border-box;">' +
+        '<span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>' +
+      '</div>' +
+      '<button class="img-scroll-right" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;">&#8594;</button>';
+  }
+
+  function getGallery(trigger) {
+    const tooltip = getTooltip(trigger);
+    return tooltip ? tooltip.querySelector(".img-gallery") : null;
+  }
+
+  function renderLoading(trigger) {
+    const gallery = getGallery(trigger);
+    if (!gallery) return;
+
+    gallery.innerHTML =
+      '<span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
+  }
+
+  function renderMessage(trigger, message) {
+    const gallery = getGallery(trigger);
+    if (!gallery) return;
+
+    gallery.textContent = "";
+
+    const messageElement = document.createElement("span");
+    messageElement.textContent = message;
+    messageElement.style.cssText =
+      "font-size:12px;color:#777;text-align:center;padding:12px;";
+    gallery.appendChild(messageElement);
+  }
+
+  function renderPreview(trigger, payload) {
+    const gallery = getGallery(trigger);
+    if (!gallery) return;
+
+    const rawUrl = payload && payload.preview_image;
+    const imageUrl = normalizeImageUrl(rawUrl);
+
+    if (!imageUrl) {
+      renderMessage(trigger, "Image unavailable");
+      return;
+    }
+
+    gallery.textContent = "";
+
+    const image = document.createElement("img");
+    image.className = "nickel-preview-img";
+    image.alt =
+      payload && (payload.is_placeholder || payload.is_fallback)
+        ? "No image available"
+        : "Model IV preview";
+    image.loading = "eager";
+    image.decoding = "async";
+    image.style.cssText =
+      "display:block;width:auto;height:auto;max-width:240px;max-height:190px;" +
+      "object-fit:contain;object-position:center;margin:auto;" +
+      "border-radius:6px;background:#fff;";
+
+    image.addEventListener("error", function () {
+      const placeholderUrl = getPlaceholderImageUrl(payload);
+      if (placeholderUrl && image.src !== placeholderUrl) {
+        image.src = placeholderUrl;
+        image.alt = "No image available";
+        return;
+      }
+      console.error(
+        "[Nickel Wiping Z1] Preview image failed:",
+        rawUrl,
+        "Normalized URL:",
+        imageUrl
+      );
+      renderMessage(trigger, "Image could not be loaded");
+    });
+
+    gallery.appendChild(image);
+    image.src = imageUrl;
+  }
+
+  function requestPreview(stockNo, cacheKey) {
+    if (previewCache.has(cacheKey)) {
+      return Promise.resolve(previewCache.get(cacheKey));
+    }
+
+    if (requestCache.has(cacheKey)) {
+      return requestCache.get(cacheKey);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(function () {
+      controller.abort();
+    }, 10000);
+
+    const request = fetch(
+      "/adminportal/api/model-hover-preview/?stock_no=" +
+        encodeURIComponent(stockNo) +
+        "&_ts=" +
+        Date.now(),
+      {
+        method: "GET",
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: {
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        signal: controller.signal
+      }
+    )
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+        return response.json();
+      })
+      .then(function (payload) {
+        const normalizedPayload = normalizePreviewPayload(payload);
+        previewCache.set(cacheKey, normalizedPayload);
+        return normalizedPayload;
+      })
+      .finally(function () {
+        window.clearTimeout(timeoutId);
+        requestCache.delete(cacheKey);
+      });
+
+    requestCache.set(cacheKey, request);
+    return request;
+  }
+
+  function loadPreview(trigger) {
+    const stockNo = getStockNo(trigger);
+    const cacheKey = getStockCacheKey(stockNo);
+
+    if (!stockNo) {
+      renderMessage(trigger, "Stock number unavailable");
+      return;
+    }
+
+    setTriggerVisualAidUrl(trigger, stockNo);
+
+    if (previewCache.has(cacheKey)) {
+      const cached = previewCache.get(cacheKey);
+      setTriggerVisualAidUrl(trigger, stockNo, cached);
+      renderPreview(trigger, cached);
+      return;
+    }
+
+    renderLoading(trigger);
+
+    requestPreview(stockNo, cacheKey)
+      .then(function (payload) {
+        // Always complete the tooltip that initiated this request. This avoids
+        // a permanent Loading state if the pointer briefly leaves the cell.
+        setTriggerVisualAidUrl(trigger, stockNo, payload);
+        renderPreview(trigger, payload);
+      })
+      .catch(function (error) {
+        console.error(
+          "[Nickel Wiping Z1] Model preview request failed:",
+          stockNo,
+          error
+        );
+
+        if (error && error.name === "AbortError") {
+          renderMessage(trigger, "Image request timed out");
+        } else {
+          renderMessage(trigger, "Image unavailable");
+        }
+      });
+  }
+
+  function positionTooltip(trigger) {
+    const tooltip = getTooltip(trigger);
+    if (!tooltip) return;
+
+    tooltip.style.left = "80%";
+    tooltip.style.right = "auto";
+    tooltip.style.top = "110%";
+    tooltip.style.transform = "translateX(-50%)";
+
+    const rect = tooltip.getBoundingClientRect();
+
+    if (rect.right > window.innerWidth - 8) {
+      tooltip.style.left = "auto";
+      tooltip.style.right = "0";
+      tooltip.style.transform = "none";
+    }
+
+    if (rect.left < 8) {
+      tooltip.style.left = "0";
+      tooltip.style.right = "auto";
+      tooltip.style.transform = "none";
+    }
+  }
+
+  function closeTrigger(trigger, force) {
+    if (!trigger) return;
+    if (!force && pinnedTrigger === trigger) return;
+
+    const tooltip = getTooltip(trigger);
+
+    if (tooltip) {
+      tooltip.classList.remove("is-visible", "pinned");
+      tooltip.style.opacity = "0";
+      tooltip.style.visibility = "hidden";
+      tooltip.style.pointerEvents = "none";
+      tooltip.style.display = "none";
+
+      const infoButton = tooltip.querySelector(".info-btn");
+      const closeButton = tooltip.querySelector(".close-btn");
+      if (infoButton) infoButton.style.display = "none";
+      if (closeButton) closeButton.style.display = "none";
+    }
+
+    trigger.style.backgroundColor = "";
+    trigger.style.borderRadius = "";
+
+    if (openTooltip === tooltip) openTooltip = null;
+    if (force && pinnedTrigger === trigger) pinnedTrigger = null;
+  }
+
+  function closeOthers(currentTrigger) {
+    triggers.forEach(function (trigger) {
+      if (trigger !== currentTrigger) {
+        closeTrigger(trigger, true);
+      }
+    });
+  }
+
+  function openTrigger(trigger, pinTooltip) {
+    window.clearTimeout(hideTimer);
+    closeOthers(trigger);
+
+    const tooltip = getTooltip(trigger);
+    if (!tooltip) return;
+
+    prepareTooltip(tooltip);
+
+    if (pinTooltip) {
+      pinnedTrigger = trigger;
+      tooltip.classList.add("pinned");
+      trigger.style.backgroundColor = "#e3f2fd";
+      trigger.style.borderRadius = "4px";
+    }
+
+    openTooltip = tooltip;
+    tooltip.classList.add("is-visible");
+    tooltip.style.display = "flex";
+    tooltip.style.visibility = "visible";
+    tooltip.style.opacity = "1";
+    tooltip.style.pointerEvents = "auto";
+
+    const infoButton = tooltip.querySelector(".info-btn");
+    const closeButton = tooltip.querySelector(".close-btn");
+    if (infoButton) infoButton.style.display = "block";
+    if (closeButton) closeButton.style.display = "block";
+
+    positionTooltip(trigger);
+    loadPreview(trigger);
+  }
+
+  triggers.forEach(function (trigger) {
+    const tooltip = getTooltip(trigger);
+
+    if (!tooltip || trigger.dataset.nickelDynamicHoverBound === "1") {
+      return;
+    }
+
+    trigger.dataset.nickelDynamicHoverBound = "1";
+    prepareTooltip(tooltip);
+
+    const infoButton = tooltip.querySelector(".info-btn");
+    const closeButton = tooltip.querySelector(".close-btn");
+
+    if (infoButton) infoButton.style.display = "none";
+    if (closeButton) closeButton.style.display = "none";
+
+    trigger.addEventListener("mouseenter", function () {
+      window.clearTimeout(hideTimer);
+      if (pinnedTrigger !== trigger) {
+        openTrigger(trigger, false);
+      }
+    });
+
+    trigger.addEventListener("mouseleave", function () {
+      hideTimer = window.setTimeout(function () {
+        if (
+          pinnedTrigger !== trigger &&
+          !trigger.matches(":hover") &&
+          !tooltip.matches(":hover")
+        ) {
+          closeTrigger(trigger, false);
+        }
+      }, 180);
+    });
+
+    tooltip.addEventListener("mouseenter", function () {
+      window.clearTimeout(hideTimer);
+    });
+
+    tooltip.addEventListener("mouseleave", function () {
+      hideTimer = window.setTimeout(function () {
+        if (
+          pinnedTrigger !== trigger &&
+          !trigger.matches(":hover") &&
+          !tooltip.matches(":hover")
+        ) {
+          closeTrigger(trigger, false);
+        }
+      }, 180);
+    });
+
+    trigger.addEventListener("click", function (event) {
+      if (
+        event.target.closest(".info-btn") ||
+        event.target.closest(".close-btn")
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (pinnedTrigger === trigger) {
+        closeTrigger(trigger, true);
+        return;
+      }
+
+      openTrigger(trigger, true);
+    });
+
+    if (infoButton) {
+      infoButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const stockNo = getStockNo(trigger);
+        if (!stockNo) return;
+
+        window.location.href = trigger.dataset.visualAidUrl || getDefaultVisualAidUrl(stockNo);
+      });
+    }
+
+    if (closeButton) {
+      closeButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeTrigger(trigger, true);
+      });
+    }
+  });
+
+  document.addEventListener("click", function (event) {
+    if (
+      pinnedTrigger &&
+      !event.target.closest(".model-image-tooltip") &&
+      !event.target.closest(".model-hover-trigger")
+    ) {
+      closeTrigger(pinnedTrigger, true);
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && pinnedTrigger) {
+      closeTrigger(pinnedTrigger, true);
+    }
+  });
+});
+</script>
+
+<script nonce="{{ csp_nonce }}" src="{% static 'js/nickel_qc_shortcuts.js' %}"></script>
+
+<!-- NQ Checkbox + Reject Modal JS -->
 <script nonce="{{ csp_nonce }}">
 (function () {
   'use strict';
-  var API_BASE = '/nickel_audit_zone_two/api/';
+  var API_BASE = '/nickle_inspection/api/';
   var csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
   function post(url, body) {
     return fetch(url, {
@@ -1469,311 +2191,6 @@ document.addEventListener("DOMContentLoaded", function() {
       body: JSON.stringify(body),
     }).then(function (r) { return r.json(); });
   }
-
-  var naZone2PreviewCache = new Map();
-  var naZone2PreviewRequestCache = new Map();
-  var naZone2ActivePreviewTrigger = null;
-  var naZone2ActivePreviewRow = null;
-  var naZone2TriggerHovered = false;
-  var naZone2PopupHovered = false;
-  var naZone2RowActive = false;
-  var naZone2PreviewHideTimer = null;
-  var NA_ZONE2_PREVIEW_HIDE_DELAY_MS = 220;
-
-  function normalizeNaZone2ImageUrl(rawUrl) {
-    var value = String(rawUrl || '').trim();
-    if (!value) return '';
-    try {
-      var parsed = new URL(value, window.location.origin);
-      var hostname = String(parsed.hostname || '').toLowerCase();
-      var isLoopbackHost =
-        hostname === '127.0.0.1' ||
-        hostname === 'localhost' ||
-        hostname === '::1' ||
-        hostname === '[::1]';
-      var isApplicationAsset =
-        parsed.pathname.indexOf('/media/') === 0 ||
-        parsed.pathname.indexOf('/static/') === 0;
-      if (parsed.origin === window.location.origin || (isLoopbackHost && isApplicationAsset)) {
-        return parsed.pathname + parsed.search + parsed.hash;
-      }
-      return parsed.href;
-    } catch (error) {
-      return value;
-    }
-  }
-
-  function getNaZone2ImageUrlFromEntry(entry) {
-    if (!entry) return '';
-    if (typeof entry === 'string') return normalizeNaZone2ImageUrl(entry);
-    return normalizeNaZone2ImageUrl(entry.preview_image || entry.url || entry.image_url || entry.src || entry.image || '');
-  }
-
-  function resolveNaZone2PreviewImage(payload) {
-    var previewImage = normalizeNaZone2ImageUrl(payload && payload.preview_image);
-    if (previewImage) return previewImage;
-
-    var images = Array.isArray(payload && payload.images) ? payload.images : [];
-    var insideView = images.find(function (image) {
-      return String(image && image.view_code || '').toUpperCase() === 'IV';
-    });
-    var insideViewUrl = getNaZone2ImageUrlFromEntry(insideView);
-    if (insideViewUrl) return insideViewUrl;
-
-    var noImage = images.find(function (image) {
-      var viewCode = String(image && image.view_code || '').toUpperCase();
-      return viewCode === 'NO_IMAGE' || image && image.is_placeholder === true;
-    });
-    return getNaZone2ImageUrlFromEntry(noImage);
-  }
-
-  function fetchNaZone2Preview(stockNo) {
-    var cacheKey = String(stockNo || '').trim().toUpperCase();
-    if (!cacheKey) return Promise.resolve(null);
-    if (naZone2PreviewCache.has(cacheKey)) {
-      return Promise.resolve(naZone2PreviewCache.get(cacheKey));
-    }
-    if (naZone2PreviewRequestCache.has(cacheKey)) {
-      return naZone2PreviewRequestCache.get(cacheKey);
-    }
-
-    var request = fetch('/adminportal/api/model-hover-preview/?stock_no=' + encodeURIComponent(stockNo) + '&_ts=' + Date.now(), {
-      method: 'GET',
-      credentials: 'same-origin',
-      cache: 'no-store',
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-      .then(function (response) {
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        return response.json();
-      })
-      .then(function (payload) {
-        naZone2PreviewCache.set(cacheKey, payload);
-        return payload;
-      })
-      .finally(function () {
-        naZone2PreviewRequestCache.delete(cacheKey);
-      });
-
-    naZone2PreviewRequestCache.set(cacheKey, request);
-    return request;
-  }
-
-  function renderNaZone2TooltipPreview(trigger) {
-    var tooltip = trigger ? trigger.querySelector('.model-image-tooltip') : null;
-    var gallery = tooltip ? tooltip.querySelector('.img-gallery') : null;
-    var stockNo = trigger && trigger.dataset ? trigger.dataset.platingStkNo : '';
-    if (!gallery) return;
-
-    gallery.innerHTML = '<span class="model-preview-loading" style="font-size:12px;color:#777;text-align:center;">Loading...</span>';
-    fetchNaZone2Preview(stockNo)
-      .then(function (payload) {
-        var imageUrl = resolveNaZone2PreviewImage(payload);
-        if (!imageUrl) {
-          gallery.innerHTML = '<span style="font-size:12px;color:#777;text-align:center;">Image unavailable</span>';
-          return;
-        }
-        gallery.innerHTML = '';
-        var image = document.createElement('img');
-        image.alt = payload && (payload.is_placeholder || payload.is_fallback) ? 'No image available' : 'Model IV preview';
-        image.style.cssText = 'width:120px;height:120px;object-fit:contain;object-position:center;border-radius:6px;';
-        image.onerror = function () {
-          gallery.innerHTML = '<span style="font-size:12px;color:#777;text-align:center;">Image could not be loaded</span>';
-        };
-        gallery.appendChild(image);
-        image.src = imageUrl;
-      })
-      .catch(function () {
-        gallery.innerHTML = '<span style="font-size:12px;color:#777;text-align:center;">Image unavailable</span>';
-      });
-  }
-
-  function cancelNaZone2PreviewClose() {
-    clearTimeout(naZone2PreviewHideTimer);
-    naZone2PreviewHideTimer = null;
-  }
-
-  function closeNaZone2Preview() {
-    var trigger = naZone2ActivePreviewTrigger;
-    var tooltip = trigger ? trigger.querySelector('.model-image-tooltip') : null;
-    if (!tooltip) return;
-    tooltip.classList.remove('pinned');
-    tooltip.style.opacity = '0';
-    tooltip.style.visibility = 'hidden';
-    tooltip.style.pointerEvents = 'none';
-    tooltip.style.display = 'none';
-    trigger.style.backgroundColor = '';
-    trigger.style.borderRadius = '';
-    naZone2ActivePreviewTrigger = null;
-    naZone2ActivePreviewRow = null;
-    naZone2TriggerHovered = false;
-    naZone2PopupHovered = false;
-    naZone2RowActive = false;
-  }
-
-  function isMovingWithinNaZone2Hover(event, trigger, tooltip) {
-    var nextTarget = event.relatedTarget;
-    var row = trigger ? trigger.closest('tr') : naZone2ActivePreviewRow;
-
-    return !!(
-      nextTarget &&
-      (
-        (trigger && trigger.contains(nextTarget)) ||
-        (tooltip && tooltip.contains(nextTarget)) ||
-        (row && row.contains(nextTarget))
-      )
-    );
-  }
-
-  function scheduleNaZone2PreviewClose(trigger, tooltip) {
-    cancelNaZone2PreviewClose();
-    naZone2PreviewHideTimer = setTimeout(function () {
-      var currentTrigger = trigger || naZone2ActivePreviewTrigger;
-      var currentTooltip = tooltip || (currentTrigger ? currentTrigger.querySelector('.model-image-tooltip') : null);
-      var currentRow = currentTrigger ? currentTrigger.closest('tr') : naZone2ActivePreviewRow;
-      var rowHovered = currentRow && currentRow.matches(':hover');
-      var triggerHovered = currentTrigger && currentTrigger.matches(':hover');
-      var popupHovered = currentTooltip && currentTooltip.matches(':hover');
-
-      if (
-        !naZone2TriggerHovered &&
-        !naZone2PopupHovered &&
-        !naZone2RowActive &&
-        !rowHovered &&
-        !triggerHovered &&
-        !popupHovered
-      ) {
-        closeNaZone2Preview();
-      }
-    }, NA_ZONE2_PREVIEW_HIDE_DELAY_MS);
-  }
-
-  function markNaZone2RowActive(trigger) {
-    naZone2ActivePreviewTrigger = trigger;
-    naZone2ActivePreviewRow = trigger ? trigger.closest('tr') : null;
-    naZone2RowActive = !!(naZone2ActivePreviewRow && naZone2ActivePreviewRow.matches(':hover'));
-    cancelNaZone2PreviewClose();
-  }
-
-  function bindNaZone2ModelImageTooltips() {
-    document.querySelectorAll('.model-hover-trigger[data-plating-stk-no]').forEach(function (trigger) {
-      if (trigger.dataset.naZone2PreviewBound === '1') return;
-      trigger.dataset.naZone2PreviewBound = '1';
-      var tooltip = trigger.querySelector('.model-image-tooltip');
-      if (!tooltip) return;
-
-      function openTooltip() {
-        if (naZone2ActivePreviewTrigger && naZone2ActivePreviewTrigger !== trigger) {
-          closeNaZone2Preview();
-        }
-        cancelNaZone2PreviewClose();
-        naZone2ActivePreviewTrigger = trigger;
-        naZone2ActivePreviewRow = trigger.closest('tr');
-        naZone2TriggerHovered = trigger.matches(':hover');
-        naZone2PopupHovered = tooltip.matches(':hover');
-        tooltip.style.display = 'flex';
-        tooltip.style.opacity = '1';
-        tooltip.style.visibility = 'visible';
-        tooltip.style.pointerEvents = 'auto';
-        renderNaZone2TooltipPreview(trigger);
-      }
-
-      trigger.addEventListener('mouseenter', function () {
-        naZone2TriggerHovered = true;
-        cancelNaZone2PreviewClose();
-        openTooltip();
-      });
-      trigger.addEventListener('mouseleave', function (event) {
-        naZone2TriggerHovered = false;
-        if (isMovingWithinNaZone2Hover(event, trigger, tooltip)) return;
-        scheduleNaZone2PreviewClose(trigger, tooltip);
-      });
-      tooltip.addEventListener('mouseenter', function () {
-        naZone2PopupHovered = true;
-        cancelNaZone2PreviewClose();
-      });
-      tooltip.addEventListener('mouseleave', function (event) {
-        naZone2PopupHovered = false;
-        if (isMovingWithinNaZone2Hover(event, trigger, tooltip)) return;
-        scheduleNaZone2PreviewClose(trigger, tooltip);
-      });
-
-      var row = trigger.closest('tr');
-      if (row && row.dataset.naZone2PreviewRowBound !== '1') {
-        row.dataset.naZone2PreviewRowBound = '1';
-        row.addEventListener('mouseenter', function () {
-          if (naZone2ActivePreviewRow === row) {
-            naZone2RowActive = true;
-            cancelNaZone2PreviewClose();
-          }
-        });
-        row.addEventListener('mouseleave', function (event) {
-          if (naZone2ActivePreviewRow !== row) return;
-          if (isMovingWithinNaZone2Hover(event, naZone2ActivePreviewTrigger, naZone2ActivePreviewTrigger ? naZone2ActivePreviewTrigger.querySelector('.model-image-tooltip') : null)) return;
-          naZone2RowActive = false;
-          scheduleNaZone2PreviewClose();
-        });
-      }
-
-      trigger.addEventListener('click', function (event) {
-        if (event.target.closest('.info-btn')) {
-          event.preventDefault();
-          event.stopPropagation();
-          var stockNo = trigger.dataset.platingStkNo || '';
-          var cached = naZone2PreviewCache.get(String(stockNo || '').trim().toUpperCase());
-          window.location.href = cached && cached.visual_aid_url
-            ? cached.visual_aid_url
-            : '/adminportal/dp_visualaid/?plating_stk_no=' + encodeURIComponent(stockNo);
-          return;
-        }
-        if (event.target.closest('.close-btn')) {
-          event.preventDefault();
-          event.stopPropagation();
-          closeNaZone2Preview();
-          return;
-        }
-        markNaZone2RowActive(trigger);
-        openTooltip();
-      });
-    });
-  }
-
-  document.addEventListener('click', function (event) {
-    var infoButton = event.target.closest('.model-image-tooltip .info-btn');
-    if (!infoButton) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-
-    var trigger = infoButton.closest('.model-hover-trigger');
-    var stockNo = trigger && trigger.dataset ? trigger.dataset.platingStkNo || '' : '';
-    if (!stockNo) return;
-    var cached = naZone2PreviewCache.get(String(stockNo || '').trim().toUpperCase());
-    window.location.href = cached && cached.visual_aid_url
-      ? cached.visual_aid_url
-      : '/adminportal/dp_visualaid/?plating_stk_no=' + encodeURIComponent(stockNo);
-  }, true);
-
-  document.addEventListener('click', function (event) {
-    if (!naZone2ActivePreviewTrigger) return;
-    var clickedInsideTrigger = event.target.closest('.model-hover-trigger');
-    var clickedInsidePopup = event.target.closest('.model-image-tooltip');
-    var clickedInsideActiveRow = naZone2ActivePreviewRow && naZone2ActivePreviewRow.contains(event.target);
-
-    if (clickedInsideTrigger || clickedInsidePopup || clickedInsideActiveRow) {
-      if (clickedInsideActiveRow) {
-        naZone2RowActive = !!(naZone2ActivePreviewRow && naZone2ActivePreviewRow.matches(':hover'));
-        cancelNaZone2PreviewClose();
-      }
-      return;
-    }
-
-    closeNaZone2Preview();
-  });
 
   function showRemarkSavedModal() {
     if (window.Swal && typeof Swal.fire === 'function') {
@@ -1788,7 +2205,7 @@ document.addEventListener("DOMContentLoaded", function() {
     return Promise.resolve();
   }
 
-  function closeNaRemarkTooltip(trigger) {
+  function closeNqRemarkTooltip(trigger) {
     var tooltip = trigger ? trigger.querySelector('.remark-tooltip') : null;
     if (!tooltip) return;
     tooltip.classList.remove('pinned');
@@ -1798,8 +2215,8 @@ document.addEventListener("DOMContentLoaded", function() {
     tooltip.style.display = 'none';
   }
 
-  if (!window.__naZone2RemarkHandlerBound) {
-    window.__naZone2RemarkHandlerBound = true;
+  if (!window.__nqZone1RemarkHandlerBound) {
+    window.__nqZone1RemarkHandlerBound = true;
     document.addEventListener('click', function (event) {
       var sendBtn = event.target.closest('.remark-send-btn');
       if (!sendBtn) return;
@@ -1868,7 +2285,7 @@ document.addEventListener("DOMContentLoaded", function() {
             sendBtn.parentElement.innerHTML = '<div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;"><i class="fa fa-info-circle" style="margin-right: 6px;"></i>Remark already saved and cannot be edited.</div>';
           }
           return showRemarkSavedModal().then(function () {
-            closeNaRemarkTooltip(trigger);
+            closeNqRemarkTooltip(trigger);
           });
         })
         .catch(function (error) {
@@ -1932,52 +2349,11 @@ document.addEventListener("DOMContentLoaded", function() {
       if (e.target === viewModal) closeViewModal();
     });
 
-    bindNaZone2ModelImageTooltips();
-
-    var modalImgEl = document.getElementById('modalUserImg_DayPlanning');
-    var modalImgDefaultSrc = modalImgEl ? modalImgEl.getAttribute('src') : '';
-
-    function resetModalModelImage() {
-      if (!modalImgEl) return;
-      modalImgEl.onerror = null;
-      modalImgEl.src = modalImgDefaultSrc;
-      modalImgEl.alt = 'Model Image';
-    }
-
-    function renderModalModelImage(stockNo) {
-      if (!modalImgEl) return;
-      if (!stockNo) {
-        resetModalModelImage();
-        return;
-      }
-
-      fetchNaZone2Preview(stockNo)
-        .then(function (payload) {
-          var imageUrl = resolveNaZone2PreviewImage(payload);
-          if (!imageUrl) {
-            resetModalModelImage();
-            return;
-          }
-          modalImgEl.onerror = function () {
-            modalImgEl.onerror = null;
-            resetModalModelImage();
-          };
-          modalImgEl.alt = payload && (payload.is_placeholder || payload.is_fallback)
-            ? 'No image available'
-            : 'Model IV preview';
-          modalImgEl.src = imageUrl;
-        })
-        .catch(function () {
-          resetModalModelImage();
-        });
-    }
-
     document.querySelectorAll('.tray-scan-btn-BQ-view').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         var lotId = btn.dataset.stockLotId || '';
         var modelNo = btn.dataset.modelNo || '';
-        var stockNo = btn.dataset.platingStkNo || '';
         var totalQty = btn.dataset.totalBatchQuantity || '0';
         var missingQty = btn.dataset.brassMissingQty || '0';
         var physQty = (parseInt(totalQty, 10) || 0) - (parseInt(missingQty, 10) || 0);
@@ -1991,9 +2367,6 @@ document.addEventListener("DOMContentLoaded", function() {
         if (elMisQty) elMisQty.textContent = missingQty;
         if (elPhysQty) elPhysQty.textContent = physQty;
 
-        resetModalModelImage();
-        renderModalModelImage(stockNo);
-
         if (viewDetails) viewDetails.innerHTML = '<span style="color:#888;font-size:13px;">Loading tray data...</span>';
         if (viewModal) viewModal.classList.add('open');
 
@@ -2004,19 +2377,23 @@ document.addEventListener("DOMContentLoaded", function() {
         post(API_BASE + 'action/', { action: 'GET_TRAYS', lot_id: lotId })
           .then(function (data) {
             if (!data.success) {
-              if (viewDetails) viewDetails.innerHTML = '<span style="color:red;">Failed to load tray data.</span>';
+              viewDetails.innerHTML = '<span style="color:red;">Failed to load tray data.</span>';
               return;
             }
             var trays = data.trays || [];
             var html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
-            html += '<thead><tr style="background:#f0f4f8;"><th style="padding:6px 10px;text-align:center;border-bottom:2px solid #dee2e6;width:50px;">S.No</th>';
+            html += '<thead><tr style="background:#f0f4f8;">';
+            html += '<th style="padding:6px 10px;text-align:center;border-bottom:2px solid #dee2e6;width:50px;">S.No</th>';
             html += '<th style="padding:6px 10px;text-align:left;border-bottom:2px solid #dee2e6;">Tray ID</th>';
-            html += '<th style="padding:6px 10px;text-align:center;border-bottom:2px solid #dee2e6;width:80px;">Qty</th></tr></thead><tbody>';
+            html += '<th style="padding:6px 10px;text-align:center;border-bottom:2px solid #dee2e6;width:80px;">Qty</th>';
+            html += '</tr></thead><tbody>';
             if (trays.length === 0) {
-              html += '<tr><td colspan="3" style="text-align:center;padding:16px;color:#888;">No tray data available.</td></tr>';
+              html += '<tr><td colspan="3" style="text-align:center;padding:16px;color:#888;">No tray data available for this lot.</td></tr>';
             } else {
               trays.forEach(function (t, i) {
-                var snoCell = (i === 0) ? (i + 1) + ' <span style="color:#028084;font-weight:600;">(Top Tray)</span>' : (i + 1);
+                var snoCell = (i === 0)
+                  ? (i + 1) + ' <span style="color:#028084;font-weight:600;">(Top Tray)</span>'
+                  : (i + 1);
                 html += '<tr style="background:' + (i % 2 === 0 ? '#fff' : '#f8f9fa') + ';">';
                 html += '<td style="padding:6px 10px;text-align:center;">' + snoCell + '</td>';
                 html += '<td style="padding:6px 10px;font-weight:600;">' + t.tray_id + '</td>';
@@ -2029,12 +2406,12 @@ document.addEventListener("DOMContentLoaded", function() {
             if (viewDetails) viewDetails.innerHTML = html;
           })
           .catch(function () {
-            if (viewDetails) viewDetails.innerHTML = '<span style="color:red;">Server error.</span>';
+            if (viewDetails) viewDetails.innerHTML = '<span style="color:red;">Server error while loading tray data.</span>';
           });
       });
     });
 
-    /* ── 3. Accept Button ── */
+    /* ── 3. Accept Button — full accept with confirmation ── */
     document.querySelectorAll('.btn-accept-is').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var lotId = btn.dataset.lotId || btn.dataset.stockLotId || '';
@@ -2074,29 +2451,29 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     /* ── 4. Reject Modal ── */
-    var overlay = document.getElementById('nickelAuditRejectModalOverlay');
-    var modalClose = document.getElementById('nickelAuditRejectModalClose');
-    var cancelBtn = document.getElementById('naRejectCancelBtn');
-    var reasonsGrid = document.getElementById('naRejectReasonsGrid');
-    var totalQtyDisp = document.getElementById('naRejectTotalQtyDisplay');
-    var remainingDisp = document.getElementById('naRejectRemainingQtyDisplay');
-    var allocSection = document.getElementById('naTrayAllocationSection');
-    var origContainer = document.getElementById('naOriginalTraysContainer');
-    var rejectSlotsCont = document.getElementById('naRejectSlotsContainer');
-    var acceptSlotsCont = document.getElementById('naAcceptSlotsContainer');
-    var delinkSection = document.getElementById('naDelinkSection');
-    var delinkList = document.getElementById('naDelinkListContainer');
-    var reuseInfo = document.getElementById('naRejectReuseInfo');
-    var rejectQtyLabel = document.getElementById('naRejectTotalQtyLabel');
-    var acceptQtyLabel = document.getElementById('naAcceptTotalQtyLabel');
-    var combAccept = document.getElementById('naCombinedAcceptQty');
-    var combReject = document.getElementById('naCombinedRejectQty');
-    var combDelink = document.getElementById('naCombinedDelinkQty');
-    var submitBtn = document.getElementById('naRejectSubmitBtn');
-    var draftBtn = document.getElementById('naDraftSaveBtn');
-    var errDiv = document.getElementById('naRejectModalError');
-    var fullRejCb = document.getElementById('naFullLotRejectionCb');
-    var clearAllBtn = document.getElementById('naGlobalClearAllBtn');
+    var overlay = document.getElementById('nickelRejectModalOverlay');
+    var modalClose = document.getElementById('nickelRejectModalClose');
+    var cancelBtn = document.getElementById('nqRejectCancelBtn');
+    var reasonsGrid = document.getElementById('nqRejectReasonsGrid');
+    var totalQtyDisp = document.getElementById('nqRejectTotalQtyDisplay');
+    var remainingDisp = document.getElementById('nqRejectRemainingQtyDisplay');
+    var allocSection = document.getElementById('nqTrayAllocationSection');
+    var origContainer = document.getElementById('nqOriginalTraysContainer');
+    var rejectSlotsCont = document.getElementById('nqRejectSlotsContainer');
+    var acceptSlotsCont = document.getElementById('nqAcceptSlotsContainer');
+    var delinkSection = document.getElementById('nqDelinkSection');
+    var delinkList = document.getElementById('nqDelinkListContainer');
+    var reuseInfo = document.getElementById('nqRejectReuseInfo');
+    var rejectQtyLabel = document.getElementById('nqRejectTotalQtyLabel');
+    var acceptQtyLabel = document.getElementById('nqAcceptTotalQtyLabel');
+    var combAccept = document.getElementById('nqCombinedAcceptQty');
+    var combReject = document.getElementById('nqCombinedRejectQty');
+    var combDelink = document.getElementById('nqCombinedDelinkQty');
+    var submitBtn = document.getElementById('nqRejectSubmitBtn');
+    var draftBtn = document.getElementById('nqDraftSaveBtn');
+    var errDiv = document.getElementById('nqRejectModalError');
+    var fullRejCb = document.getElementById('nqFullLotRejectionCb');
+    var clearAllBtn = document.getElementById('nqGlobalClearAllBtn');
     if (!overlay) return;
 
     var state = {
@@ -2110,7 +2487,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.addEventListener('focusin', function (event) {
       var target = event.target;
-      if (target && target.classList && (target.classList.contains('na-delink-tray-input') || target.classList.contains('na-acc-tray-input'))) {
+      if (target && target.classList && (target.classList.contains('nq-delink-tray-input') || target.classList.contains('nq-acc-tray-input'))) {
         lastFocusedTrayInput = target;
       }
     });
@@ -2126,18 +2503,6 @@ document.addEventListener("DOMContentLoaded", function() {
       return null;
     }
 
-    function normalizeTrayInputValue(input) {
-      var value = (input.value || '').toUpperCase().replace(/\s+/g, '');
-      if (value.length > 9) value = value.slice(0, 9);
-      input.value = value;
-      return value;
-    }
-
-    function selectTrayInputForOverwrite(input) {
-      if (!input || !input.value || input.value.length < 9 || typeof input.select !== 'function') return;
-      setTimeout(function () { input.select(); }, 0);
-    }
-
     function closeModal() {
       overlay.style.display = 'none';
       errDiv.textContent = '';
@@ -2151,8 +2516,8 @@ document.addEventListener("DOMContentLoaded", function() {
         sessionStorage.removeItem('globalScanTrayId');
         sessionStorage.removeItem('globalScanLotId');
       } catch (e) {}
-      if (typeof window.naRestoreRowPosition === 'function') {
-        window.naRestoreRowPosition();
+      if (typeof window.nqRestoreRowPosition === 'function') {
+        window.nqRestoreRowPosition();
       }
     }
     if (modalClose) modalClose.addEventListener('click', closeModal);
@@ -2182,7 +2547,7 @@ document.addEventListener("DOMContentLoaded", function() {
       state.pendingRestore = null;
       reasonsGrid.innerHTML = '<span style="color:#888;font-size:13px;">Loading...</span>';
       overlay.style.display = 'flex';
-      var initialRemarksInput = document.getElementById('naRejectRemarksInput');
+      var initialRemarksInput = document.getElementById('nqRejectRemarksInput');
       if (initialRemarksInput) initialRemarksInput.value = '';
       if (fullRejCb) fullRejCb.checked = false;
       Promise.all([
@@ -2201,22 +2566,25 @@ document.addEventListener("DOMContentLoaded", function() {
         state.trayCapacity = tData.tray_capacity || 20;
         state.trayType = tData.tray_type || '';
         state.platingStk = tData.plating_stk_no || state.platingStk;
-        document.getElementById('naRejectModalPlatingStk').textContent = state.platingStk;
-        document.getElementById('naRejectModalTotalQty').textContent = state.totalQty;
+        document.getElementById('nqRejectModalPlatingStk').textContent = state.platingStk;
+        document.getElementById('nqRejectModalTotalQty').textContent = state.totalQty;
         totalQtyDisp.textContent = '0';
         remainingDisp.textContent = state.totalQty;
         renderReasons();
+        // Restore draft if exists
         if (draftRes && draftRes.success && draftRes.has_draft && draftRes.draft_data) {
           var dd = draftRes.draft_data;
           state.pendingRestore = dd;
           state.totalQty = parseInt(dd.total_lot_qty || dd.total_qty || state.totalQty, 10) || state.totalQty;
           state.platingStk = dd.plating_stk_no || state.platingStk;
-          document.getElementById('naRejectModalPlatingStk').textContent = state.platingStk;
-          document.getElementById('naRejectModalTotalQty').textContent = state.totalQty;
-          reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) { inp.max = state.totalQty; });
-          var remarksInp = document.getElementById('naRejectRemarksInput');
+          document.getElementById('nqRejectModalPlatingStk').textContent = state.platingStk;
+          document.getElementById('nqRejectModalTotalQty').textContent = state.totalQty;
+          reasonsGrid.querySelectorAll('.nq-reason-qty').forEach(function (inp) { inp.max = state.totalQty; });
+          // Restore remarks
+          var remarksInp = document.getElementById('nqRejectRemarksInput');
           if (remarksInp) remarksInp.value = dd.remarks || '';
           if (fullRejCb) fullRejCb.checked = !!dd.full_lot_rejection;
+          // Restore reason qty inputs
           var totalRej = parseInt(dd.rejected_qty, 10) || 0;
           if (dd.reason_qtys && dd.reason_qtys.length > 0) {
             dd.reason_qtys.forEach(function (rq) {
@@ -2243,18 +2611,19 @@ document.addEventListener("DOMContentLoaded", function() {
         row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f0f0f0;';
         row.innerHTML =
           '<label style="flex:1;font-size:13px;color:#333;">' + r.rejection_reason + '</label>' +
-          '<input type="number" class="na-reason-qty" min="0" max="' + state.totalQty + '" ' +
+          '<input type="number" class="nq-reason-qty" min="0" max="' + state.totalQty + '" ' +
           'style="width:64px;border:1px solid #ccc;border-radius:4px;padding:2px 5px;font-size:13px;" ' +
           'placeholder="Qty" data-reason-id="' + r.id + '">';
         reasonsGrid.appendChild(row);
       });
-      reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) {
+      reasonsGrid.querySelectorAll('.nq-reason-qty').forEach(function (inp) {
         inp.addEventListener('input', debounce(onReasonQtyChange, 350));
       });
       if (fullRejCb) {
         fullRejCb.onchange = function () {
           if (fullRejCb.checked) {
-            reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) { inp.value = ''; });
+            reasonsGrid.querySelectorAll('.nq-reason-qty').forEach(function (inp) { inp.value = ''; });
+            // Full lot rejection: do NOT auto-fill lot qty into reason fields; directly allocate
             totalQtyDisp.textContent = state.totalQty;
             remainingDisp.textContent = '0';
             fetchAllocation(state.totalQty);
@@ -2271,7 +2640,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function getTotalRejectQty() {
       if (fullRejCb && fullRejCb.checked) { return state.totalQty; }
       var total = 0;
-      reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) {
+      reasonsGrid.querySelectorAll('.nq-reason-qty').forEach(function (inp) {
         total += parseInt(inp.value, 10) || 0;
       });
       return total;
@@ -2307,7 +2676,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function getDelinkRows() {
-      return Array.from(delinkList.querySelectorAll('.na-delink-tray-input')).map(function (inp) {
+      return Array.from(delinkList.querySelectorAll('.nq-delink-tray-input')).map(function (inp) {
         return {
           tray_id: inp.value.trim().toUpperCase(),
           qty: parseInt(inp.dataset.qty, 10) || 0,
@@ -2327,7 +2696,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function clearDuplicateDelinkValue(trayId, currentInput) {
       if (!trayId) return;
-      delinkList.querySelectorAll('.na-delink-tray-input').forEach(function (inp) {
+      delinkList.querySelectorAll('.nq-delink-tray-input').forEach(function (inp) {
         if (inp !== currentInput && inp.value.trim().toUpperCase() === trayId) {
           inp.value = '';
         }
@@ -2335,9 +2704,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function fillDelinkSlotFromTap(trayId) {
-      var delinkInputs = Array.from(delinkList.querySelectorAll('.na-delink-tray-input'));
+      var delinkInputs = Array.from(delinkList.querySelectorAll('.nq-delink-tray-input'));
       if (!delinkInputs.length) return false;
-      var targetInput = getFocusedTrayInput('.na-delink-tray-input', delinkList) || delinkInputs.find(function (inp) { return !inp.value.trim(); }) || delinkInputs[0];
+      var targetInput = getFocusedTrayInput('.nq-delink-tray-input', delinkList) || delinkInputs.find(function (inp) { return !inp.value.trim(); }) || delinkInputs[0];
       targetInput.value = trayId;
       lastFocusedTrayInput = targetInput;
       clearDuplicateDelinkValue(trayId, targetInput);
@@ -2347,7 +2716,7 @@ document.addEventListener("DOMContentLoaded", function() {
         nextInput.focus();
         lastFocusedTrayInput = nextInput;
       } else {
-        var acceptTopInput = acceptSlotsCont.querySelector('.na-acc-tray-input');
+        var acceptTopInput = acceptSlotsCont.querySelector('.nq-acc-tray-input');
         if (acceptTopInput) {
           acceptTopInput.focus();
           lastFocusedTrayInput = acceptTopInput;
@@ -2359,9 +2728,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function fillAcceptSlotFromTap(trayId) {
-      var accInputs = Array.from(acceptSlotsCont.querySelectorAll('.na-acc-tray-input'));
+      var accInputs = Array.from(acceptSlotsCont.querySelectorAll('.nq-acc-tray-input'));
       if (!accInputs.length) return false;
-      var targetInput = getFocusedTrayInput('.na-acc-tray-input', acceptSlotsCont) || accInputs.find(function (inp) { return !inp.value.trim(); }) || accInputs[0];
+      var targetInput = getFocusedTrayInput('.nq-acc-tray-input', acceptSlotsCont) || accInputs.find(function (inp) { return !inp.value.trim(); }) || accInputs[0];
       targetInput.value = trayId;
       lastFocusedTrayInput = targetInput;
       var targetIndex = accInputs.indexOf(targetInput);
@@ -2396,18 +2765,20 @@ document.addEventListener("DOMContentLoaded", function() {
       var filteredAutoTrays = (state.acceptAutoTrays || []).filter(function (t) {
         return delinkedIdSet.indexOf(t.tray_id) === -1;
       });
-      var accInputs = Array.from(acceptSlotsCont.querySelectorAll('.na-acc-tray-input'));
+      var accInputs = Array.from(acceptSlotsCont.querySelectorAll('.nq-acc-tray-input'));
       var slot0Val = accInputs.length > 0 ? accInputs[0].value.trim().toUpperCase() : '';
       if (!slot0Val) {
+        // Top tray not scanned yet — leave slot 0 empty, clear remaining
         for (var j = 1; j < accInputs.length; j++) accInputs[j].value = '';
       } else {
+        // Top tray scanned — preserve slot 0, re-fill slots 1+ excluding the slot-0 tray
         var filteredForRest = filteredAutoTrays.filter(function (t) { return t.tray_id !== slot0Val; });
-        var availSlots = accInputs.length - 1;
-        filteredForRest.slice(0, availSlots).forEach(function (t, i) {
+        var availSlotsDS = accInputs.length - 1;
+        filteredForRest.slice(0, availSlotsDS).forEach(function (t, i) {
           accInputs[i + 1].value = t.tray_id;
         });
-        for (var k = Math.min(filteredForRest.length, availSlots) + 1; k < accInputs.length; k++) {
-          accInputs[k].value = '';
+        for (var j = Math.min(filteredForRest.length, availSlotsDS) + 1; j < accInputs.length; j++) {
+          accInputs[j].value = '';
         }
       }
     }
@@ -2419,6 +2790,7 @@ document.addEventListener("DOMContentLoaded", function() {
       delinkList.innerHTML = '';
       state.reuseTrays = [];
 
+      // Original tray chips — required delink trays fill delink slots; others fill accept slots
       (data.original_trays || []).forEach(function (t) {
         var chip = document.createElement('span');
         chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:#e3f2fd;border:1px solid #90caf9;border-radius:14px;padding:3px 12px;font-size:12px;cursor:pointer;user-select:none;margin:2px;transition:all 0.15s;';
@@ -2430,11 +2802,11 @@ document.addEventListener("DOMContentLoaded", function() {
         chip.dataset.isTop = t.is_top ? '1' : '0';
         chip.dataset.selected = '0';
         chip.addEventListener('click', function () {
-          if (getFocusedTrayInput('.na-delink-tray-input', delinkList)) {
+          if (getFocusedTrayInput('.nq-delink-tray-input', delinkList)) {
             fillDelinkSlotFromTap(t.tray_id);
             return;
           }
-          if (getFocusedTrayInput('.na-acc-tray-input', acceptSlotsCont)) {
+          if (getFocusedTrayInput('.nq-acc-tray-input', acceptSlotsCont)) {
             fillAcceptSlotFromTap(t.tray_id);
             return;
           }
@@ -2447,26 +2819,31 @@ document.addEventListener("DOMContentLoaded", function() {
         origContainer.appendChild(chip);
       });
 
+      // Reject slots
       (data.reject_slots || []).forEach(function (slot, i) {
         var wrap = document.createElement('div');
         wrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
         wrap.innerHTML =
           '<span style="font-size:11px;color:#888;min-width:24px;">' + (i + 1) + '.</span>' +
-          '<input class="na-rej-tray-input" type="text" placeholder="' + state.rejPrefix + 'xxxx" maxlength="9" ' +
+          '<input class="nq-rej-tray-input" type="text" placeholder="' + state.rejPrefix + 'xxxx" ' +
+          'maxlength="9" ' +
           'style="flex:1;border:1px solid #ef9a9a;border-radius:4px;padding:3px 6px;font-size:12px;text-transform:uppercase;" ' +
           'data-qty="' + slot.qty + '" data-is-top="' + (slot.is_top ? '1' : '0') + '" data-slot-idx="' + i + '">' +
-          '<span class="na-rej-tray-status" style="font-size:11px;min-width:16px;"></span>' +
+          '<span class="nq-rej-tray-status" style="font-size:11px;min-width:16px;"></span>' +
           '<span style="font-size:12px;color:#c62828;">× ' + slot.qty + (slot.is_top ? ' Top' : '') + '</span>';
         rejectSlotsCont.appendChild(wrap);
       });
 
-      (data.accept_slots || []).forEach(function (slot, i) {
+      // Accept slots — empty by default; top tray scanned by user, rest auto-fill on input
+      var acceptAutoTrays = state.acceptAutoTrays;
+      ;(data.accept_slots || []).forEach(function (slot, i) {
+        var autoTray = '';
         var wrap = document.createElement('div');
         wrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
         wrap.innerHTML =
           '<span style="font-size:11px;color:#888;min-width:24px;">' + (i + 1) + '.</span>' +
-          '<input class="na-acc-tray-input" type="text" placeholder="Tray ID" value="" ' +
-          'maxlength="9" ' +
+          '<input class="nq-acc-tray-input" type="text" placeholder="Tray ID" ' +
+          'value="' + autoTray + '" ' +
           'style="flex:1;border:1px solid #a5d6a7;border-radius:4px;padding:3px 6px;font-size:12px;" ' +
           'data-qty="' + slot.qty + '" data-is-top="' + (slot.is_top ? '1' : '0') + '" data-slot-idx="' + i + '">' +
           '<span style="font-size:12px;color:#388e3c;">× ' + slot.qty + '</span>';
@@ -2478,31 +2855,31 @@ document.addEventListener("DOMContentLoaded", function() {
         wrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
         wrap.innerHTML =
           '<span style="font-size:11px;color:#888;min-width:24px;">' + (i + 1) + '.</span>' +
-          '<input class="na-delink-tray-input" type="text" placeholder="Tray ID" ' +
-          'maxlength="9" ' +
+          '<input class="nq-delink-tray-input" type="text" placeholder="Tray ID" ' +
           'style="flex:1;border:1px solid #ffcc80;border-radius:4px;padding:3px 6px;font-size:12px;text-transform:uppercase;" ' +
           'data-qty="' + slot.qty + '" data-expected-tray-id="' + slot.tray_id + '" data-slot-idx="' + i + '">' +
           '<span style="font-size:12px;color:#e65100;">× ' + slot.qty + '</span>';
         delinkList.appendChild(wrap);
       });
 
-      delinkList.querySelectorAll('.na-delink-tray-input').forEach(function (inp) {
+      delinkList.querySelectorAll('.nq-delink-tray-input').forEach(function (inp) {
         inp.addEventListener('input', function () {
-          normalizeTrayInputValue(inp);
+          inp.value = inp.value.trim().toUpperCase();
           var val = inp.value;
           clearDuplicateDelinkValue(val, inp);
           updateDelinkSection();
         });
       });
 
-      var allAccSlotInputs = Array.from(acceptSlotsCont.querySelectorAll('.na-acc-tray-input'));
-      allAccSlotInputs.forEach(function (inp) {
-        inp.addEventListener('input', function () { normalizeTrayInputValue(inp); });
-      });
+      // Slot 0 input: user scans/types top accept tray, backend-plan fills the rest
+      var allAccSlotInputs = Array.from(acceptSlotsCont.querySelectorAll('.nq-acc-tray-input'));
       if (allAccSlotInputs.length >= 1) {
         allAccSlotInputs[0].addEventListener('input', function () {
-          var topVal = normalizeTrayInputValue(allAccSlotInputs[0]);
+          var topVal = allAccSlotInputs[0].value.trim().toUpperCase();
+          allAccSlotInputs[0].value = topVal;
           if (topVal) {
+            // Auto-fill remaining slots from acceptAutoTrays (excluding the typed tray)
+            // Clamp to available slots: slot 0 is taken by user, so only N-1 slots remain.
             var otherTrays = (state.acceptAutoTrays || []).filter(function (t) { return t.tray_id !== topVal; });
             var availSlots = allAccSlotInputs.length - 1;
             otherTrays.slice(0, availSlots).forEach(function (t, idx) {
@@ -2513,7 +2890,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             updateDelinkSection();
           } else {
-            for (var k2 = 1; k2 < allAccSlotInputs.length; k2++) { allAccSlotInputs[k2].value = ''; }
+            for (var k = 1; k < allAccSlotInputs.length; k++) { allAccSlotInputs[k].value = ''; }
             updateDelinkSection();
           }
         });
@@ -2528,30 +2905,33 @@ document.addEventListener("DOMContentLoaded", function() {
       allocSection.style.display = '';
       state.allocDone = true;
 
+      // Restore draft tray inputs if a draft was loaded
       if (state.pendingRestore) {
         var pd = state.pendingRestore;
         state.pendingRestore = null;
         function restoreAcceptInputs() {
           if (pd.accept_trays && pd.accept_trays.length > 0) {
-            var allAccInputs = Array.from(acceptSlotsCont.querySelectorAll('.na-acc-tray-input'));
+            var allAccInputsR = Array.from(acceptSlotsCont.querySelectorAll('.nq-acc-tray-input'));
             pd.accept_trays.forEach(function (at, i) {
-              if (allAccInputs[i] && at.tray_id) allAccInputs[i].value = at.tray_id;
+              if (allAccInputsR[i] && at.tray_id) allAccInputsR[i].value = at.tray_id;
             });
           }
         }
+        // Restore reject trays
         if (pd.reject_trays && pd.reject_trays.length > 0) {
-          var allRejInputs = Array.from(rejectSlotsCont.querySelectorAll('.na-rej-tray-input'));
+          var allRejInputs = Array.from(rejectSlotsCont.querySelectorAll('.nq-rej-tray-input'));
           pd.reject_trays.forEach(function (rt, i) {
             if (allRejInputs[i] && rt.tray_id) allRejInputs[i].value = rt.tray_id;
           });
         }
+        // Restore accept trays
         restoreAcceptInputs();
         if (pd.delink_trays && pd.delink_trays.length > 0) {
-          var allDelinkInputs = Array.from(delinkList.querySelectorAll('.na-delink-tray-input'));
+          var allDelinkInputsR = Array.from(delinkList.querySelectorAll('.nq-delink-tray-input'));
           pd.delink_trays.forEach(function (dt, i) {
             var tid = (typeof dt === 'string' ? dt : dt.tray_id || '').trim().toUpperCase();
-            var input = tid ? delinkList.querySelector('.na-delink-tray-input[data-expected-tray-id="' + tid + '"]') : null;
-            if (!input) input = allDelinkInputs[i];
+            var input = tid ? delinkList.querySelector('.nq-delink-tray-input[data-expected-tray-id="' + tid + '"]') : null;
+            if (!input) input = allDelinkInputsR[i];
             if (input) input.value = tid;
           });
           updateDelinkSection();
@@ -2559,16 +2939,18 @@ document.addEventListener("DOMContentLoaded", function() {
         }
       }
 
-      rejectSlotsCont.querySelectorAll('.na-rej-tray-input').forEach(function (inp) {
+      // Validate reject tray inputs on blur and live oninput
+      rejectSlotsCont.querySelectorAll('.nq-rej-tray-input').forEach(function (inp) {
         var statusEl = inp.nextElementSibling;
         function validateTrayInput() {
-          var val = normalizeTrayInputValue(inp);
+          inp.value = inp.value.toUpperCase();
+          var val = inp.value.trim();
           if (!val) { inp.style.borderColor = '#ef9a9a'; if (statusEl) statusEl.textContent = ''; errDiv.textContent = ''; return; }
           if (!val.startsWith(state.rejPrefix)) {
             inp.style.borderColor = '#f44336';
             if (statusEl) { statusEl.textContent = '✗'; statusEl.style.color = '#f44336'; }
             errDiv.textContent = 'Reject tray must start with ' + state.rejPrefix;
-            selectTrayInputForOverwrite(inp);
+            if (val.length >= 9) inp.select();
             return;
           }
           post(API_BASE + 'action/', { action: 'CHECK_TRAY', tray_id: val })
@@ -2577,14 +2959,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 inp.style.borderColor = '#4caf50';
                 if (statusEl) { statusEl.textContent = '✓'; statusEl.style.color = '#4caf50'; }
                 errDiv.textContent = '';
-                var allRejInputs = Array.from(rejectSlotsCont.querySelectorAll('.na-rej-tray-input'));
+                // Move cursor to next reject tray input
+                var allRejInputs = Array.from(rejectSlotsCont.querySelectorAll('.nq-rej-tray-input'));
                 var idx = allRejInputs.indexOf(inp);
-                if (idx >= 0 && idx < allRejInputs.length - 1) allRejInputs[idx + 1].focus();
-                else if (idx === allRejInputs.length - 1) {
-                  var firstDelinkInput = Array.from(delinkList.querySelectorAll('.na-delink-tray-input')).find(function (input) {
+                if (idx >= 0 && idx < allRejInputs.length - 1) {
+                  allRejInputs[idx + 1].focus();
+                } else if (idx === allRejInputs.length - 1) {
+                  var firstDelinkInput = Array.from(delinkList.querySelectorAll('.nq-delink-tray-input')).find(function (input) {
                     return !input.value.trim();
                   });
-                  var firstAccInput = acceptSlotsCont.querySelector('.na-acc-tray-input');
+                  var firstAccInput = acceptSlotsCont.querySelector('.nq-acc-tray-input');
                   if (firstDelinkInput) firstDelinkInput.focus();
                   else if (firstAccInput) firstAccInput.focus();
                 }
@@ -2592,18 +2976,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 inp.style.borderColor = '#f44336';
                 if (statusEl) { statusEl.textContent = '✗'; statusEl.style.color = '#f44336'; }
                 errDiv.textContent = res.message || 'Tray not found in master';
-                selectTrayInputForOverwrite(inp);
+                // If at max length, select all so user can retype
+                if (val.length >= 9) inp.select();
               }
             }).catch(function () {
               inp.style.borderColor = '#ef9a9a';
               if (statusEl) statusEl.textContent = '';
             });
         }
-        var debouncedValidate = debounce(validateTrayInput, 400);
+        var debouncedValidate = debounce(validateTrayInput, 200);
         inp.addEventListener('input', function () {
-          var val = normalizeTrayInputValue(inp);
-          if (val.length >= 9) validateTrayInput();
-          else debouncedValidate();
+          inp.value = inp.value.toUpperCase();
+          // Trigger immediately at full length, otherwise debounce
+          if (inp.value.length >= parseInt(inp.getAttribute('maxlength') || '9', 10)) {
+            validateTrayInput();
+          } else {
+            debouncedValidate();
+          }
         });
         inp.addEventListener('blur', validateTrayInput);
       });
@@ -2611,18 +3000,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (clearAllBtn) {
       clearAllBtn.addEventListener('click', function () {
-        reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (i) { i.value = ''; });
+        // Clear rejection reason inputs and qty displays
+        reasonsGrid.querySelectorAll('.nq-reason-qty').forEach(function (i) { i.value = ''; });
         totalQtyDisp.textContent = '0';
         remainingDisp.textContent = state.totalQty;
         if (state.allocDone) {
-          acceptSlotsCont.querySelectorAll('.na-acc-tray-input').forEach(function (inp) { inp.value = ''; });
-          rejectSlotsCont.querySelectorAll('.na-rej-tray-input').forEach(function (inp) {
+          // Clear all accept tray inputs
+          acceptSlotsCont.querySelectorAll('.nq-acc-tray-input').forEach(function (inp) { inp.value = ''; });
+          // Clear all reject tray inputs and reset their border/status
+          rejectSlotsCont.querySelectorAll('.nq-rej-tray-input').forEach(function (inp) {
             inp.value = '';
             inp.style.borderColor = '#ef9a9a';
             var statusEl = inp.nextElementSibling;
             if (statusEl) statusEl.textContent = '';
           });
-          delinkList.querySelectorAll('.na-delink-tray-input').forEach(function (inp) { inp.value = ''; });
+          delinkList.querySelectorAll('.nq-delink-tray-input').forEach(function (inp) { inp.value = ''; });
+          // Un-strike ALL chips (auto-delink and manually selected)
           origContainer.querySelectorAll('span[data-tray-id]').forEach(function (chip) {
             chip.dataset.selected = '0';
             chip.style.background = '#e3f2fd';
@@ -2637,22 +3030,20 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function buildPayload() {
       var reasonIds = [];
-      reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) {
+      reasonsGrid.querySelectorAll('.nq-reason-qty').forEach(function (inp) {
         var rid = parseInt(inp.dataset.reasonId, 10);
-        if ((parseInt(inp.value, 10) || 0) > 0) reasonIds.push(rid);
+        if ((parseInt(inp.value, 10) || 0) > 0) {
+          reasonIds.push(rid);
+        }
       });
-      if (fullRejCb && fullRejCb.checked && !reasonIds.length) {
-        var firstReason = reasonsGrid.querySelector('.na-reason-qty');
-        if (firstReason) reasonIds.push(parseInt(firstReason.dataset.reasonId, 10));
-      }
       var rejTrays = [];
-      rejectSlotsCont.querySelectorAll('.na-rej-tray-input').forEach(function (inp) {
+      rejectSlotsCont.querySelectorAll('.nq-rej-tray-input').forEach(function (inp) {
         var tid = inp.value.trim();
         var qty = parseInt(inp.dataset.qty, 10) || 0;
         if (tid && qty > 0) rejTrays.push({ tray_id: tid, qty: qty });
       });
       var accTrays = [];
-      acceptSlotsCont.querySelectorAll('.na-acc-tray-input').forEach(function (inp) {
+      acceptSlotsCont.querySelectorAll('.nq-acc-tray-input').forEach(function (inp) {
         var tid = inp.value.trim();
         var qty = parseInt(inp.dataset.qty, 10) || 0;
         var isTop = inp.dataset.isTop === '1';
@@ -2664,7 +3055,7 @@ document.addEventListener("DOMContentLoaded", function() {
         reject_trays: rejTrays,
         accept_trays: accTrays,
         delink_trays: state.reuseTrays,
-        remarks: document.getElementById('naRejectRemarksInput').value.trim(),
+        remarks: document.getElementById('nqRejectRemarksInput').value.trim(),
         lot_id: state.lotId,
       };
     }
@@ -2674,7 +3065,12 @@ document.addEventListener("DOMContentLoaded", function() {
         errDiv.textContent = '';
         var payload = buildPayload();
         payload.action = 'SUBMIT_REJECT';
-        if (!payload.reason_ids.length) { errDiv.textContent = 'Select at least one rejection reason.'; return; }
+        // Full Lot Rejection intentionally skips per-reason quantity entry (see fullRejCb
+        // handler above) — only a partial rejection needs a reason to justify the split.
+        if (!(fullRejCb && fullRejCb.checked) && !payload.reason_ids.length) {
+          errDiv.textContent = 'Select at least one rejection reason.';
+          return;
+        }
         if (!payload.rejected_qty) { errDiv.textContent = 'Enter rejected quantity.'; return; }
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
@@ -2701,25 +3097,23 @@ document.addEventListener("DOMContentLoaded", function() {
       draftBtn.addEventListener('click', function () {
         errDiv.textContent = '';
         var reasonQtys = [];
-        reasonsGrid.querySelectorAll('.na-reason-qty').forEach(function (inp) {
+        reasonsGrid.querySelectorAll('.nq-reason-qty').forEach(function (inp) {
           var entered = inp.value.trim();
           if (entered !== '') reasonQtys.push({ reason_id: parseInt(inp.dataset.reasonId, 10), qty: parseInt(entered, 10) || 0 });
         });
         var rejTrays = [];
-        rejectSlotsCont.querySelectorAll('.na-rej-tray-input').forEach(function (inp) {
+        rejectSlotsCont.querySelectorAll('.nq-rej-tray-input').forEach(function (inp) {
           var tid = inp.value.trim();
           var qty = parseInt(inp.dataset.qty, 10) || 0;
           if (tid) rejTrays.push({ tray_id: tid, qty: qty });
         });
         var accTrays = [];
-        acceptSlotsCont.querySelectorAll('.na-acc-tray-input').forEach(function (inp) {
+        acceptSlotsCont.querySelectorAll('.nq-acc-tray-input').forEach(function (inp) {
           var tid = inp.value.trim();
           var qty = parseInt(inp.dataset.qty, 10) || 0;
           if (tid) accTrays.push({ tray_id: tid, qty: qty, is_top: inp.dataset.isTop === '1' });
         });
-        draftBtn.disabled = true;
-        draftBtn.innerHTML = '<i class="fa fa-save"></i> Saving...';
-        post(API_BASE + 'action/', {
+        var draftPayload = {
           action: 'SAVE_DRAFT',
           lot_id: state.lotId,
           draft_data: {
@@ -2727,7 +3121,7 @@ document.addEventListener("DOMContentLoaded", function() {
             reject_trays: rejTrays,
             delink_trays: state.reuseTrays,
             accept_trays: accTrays,
-            remarks: document.getElementById('naRejectRemarksInput').value.trim(),
+            remarks: document.getElementById('nqRejectRemarksInput').value.trim(),
             rejected_qty: getTotalRejectQty(),
             accepted_qty: Math.max(state.totalQty - getTotalRejectQty(), 0),
             total_lot_qty: state.totalQty,
@@ -2753,20 +3147,25 @@ document.addEventListener("DOMContentLoaded", function() {
             isDraft: true,
             status: 'Draft',
           },
-        }).then(function (data) {
-          if (data.success) {
-            closeModal();
-            setTimeout(function () { location.reload(); }, 300);
-          } else {
-            errDiv.textContent = data.error || 'Draft save failed';
+        };
+        draftBtn.disabled = true;
+        draftBtn.innerHTML = '<i class="fa fa-save"></i> Saving...';
+        post(API_BASE + 'action/', draftPayload)
+          .then(function (data) {
+            if (data.success) {
+              closeModal();
+              setTimeout(function () { location.reload(); }, 300);
+            } else {
+              errDiv.textContent = data.error || 'Draft save failed';
+              draftBtn.disabled = false;
+              draftBtn.innerHTML = '<i class="fa fa-save"></i> Draft';
+            }
+          })
+          .catch(function () {
+            errDiv.textContent = 'Server error saving draft';
             draftBtn.disabled = false;
             draftBtn.innerHTML = '<i class="fa fa-save"></i> Draft';
-          }
-        }).catch(function () {
-          errDiv.textContent = 'Server error saving draft';
-          draftBtn.disabled = false;
-          draftBtn.innerHTML = '<i class="fa fa-save"></i> Draft';
-        });
+          });
       });
     }
   });
@@ -2810,7 +3209,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('globalScan:success', function (event) {
     var detail = (event && event.detail) || {};
     var moduleName = normalizeModule(detail.module);
-    if (moduleName !== 'nickel audit' && moduleName !== 'nickel audit z2' && moduleName !== 'nickel audit zone 2') return;
+    if (moduleName !== 'nickel wiping' && moduleName !== 'nickel inspection') return;
 
     window.setTimeout(function () {
       var row = document.querySelector('#order-listing tbody tr[data-global-scan-active="1"]') ||
@@ -2822,11 +3221,11 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!rejectButton || rejectButton.disabled || rejectButton.classList.contains('disabled') || rejectButton.getAttribute('aria-disabled') === 'true') return;
 
       rejectButton.click();
-      document.dispatchEvent(new CustomEvent('nickelAudit:autoOpenRejectModal', {
+      document.dispatchEvent(new CustomEvent('nickelQC:autoOpenRejectModal', {
         detail: {
           tray_id: detail.tray_id || '',
           lot_id: row.getAttribute('data-stock-lot-id') || detail.lot_id || '',
-          zone: 'Z2',
+          zone: 'Z1',
           triggered_by: 'global_scan'
         }
       }));
@@ -2835,7 +3234,128 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="{% static 'js/row_lock_guard.js' %}"></script>
+<!-- Hold / Release Toggle (Nickel Wiping Zone 1) -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+  'use strict';
+  var HOLD_API = '/nickle_inspection/api/hold-unhold/';
+  var holdCsrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
 
-{% endblock %}
-{% endblock content %}
+  document.querySelectorAll('.hold-remark-icon').forEach(function (icon) {
+    icon.addEventListener('click', function () {
+      var title = this.getAttribute('title') || '';
+      if (!title) return;
+      if (window.Swal && typeof Swal.fire === 'function') {
+        Swal.fire({ icon: 'info', title: 'Hold / Release Remark', html: '<div style="text-align:left;">' + title.replace(/&#10;/g, '<br>') + '</div>', confirmButtonColor: '#028084' });
+      } else {
+        alert(title);
+      }
+    });
+  });
+
+  (function initNqHoldToggle() {
+    var holdModal = document.getElementById('holdRemarkModal');
+    var holdInput = document.getElementById('holdRemarkInput');
+    var holdError = document.getElementById('holdRemarkError');
+    var holdTitle = holdModal ? holdModal.querySelector('h5') : null;
+    var saveBtn = document.getElementById('saveHoldRemarkBtn');
+    var closeBtn = document.getElementById('closeHoldRemarkModal');
+
+    if (!holdModal || !holdInput || !saveBtn) return;
+
+    window.nqHoldToggleState = null;
+
+    document.querySelectorAll('.hold-toggle-btn').forEach(function (toggle) {
+      toggle.addEventListener('change', function (e) {
+        e.preventDefault();
+        var row = this.closest('tr');
+        var lotId = row ? row.getAttribute('data-stock-lot-id') : null;
+        if (!lotId) return;
+
+        // checked = active (not held), unchecked = held
+        var intendedHold = !this.checked;
+        var action = intendedHold ? 'hold' : 'unhold';
+
+        window.nqHoldToggleState = {
+          toggle: this,
+          row: row,
+          lotId: lotId,
+          action: action,
+          originalChecked: !intendedHold
+        };
+        // Revert toggle visually until modal confirms
+        this.checked = !intendedHold;
+
+        if (holdTitle) holdTitle.textContent = action === 'hold' ? 'Hold Reason' : 'Release Reason';
+        holdInput.value = '';
+        if (holdError) holdError.textContent = '';
+        holdModal.style.display = 'flex';
+        holdInput.focus();
+      });
+    });
+
+    saveBtn.addEventListener('click', function () {
+      var state = window.nqHoldToggleState;
+      if (!state) return;
+
+      var remark = holdInput.value.trim();
+      if (!remark) {
+        if (holdError) holdError.textContent = 'Remark is required.';
+        return;
+      }
+      if (remark.length > 50) {
+        if (holdError) holdError.textContent = 'Max 50 characters allowed.';
+        return;
+      }
+
+      saveBtn.disabled = true;
+      fetch(HOLD_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': holdCsrf },
+        body: JSON.stringify({ lot_id: state.lotId, action: state.action, remark: remark })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          saveBtn.disabled = false;
+          if (data.success) {
+            holdModal.style.display = 'none';
+            if (window.Swal && typeof Swal.fire === 'function') {
+              Swal.fire({
+                icon: 'success',
+                title: state.action === 'hold' ? 'Lot Held' : 'Lot Released',
+                text: data.message,
+                timer: 1500,
+                showConfirmButton: false
+              });
+            }
+            setTimeout(function () { location.reload(); }, 1500);
+          } else {
+            if (holdError) holdError.textContent = data.error || 'Failed to save.';
+          }
+        })
+        .catch(function (err) {
+          saveBtn.disabled = false;
+          if (holdError) holdError.textContent = 'Network error.';
+          console.error('[NickelWiping Z1] Hold/Unhold error:', err);
+        });
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        holdModal.style.display = 'none';
+        window.nqHoldToggleState = null;
+      });
+    }
+
+    holdModal.addEventListener('click', function (e) {
+      if (e.target === holdModal) {
+        holdModal.style.display = 'none';
+        window.nqHoldToggleState = null;
+      }
+    });
+  })();
+});
+</script>
+
+
+{% endblock %} {% endblock content %}

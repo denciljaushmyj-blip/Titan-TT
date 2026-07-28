@@ -551,7 +551,7 @@ width: 435px !important;
          <div class="card-body" style="padding-bottom:12px;">
             <h5 class="text-left mt-0 mb-4" style="font-weight:700;">R-Input Screening Pick Table</h5>
             <div class="table-responsive" style="overflow: scroll !important">
-               <table id="order-listing" class="table">
+               <table id="order-listing" class="table" data-lock-module="RECOVERY_INPUT_SCREENING">
                   <thead>
                      <tr>
                         <th>
@@ -7724,4 +7724,6 @@ function setBodyModalState(active) {
   }
 }
 </script>
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
+
 {% endblock %} {% endblock content %}

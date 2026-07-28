@@ -925,7 +925,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
           
           <!-- Table Section -->
             <div class="table-responsive">
-              <table id="order-listing" class="table">
+              <table id="order-listing" class="table" data-lock-module="BRASS_QC">
                 <thead>
                   <tr>
                     <th>
@@ -3656,6 +3656,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ── Draft Save ──
+    function isBrassRejectTypingTarget() {
+      var el = document.activeElement;
+      if (!el) return false;
+      var tag = el.tagName ? el.tagName.toLowerCase() : '';
+      return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (!overlay || overlay.style.display === 'none') return;
+      if (document.querySelector('.swal2-container')) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+      const key = event.key || '';
+      let handled = false;
+
+      // Don't let letter-key shortcuts (d/o/c) interrupt the user while they
+      // are typing into an input/textarea (e.g. the remarks box) inside this modal.
+      var isLetterShortcut = key === 'd' || key === 'D' || key === 'o' || key === 'O' || key === 'c' || key === 'C';
+      if (isLetterShortcut && isBrassRejectTypingTarget()) return;
+
+      if (key === 'd' || key === 'D') {
+        if (draftSaveBtn && !draftSaveBtn.disabled) {
+          draftSaveBtn.click();
+          handled = true;
+        }
+      } else if (key === 'o' || key === 'O') {
+        handled = restoreClearUndoSnapshot();
+      } else if (key === 'c' || key === 'C') {
+        if (globalClearAllBtn && !globalClearAllBtn.disabled) {
+          globalClearAllBtn.click();
+          handled = true;
+        }
+      }
+
+      if (handled) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+      }
+    }, true);
+
     document.addEventListener('keydown', function(event) {
       if (!overlay || overlay.style.display === 'none') return;
       if (document.querySelector('.swal2-container')) return;
@@ -4501,5 +4542,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
 
 {% endblock %} {% endblock content %}

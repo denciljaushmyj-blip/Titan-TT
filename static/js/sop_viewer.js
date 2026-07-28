@@ -171,6 +171,11 @@
             return;
           }
           var sop = data.sop;
+          if (!sop.file_url) {
+            viewerMessage.textContent = NOT_UPLOADED_MESSAGE;
+            viewerMessage.style.display = "flex";
+            return;
+          }
           viewerTitle.textContent =
             "SOP: " + esc(sop.sop_title) + " (v" + esc(sop.version) + ") — " + esc(moduleName);
           currentFileUrl = sop.file_url;

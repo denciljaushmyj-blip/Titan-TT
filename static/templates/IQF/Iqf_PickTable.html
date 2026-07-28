@@ -1648,7 +1648,7 @@
           </div>
           <!-- Table Section -->
           <div class="table-responsive">
-            <table id="order-listing" class="table">
+            <table id="order-listing" class="table" data-lock-module="IQF">
                 <thead>
                   <tr>
                     <th>
@@ -6522,5 +6522,7 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('[IQF] Global scan listener attached for auto-opening audit modal');
 });
 </script>
+
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
 
 {% endblock %} {% endblock content %}

@@ -38,6 +38,31 @@
     );
   }
 
+  /**
+   * Returns true when any popup/modal on this page is currently open.
+   * Table row shortcuts (A/R/D/V/Enter/Arrows) must not leak through to the
+   * underlying pick table while a modal is covering it.
+   */
+  function _isModalOpen() {
+    var tvm = document.getElementById("trayVerificationModal");
+    if (tvm && tvm.style.display !== "none") return true;
+    var isrm = document.getElementById("isRejectModal");
+    if (isrm && isrm.classList.contains("open")) return true;
+    var tsModal = document.getElementById("trayScanModal");
+    if (tsModal && tsModal.classList.contains("open")) return true;
+    var dpModal = document.getElementById("trayScanModal_DayPlanning");
+    if (dpModal) {
+      var dpComputed = window.getComputedStyle(dpModal);
+      if (dpComputed.display !== "none" && dpComputed.visibility !== "hidden") return true;
+    }
+    var acceptPop = document.getElementById("newPopupModal");
+    if (acceptPop && acceptPop.classList.contains("open")) return true;
+    var holdModal = document.getElementById("holdRemarkModal");
+    if (holdModal && holdModal.style.display === "flex") return true;
+    if (document.querySelector(".swal2-container")) return true;
+    return false;
+  }
+
   /** Lightweight toast – falls back to nothing if Swal is absent. */
   function _toast(msg, icon) {
     if (window.Swal) {
@@ -421,8 +446,8 @@
     var _isrm = document.getElementById("isRejectModal");
     if (_isrm && _isrm.classList.contains("open")) return;
 
-    // All other shortcuts: skip when user is typing
-    if (_isTyping()) return;
+    // All other shortcuts: skip when user is typing, or when any modal/popup is open
+    if (_isTyping() || _isModalOpen()) return;
 
     switch (e.key) {
       case "a":
