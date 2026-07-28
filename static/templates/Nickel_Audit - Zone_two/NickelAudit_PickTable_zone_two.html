@@ -1573,7 +1573,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(function (payload) {
         var imageUrl = resolveNaZone2PreviewImage(payload);
         if (!imageUrl) {
-          gallery.innerHTML = '<span style="font-size:12px;color:#777;text-align:center;">Image unavailable</span>';
+          gallery.innerHTML = '<span style="font-size:12px;color:#777;text-align:center;">Coming Soon</span>';
           return;
         }
         gallery.innerHTML = '';
@@ -1587,7 +1587,7 @@ document.addEventListener("DOMContentLoaded", function() {
         image.src = imageUrl;
       })
       .catch(function () {
-        gallery.innerHTML = '<span style="font-size:12px;color:#777;text-align:center;">Image unavailable</span>';
+        gallery.innerHTML = '<span style="font-size:12px;color:#777;text-align:center;">Coming Soon</span>';
       });
   }
 

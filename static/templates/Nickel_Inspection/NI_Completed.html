@@ -2614,7 +2614,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const imageUrl = normalizeImageUrl(rawUrl);
 
     if (!imageUrl) {
-      renderMessage(trigger, "Image unavailable");
+      renderMessage(trigger, "Coming Soon");
       return;
     }
 
@@ -2741,7 +2741,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (error && error.name === "AbortError") {
           renderMessage(trigger, "Image request timed out");
         } else {
-          renderMessage(trigger, "Image unavailable");
+          renderMessage(trigger, "Coming Soon");
         }
       });
   }
