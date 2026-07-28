@@ -3664,6 +3664,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(event) {
       var isOpen = overlay && overlay.style.display !== 'none';
       if (!isOpen || document.querySelector('.swal2-container')) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
 
       var key = (event.key || '').toLowerCase();
       var handled = false;

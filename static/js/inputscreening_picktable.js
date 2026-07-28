@@ -2134,6 +2134,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById("trayVerificationModal");
     if (!modal || modal.style.display === "none") return;
     if (document.querySelector(".swal2-container")) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
 
     if (e.key === "Escape" || e.key === "c" || e.key === "C") {
       e.preventDefault();

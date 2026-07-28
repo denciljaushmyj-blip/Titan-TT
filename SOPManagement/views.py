@@ -57,7 +57,7 @@ class SOPActiveByModuleAPIView(APIView):
 
     def get(self, request, module_id):
         sop = selectors.get_active_sop_for_module(module_id)
-        if sop is None:
+        if sop is None or not sop.file:
             logger.info('[SOP_VIEW] module_id=%s user=%s result=NOT_UPLOADED', module_id, request.user)
             return Response({
                 'found': False,

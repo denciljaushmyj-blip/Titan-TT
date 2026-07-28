@@ -7605,6 +7605,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener('keydown', function (event) {
     if (!isDpTrayScanModalOpen()) return;
     if (document.querySelector('.swal2-container')) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return; //Ctrl+c Clear prevention
 
     const key = event.key;
     const target = event.target;

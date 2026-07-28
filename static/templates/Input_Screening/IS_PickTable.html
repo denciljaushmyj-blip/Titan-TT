@@ -1245,6 +1245,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("keydown", function (event) {
     if (!isTvmOpen()) return;
     if (document.querySelector(".swal2-container")) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
 
     var key = event.key || "";
     var handled = false;

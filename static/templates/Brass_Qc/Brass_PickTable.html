@@ -3654,6 +3654,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(event) {
       if (!overlay || overlay.style.display === 'none') return;
       if (document.querySelector('.swal2-container')) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
 
       const key = event.key || '';
       let handled = false;
