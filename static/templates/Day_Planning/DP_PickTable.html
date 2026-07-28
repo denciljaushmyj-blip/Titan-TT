@@ -1188,7 +1188,7 @@ html.ttt-viewport-tablet #trayScanModal .tray-scan-modal-content :is(h1, h2, h3,
 
             <!-- Table Section -->
             <div class="table-responsive">
-<table id="order-listing" class="table">
+<table id="order-listing" class="table" data-lock-module="DAY_PLANNING">
 <thead>
   <tr> 
     {% for heading in visible_headings %}
@@ -7885,6 +7885,8 @@ document.addEventListener("DOMContentLoaded", function () {
   console.log('✅ ERR 2 FIXED: D key delete mode loaded - press D to select row, arrows to navigate, Enter to confirm');
 });
 </script>
+
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
 
   {% endblock %} {% endblock content %}
 </div>

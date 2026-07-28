@@ -622,7 +622,7 @@ stock_filters %}
 
           <!-- Table Section -->
           <div class="table-responsive">
-            <table id="order-listing" class="table">
+            <table id="order-listing" class="table" data-lock-module="RECOVERY_BRASS_QC">
               <thead>
                 <tr>
                   <th>S.No <i class="fa fa-filter" aria-hidden="true"></i></th>
@@ -11215,5 +11215,7 @@ stock_filters %}
     }, 100);
   });
 </script>
+
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
 
 {% endblock %} {% endblock content %}

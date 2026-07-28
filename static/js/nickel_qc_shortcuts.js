@@ -34,6 +34,25 @@
     return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable;
   }
 
+  /**
+   * Returns true when any popup/modal on this page is currently open.
+   * Table row shortcuts must not leak through to the underlying pick table
+   * while a modal is covering it.
+   */
+  function _isModalOpen() {
+    var nqOverlay = document.getElementById("nickelRejectModalOverlay");
+    if (nqOverlay && nqOverlay.style.display !== "none") return true;
+    var tsModal = document.getElementById("trayScanModal");
+    if (tsModal && tsModal.classList.contains("open")) return true;
+    var dpModal = document.getElementById("trayScanModal_DayPlanning");
+    if (dpModal) {
+      var cs = window.getComputedStyle(dpModal);
+      if (cs.display !== "none" && cs.visibility !== "hidden") return true;
+    }
+    if (document.querySelector(".swal2-container")) return true;
+    return false;
+  }
+
   function _toast(msg, icon) {
     if (window.Swal) {
       Swal.fire({
@@ -252,7 +271,7 @@
     var nqOverlay = document.getElementById("nickelRejectModalOverlay");
     if (nqOverlay && nqOverlay.style.display !== "none") return;
 
-    if (_isTyping()) return;
+    if (_isTyping() || _isModalOpen()) return;
 
     switch (e.key) {
       case "a":

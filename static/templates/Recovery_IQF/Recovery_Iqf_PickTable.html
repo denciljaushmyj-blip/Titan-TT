@@ -571,7 +571,7 @@
         <div class="card-body">
           <!-- Table Section -->
           <div class="table-responsive">
-            <table id="order-listing" class="table">
+            <table id="order-listing" class="table" data-lock-module="RECOVERY_IQF">
                 <thead>
                   <tr>
                     <th>
@@ -9259,4 +9259,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 </script>
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
+
 {% endblock %} {% endblock content %}

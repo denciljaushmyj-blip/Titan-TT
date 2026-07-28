@@ -1283,7 +1283,7 @@
             <h5 class="text-left mt-0 mb-4" style="font-weight:700;">Inprocess Inspection Pick Table</h5>
             <!-- Table Section -->
             <div class="table-responsive" style="overflow: scroll !important">
-               <table id="order-listing" class="table">
+               <table id="order-listing" class="table" data-lock-module="INPROCESS_INSPECTION">
                   <thead>
                      <tr>
                         <th>S.No <i class="fa fa-filter" aria-hidden="true"></i></th>
@@ -4399,6 +4399,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }, 200);
 });
 </script>
+
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
 
 {% endblock %}
 {% endblock content %}

@@ -273,7 +273,7 @@ tr.hold-row td:first-child, tr.hold-row td:nth-child(2), tr.hold-row td:nth-chil
           </h5>
 
           <div class="table-responsive">
-            <table id="order-listing" class="table table-bordered">
+            <table id="order-listing" class="table table-bordered" data-lock-module="SPIDER_SPINDLE_Z2">
               <thead>
                 <tr>
                   <th>S.No</th>
@@ -1367,4 +1367,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
+
 {% endblock %}

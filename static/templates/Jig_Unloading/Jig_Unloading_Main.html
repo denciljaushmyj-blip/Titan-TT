@@ -1619,7 +1619,7 @@ body.add-model-mode #selectAllCheckbox {
 
             <!-- Table Section -->
             <div class="table-responsive" style="overflow: scroll !important">
-            <table id="order-listing" class="table">
+            <table id="order-listing" class="table" data-lock-module="JIG_UNLOADING">
                 <thead>
                   <tr>
                     <th>S.No <i class="fa fa-filter" aria-hidden="true"></i>
@@ -4047,6 +4047,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <script src="{% static 'js/model_image_tooltip.js' %}"></script>
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
+
 {% endblock %}
 {% endblock content %}
 

@@ -512,7 +512,7 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
         />
       </div>
       <div class="table-responsive">
-        <table id="order-listing" class="table">
+        <table id="order-listing" class="table" data-lock-module="JIG_LOADING">
           <thead>
             <tr>
               <th>S.No <i class="fa fa-filter" aria-hidden="true"></i></th>
@@ -9406,6 +9406,8 @@ if (window.jQuery) {
   });
 })();
 </script>
+
+<script src="{% static 'js/row_lock_guard.js' %}"></script>
 
 {% endblock %}
 {% endblock content %}
