@@ -1082,8 +1082,64 @@
     $("isrm-sec-delink").classList.toggle("isrm-locked", !rejectStepDone());
   }
 
+  var lastClearSnapshot = null;
+
+  function cloneValue(value) {
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (e) {
+      return value;
+    }
+  }
+
+  function captureUndoSnapshot() {
+    var grid = $("isrm-reason-grid");
+    lastClearSnapshot = {
+      rejectScans: cloneValue(state.rejectScans),
+      acceptScans: cloneValue(state.acceptScans),
+      delinkScans: cloneValue(state.delinkScans),
+      fullLotReject: !!state.fullLotReject,
+      remarks: ($("isrm-remarks") || {}).value || "",
+      reasonQtys: grid ? Array.from(grid.querySelectorAll(".isrm-qty-input")).map(function (input) {
+        return input.value;
+      }) : [],
+    };
+  }
+
+  function restoreUndoSnapshot() {
+    if (!lastClearSnapshot) {
+      setInsight("info", "Nothing to undo.");
+      return false;
+    }
+
+    var grid = $("isrm-reason-grid");
+    if (grid) {
+      Array.from(grid.querySelectorAll(".isrm-qty-input")).forEach(function (input, index) {
+        input.value = lastClearSnapshot.reasonQtys[index] || 0;
+      });
+    }
+
+    state.rejectScans = cloneValue(lastClearSnapshot.rejectScans) || [];
+    state.acceptScans = cloneValue(lastClearSnapshot.acceptScans) || [];
+    state.delinkScans = cloneValue(lastClearSnapshot.delinkScans) || [];
+    state.fullLotReject = !!lastClearSnapshot.fullLotReject;
+
+    var rmEl = $("isrm-remarks"); if (rmEl) rmEl.value = lastClearSnapshot.remarks || "";
+    var lotRej = $("isrm-lot-reject-toggle"); if (lotRej) lotRej.checked = state.fullLotReject;
+
+    renderRejectRows();
+    renderAcceptRows();
+    renderDelinkSection();
+    updateTotals();
+    scheduleSlotPlan();
+    renderActivePills();
+    setInsight("success", "Undo complete.");
+    return true;
+  }
+
   // ── Fix 6: Clear all user inputs (keep lot context) ──────────────────────
   function clearAllInputs() {
+    captureUndoSnapshot();
     state.scanEpoch += 1;  // invalidate any in-flight scan callbacks
     var grid = $("isrm-reason-grid");
     if (grid) {
@@ -1494,10 +1550,55 @@
     var draftBtn = $("isrm-draft-btn");
     if (draftBtn) draftBtn.addEventListener("click", saveDraft);
 
+    document.addEventListener("keydown", function (e) {
+      var modal = $("isRejectModal");
+      if (!modal || !modal.classList.contains("open")) return;
+      if (document.querySelector(".swal2-container")) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      if (e.key === "Escape" || e.key === "c" || e.key === "C") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+        closeModal();
+        return;
+      }
+
+      if (e.key === "d" || e.key === "D") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+        if (!state.isSubmitting) saveDraft();
+        return;
+      }
+
+      if (e.key === "o" || e.key === "O") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+        restoreUndoSnapshot();
+        return;
+      }
+
+      if (e.key === "Enter") {
+        var targetTag = (e.target && e.target.tagName || "").toUpperCase();
+        var pendingInput = modal.querySelector('.isrm-scan-input[data-scan-pending="1"]');
+        if (targetTag === "TEXTAREA" || pendingInput) return;
+        var submitButton = $("isrm-submit-btn");
+        if (submitButton && !submitButton.disabled && !state.isSubmitting) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+          submit();
+        }
+      }
+    }, true);
+
     // ── Clear All buttons for each section ────────────────────────────────
     var rejectClearAllBtn = $("isrm-reject-clear-all");
     if (rejectClearAllBtn) {
       rejectClearAllBtn.addEventListener("click", function () {
+        captureUndoSnapshot();
         state.rejectScans = state.rejectScans.map(function () { return null; });
         renderRejectRows();
         renderActivePills();
@@ -1510,6 +1611,7 @@
     var acceptClearAllBtn = $("isrm-accept-clear-all");
     if (acceptClearAllBtn) {
       acceptClearAllBtn.addEventListener("click", function () {
+        captureUndoSnapshot();
         state.acceptScans = state.acceptScans.map(function () { return null; });
         renderAcceptRows();
         renderActivePills();
@@ -1521,6 +1623,7 @@
     var delinkClearAllBtn = $("isrm-delink-clear-all");
     if (delinkClearAllBtn) {
       delinkClearAllBtn.addEventListener("click", function () {
+        captureUndoSnapshot();
         state.delinkScans = [];
         renderDelinkSection();
         renderActivePills();

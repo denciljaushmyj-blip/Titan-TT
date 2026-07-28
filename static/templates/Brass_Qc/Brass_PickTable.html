@@ -1339,6 +1339,11 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                           style="border: 1px solid #dc3545; background-color: #f8d7da; color: #721c24; font-size: 13px; white-space: nowrap; padding: 5px;">
                           On Hold
                         </div>
+                      {% elif data.lot_status == 'In Progress' %}
+                        <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                            style="border: 1px solid #0c8249; background-color: #e6f4ea; color: #0c8249; font-size: 13px; white-space: nowrap; padding: 5px;">
+                          In Progress
+                        </div>
                       {% elif data.lot_status == 'Yet to Release' %}
                         <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                             style="border: 1px solid #f9a825; background-color: #fff8e1; color: #b26a00; font-size: 13px; white-space: nowrap; padding: 5px;">
@@ -1797,6 +1802,25 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 <script nonce="{{ csp_nonce }}">
 // Row highlight & position swap for Accept, Reject, and View actions (DP_PickTable style)
 document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener('keydown', function(event) {
+    if (event.key !== 'x' && event.key !== 'X') return;
+    if (document.querySelector('.swal2-container')) return;
+    var rejectOverlay = document.getElementById('brassRejectModalOverlay');
+    if (rejectOverlay && rejectOverlay.style.display !== 'none') return;
+    var activeElement = document.activeElement;
+    if (activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(activeElement.tagName) !== -1) return;
+
+    var row = document.querySelector('#order-listing tbody tr.gkb-row-focus, #order-listing tbody tr.dp-row-action-highlight') ||
+      document.querySelector('#order-listing tbody tr[data-stock-lot-id]:not(.row-inactive)');
+    var deleteButton = row ? row.querySelector('.delete-batch-btn') : null;
+    if (!deleteButton) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+    deleteButton.click();
+  }, true);
+
   // Add highlight style if not present
   if (!document.getElementById('dp-row-action-highlight-style')) {
     var style = document.createElement('style');
@@ -2544,6 +2568,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let _reuseTrayIds = [];
     let _delinkSlots = [];
     let _pendingDraftRestore = null; // draft data to apply after fetchAllocation
+    let _clearUndoSnapshot = null;
 
     // ── Helpers ──
     function escHtml(s) {
@@ -2554,6 +2579,54 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function normalizeTrayId(trayId) {
       return (trayId || '').trim().toUpperCase();
+    }
+
+    function cloneState(value) {
+      try {
+        return JSON.parse(JSON.stringify(value));
+      } catch (error) {
+        return value;
+      }
+    }
+
+    function captureClearUndoSnapshot() {
+      _clearUndoSnapshot = {
+        acceptSlots: cloneState(_acceptSlots),
+        rejectSlots: cloneState(_rejectSlots),
+        delinkSlots: cloneState(_delinkSlots),
+        reasons: Array.from(reasonsGrid.querySelectorAll('.reject-qty-input')).map(function(inp) {
+          return inp.value;
+        }),
+        remarks: remarksInput ? remarksInput.value : '',
+        fullLot: fullLotCb ? fullLotCb.checked : false,
+        acceptEnabled: isAcceptSectionEnabled(),
+        delinkDisplay: delinkSection ? delinkSection.style.display : 'none'
+      };
+    }
+
+    function restoreClearUndoSnapshot() {
+      if (!_clearUndoSnapshot) {
+        errorDiv.textContent = 'Nothing to undo.';
+        return false;
+      }
+      _acceptSlots = cloneState(_clearUndoSnapshot.acceptSlots) || [];
+      _rejectSlots = cloneState(_clearUndoSnapshot.rejectSlots) || [];
+      _delinkSlots = cloneState(_clearUndoSnapshot.delinkSlots) || [];
+      reasonsGrid.querySelectorAll('.reject-qty-input').forEach(function(inp, index) {
+        inp.value = _clearUndoSnapshot.reasons[index] || '';
+      });
+      if (remarksInput) remarksInput.value = _clearUndoSnapshot.remarks || '';
+      if (fullLotCb) fullLotCb.checked = !!_clearUndoSnapshot.fullLot;
+      renderSlots(rejectSlotsContainer, _rejectSlots, 'reject');
+      renderSlots(acceptSlotsContainer, _acceptSlots, 'accept');
+      renderOriginalTrays();
+      setAcceptSectionEnabled(!!_clearUndoSnapshot.acceptEnabled);
+      if (delinkSection) delinkSection.style.display = _clearUndoSnapshot.delinkDisplay || 'none';
+      renderDelinkSlots();
+      updateSummary();
+      updateTotals();
+      errorDiv.textContent = '';
+      return true;
     }
 
     function setAcceptSectionEnabled(enabled) {
@@ -3560,6 +3633,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //Global Clear All button ──
     if (globalClearAllBtn) {
       globalClearAllBtn.addEventListener('click', function() {
+        captureClearUndoSnapshot();
         // Clear all tray assignments
         _acceptSlots.forEach(function(s) { s.tray_id = null; });
         _rejectSlots.forEach(function(s) { s.tray_id = null; });
@@ -3582,6 +3656,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ── Draft Save ──
+    document.addEventListener('keydown', function(event) {
+      if (!overlay || overlay.style.display === 'none') return;
+      if (document.querySelector('.swal2-container')) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+      const key = event.key || '';
+      let handled = false;
+
+      if (key === 'd' || key === 'D') {
+        if (draftSaveBtn && !draftSaveBtn.disabled) {
+          draftSaveBtn.click();
+          handled = true;
+        }
+      } else if (key === 'o' || key === 'O') {
+        handled = restoreClearUndoSnapshot();
+      } else if (key === 'c' || key === 'C') {
+        if (globalClearAllBtn && !globalClearAllBtn.disabled) {
+          globalClearAllBtn.click();
+          handled = true;
+        }
+      }
+
+      if (handled) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+      }
+    }, true);
+
     if (draftSaveBtn) {
       draftSaveBtn.addEventListener('click', function() {
         errorDiv.textContent = '';
@@ -4089,7 +4192,7 @@ document.addEventListener("DOMContentLoaded", function () {
     gallery.replaceChildren();
     const unavailable = document.createElement("div");
     unavailable.className = "model-image-unavailable";
-    unavailable.textContent = message || "Image unavailable";
+    unavailable.textContent = message || "Coming Soon";
     gallery.appendChild(unavailable);
   }
 
@@ -4101,7 +4204,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const imageUrl = normalizeStockImageUrl(rawUrl);
 
     if (!imageUrl) {
-      renderUnavailable(trigger, "Image unavailable");
+      renderUnavailable(trigger, "Coming Soon");
       return;
     }
 
@@ -4117,7 +4220,7 @@ document.addEventListener("DOMContentLoaded", function () {
       "border-radius:6px;background:#fff;display:block;";
 
     image.addEventListener("error", function () {
-      renderUnavailable(trigger, "Image unavailable");
+      renderUnavailable(trigger, "Coming Soon");
     });
 
     gallery.appendChild(image);
@@ -4209,7 +4312,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch(function () {
         if (trigger.dataset.stockPreviewRequestId !== requestId) return;
-        renderUnavailable(trigger, "Image unavailable");
+        renderUnavailable(trigger, "Coming Soon");
       });
   }
 

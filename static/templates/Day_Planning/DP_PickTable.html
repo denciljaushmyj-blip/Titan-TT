@@ -1493,7 +1493,7 @@ html.ttt-viewport-tablet #trayScanModal .tray-scan-modal-content :is(h1, h2, h3,
 <!-- New top header container: title + user profile aligned left -->
 <!-- Header Section -->
     <div class="modal-top-header" style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-      <div class="model-image-unavailable model-preview-state" style="width:44px;height:44px;border-radius:50%;font-size:10px;display:none;">Image unavailable</div>
+      <div class="model-image-unavailable model-preview-state" style="width:44px;height:44px;border-radius:50%;font-size:10px;display:none;">Coming Soon</div>
       <img class="model-preview-image" alt="Model preview" style="border-radius: 50%; width: 44px; height: 44px; object-fit: contain; display:none; background:#fff;" />
       
       <div style="font-weight: 600; color: #222; font-size: 14px; display: flex; gap: 8px; align-items: center;">
@@ -4936,7 +4936,7 @@ document.addEventListener("click", async function(event) {
                     modalUserImg.removeAttribute('src');
                     modalUserImg.style.display = 'none';
                     if (modalImageState) {
-                        modalImageState.textContent = 'Image unavailable';
+                        modalImageState.textContent = 'Coming Soon';
                         modalImageState.style.display = 'flex';
                     }
                 }, { once: true });
@@ -4944,7 +4944,7 @@ document.addEventListener("click", async function(event) {
                 modalUserImg.removeAttribute('src');
                 modalUserImg.style.display = 'none';
                 if (modalImageState) {
-                    modalImageState.textContent = 'Image unavailable';
+                    modalImageState.textContent = 'Coming Soon';
                     modalImageState.style.display = 'flex';
                 }
             }
@@ -6515,7 +6515,7 @@ console.log('✅ Enhanced tray scan modal with dynamic row management loaded');
        gallery.replaceChildren();
        const unavailableText = document.createElement("div");
        unavailableText.className = "model-image-unavailable";
-       unavailableText.textContent = "Image unavailable";
+       unavailableText.textContent = "Coming Soon";
        gallery.appendChild(unavailableText);
      }
 
@@ -6592,7 +6592,7 @@ function loadStockPreview(trigger) {
     if (trigger.dataset.stockPreviewRequestId !== requestId) return;
 
     if (xhr.status < 200 || xhr.status >= 300) {
-      setTooltipPreview(trigger, "", "Image unavailable");
+      setTooltipPreview(trigger, "", "Coming Soon");
       return;
     }
 
@@ -6606,7 +6606,7 @@ function loadStockPreview(trigger) {
         data.preview_view || "Model image"
       );
     } catch (err) {
-      setTooltipPreview(trigger, "", "Image unavailable");
+      setTooltipPreview(trigger, "", "Coming Soon");
     }
   };
   xhr.send();
@@ -7520,6 +7520,139 @@ All other actions (edit, delete, filter, etc.) are blocked visually and function
     console.log('Keyboard shortcuts ready: Esc=clear | Up/Down=navigate | Enter=execute | F2=scan | T=tray-scan | Delete=delete | Arrows=scroll | 1-9=page');
   }
   }
+</script>
+
+<!-- DP Pick Table tray-scan modal shortcuts: D=Draft, Enter=Submit, O/C=Clear -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  if (!window.location.pathname.includes('/dayplanning/dp_pick_table/')) return;
+
+  function isDpTrayScanModalOpen() {
+    const modal = document.getElementById('trayScanModal');
+    return !!(modal && modal.classList.contains('open'));
+  }
+
+  function clickIfUsable(selector) {
+    const element = document.querySelector(selector);
+    if (!element || element.disabled || element.getAttribute('aria-disabled') === 'true') {
+      return false;
+    }
+    element.click();
+    return true;
+  }
+
+  function isTypingIntoTrayField(target) {
+    if (!target || !target.matches) return false;
+    return target.matches('#trayScanModal input[type="text"], #trayScanModal input[type="number"], #topTrayIdInput');
+  }
+
+  function canSubmitFromField() {
+    if (typeof validateAllTrayIds === 'function' && !validateAllTrayIds()) {
+      return false;
+    }
+    const detailsDiv = document.getElementById('trayScanDetails');
+    return !(detailsDiv && detailsDiv.querySelector('.tray-id-error, .global-tray-warning'));
+  }
+
+  let lastTrayClearSnapshot = null;
+
+  function getTrayScanSnapshot() {
+    const detailsDiv = document.getElementById('trayScanDetails');
+    if (!detailsDiv) return null;
+    return {
+      trayIds: Array.from(detailsDiv.querySelectorAll('input[type="text"]')).map(function (input) {
+        return input.value;
+      }),
+      trayQtys: Array.from(detailsDiv.querySelectorAll('input[type="number"]')).map(function (input) {
+        return input.value;
+      }),
+      verifyChecked: Array.from(detailsDiv.querySelectorAll('.tray-verify-checkbox')).map(function (input) {
+        return input.checked;
+      })
+    };
+  }
+
+  function restoreTrayScanSnapshot(snapshot) {
+    const detailsDiv = document.getElementById('trayScanDetails');
+    if (!detailsDiv || !snapshot) return false;
+
+    Array.from(detailsDiv.querySelectorAll('input[type="text"]')).forEach(function (input, index) {
+      input.value = snapshot.trayIds[index] || '';
+      input.style.borderColor = '';
+      input.style.backgroundColor = '';
+    });
+    Array.from(detailsDiv.querySelectorAll('input[type="number"]')).forEach(function (input, index) {
+      input.value = snapshot.trayQtys[index] || '';
+    });
+    Array.from(detailsDiv.querySelectorAll('.tray-verify-checkbox')).forEach(function (input, index) {
+      input.checked = !!snapshot.verifyChecked[index];
+    });
+
+    detailsDiv.querySelectorAll('.tray-id-error, .tray-id-success, .global-tray-warning').forEach(function (message) {
+      message.remove();
+    });
+
+    const footer = document.getElementById('trayQtyErrorFooter');
+    if (footer) {
+      footer.textContent = 'Clear undone';
+      footer.style.color = '#007bff';
+    }
+    if (typeof updateUIElements === 'function') updateUIElements();
+    if (typeof updateTrayScanSummary === 'function') updateTrayScanSummary();
+    return true;
+  }
+
+  document.addEventListener('keydown', function (event) {
+    if (!isDpTrayScanModalOpen()) return;
+    if (document.querySelector('.swal2-container')) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return; //Ctrl+c Clear prevention
+
+    const key = event.key;
+    const target = event.target;
+
+    if (key === 'd' || key === 'D') {
+      if (clickIfUsable('#trayScanDraftBtn')) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+      return;
+    }
+
+    if (key === 'Enter') {
+      if (isTypingIntoTrayField(target) && !canSubmitFromField()) {
+        return;
+      }
+      if (clickIfUsable('#trayScanSubmitBtn')) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+      return;
+    }
+
+    if (key === 'o' || key === 'O') {
+      if (restoreTrayScanSnapshot(lastTrayClearSnapshot)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+      return;
+    }
+
+    if (key === 'c' || key === 'C') {
+      lastTrayClearSnapshot = getTrayScanSnapshot();
+      if (clickIfUsable('#trayIDRedoBtn')) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }
+  }, true);
+
+  document.addEventListener('click', function (event) {
+    const redoBtn = event.target && event.target.closest ? event.target.closest('#trayIDRedoBtn') : null;
+    if (isDpTrayScanModalOpen() && redoBtn) {
+      lastTrayClearSnapshot = getTrayScanSnapshot();
+    }
+  }, true);
+});
 </script>
 
 <!-- ✅ ERR 2 FIX: D Key Delete Mode for DP_PickTable -->

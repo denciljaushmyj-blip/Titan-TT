@@ -1259,6 +1259,11 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                           style="border: 1px solid #dc3545; background-color: #f8d7da; color: #721c24; font-size: 13px; white-space: nowrap; padding: 5px;">
                           On Hold
                         </div>
+                      {% elif data.lot_status == 'In Progress' %}
+                        <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                            style="border: 1px solid #1976d2; background-color: #e3f2fd; color: #0d47a1; font-size: 13px; white-space: nowrap; padding: 5px;">
+                          In Progress
+                        </div>
                       {% elif data.lot_status == 'Yet to Release' %}
                         <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                             style="border: 1px solid #0d5d17; background-color: #c5f9c2; color: #2f801b; font-size: 13px; white-space: nowrap; padding: 5px;">
@@ -1857,6 +1862,28 @@ document.addEventListener("DOMContentLoaded", function() {
   // Accept, Reject, View (tray-scan-btn, tray-scan-btn-Jig, btn-twitter, tray-scan-btn-BQ-view)
   attachRowHighlight('.tray-scan-btn, .tray-scan-btn-Jig, .btn-twitter, .tray-scan-btn-BQ-view');
 
+  // Brass Audit Pick Table row shortcut: X clicks the active row delete icon.
+  document.addEventListener('keydown', function(event) {
+    var key = (event.key || '').toLowerCase();
+    if (key !== 'x') return;
+    if (document.querySelector('.swal2-container')) return;
+    var rejectOverlay = document.getElementById('brassRejectModalOverlay');
+    if (rejectOverlay && rejectOverlay.style.display !== 'none') return;
+    var target = event.target;
+    if (target && target.closest && target.closest('input, textarea, select, [contenteditable="true"]')) return;
+
+    var row = document.querySelector('#order-listing tbody tr.gkb-row-focus') ||
+      document.querySelector('#order-listing tbody tr.dp-row-action-highlight') ||
+      document.querySelector('#order-listing tbody tr:not(.row-inactive)');
+    var deleteButton = row ? row.querySelector('.delete-batch-btn') : null;
+    if (!deleteButton) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    deleteButton.click();
+  }, true);
+
   // Restore on all modal closes (tray scan, day planning, new popup, etc)
   [
     'closeTrayScanModal',
@@ -2096,12 +2123,11 @@ document.addEventListener('DOMContentLoaded', function() {
               if (lotStatusIndex >= 0) {
                 const lotStatusTd = stageTds[lotStatusIndex];
                 const lotStatusPill = lotStatusTd.querySelector('.d-inline-block.rounded-pill');
-                if (lotStatusPill) {
-                  const text = lotStatusPill.textContent.trim();
-                  if (text === 'Yet to Start') {
-                    lotStatusPill.textContent = 'Released';
-                    lotStatusPill.style.cssText = 'border:1px solid #028084; background-color:#d1f8f0; color:#028084; font-size:13px; white-space:nowrap; padding:5px;';
-                    lotStatusPill.classList.add('lot-status-pill');
+                if (lotStatusPill && result.lot_status) {
+                  lotStatusPill.textContent = result.lot_status;
+                  if (result.lot_status === 'In Progress') {
+                    lotStatusPill.style.cssText = 'border:1px solid #1976d2; background-color:#e3f2fd; color:#0d47a1; font-size:13px; white-space:nowrap; padding:5px;';
+                    lotStatusPill.classList.remove('lot-status-pill');
                   }
                 }
               }
@@ -2562,6 +2588,59 @@ document.addEventListener('DOMContentLoaded', function() {
       var d = document.createElement('div');
       d.textContent = s;
       return d.innerHTML;
+    }
+
+    let _clearUndoSnapshot = null;
+
+    function cloneSlots(slots) {
+      return slots.map(function(s) {
+        return { qty: s.qty, is_top: s.is_top, tray_id: s.tray_id || null };
+      });
+    }
+
+    function captureClearUndoSnapshot() {
+      _clearUndoSnapshot = {
+        acceptSlots: cloneSlots(_acceptSlots),
+        rejectSlots: cloneSlots(_rejectSlots),
+        delinkSlots: _delinkSlots.map(function(s) { return { tray_id: s.tray_id || null }; }),
+        reasonValues: Array.prototype.map.call(
+          reasonsGrid.querySelectorAll('.reject-qty-input'),
+          function(inp) {
+            return { reasonId: inp.getAttribute('data-reason-id'), value: inp.value };
+          }
+        ),
+        remarks: remarksInput ? remarksInput.value : '',
+        fullLot: fullLotCb ? fullLotCb.checked : false,
+        acceptDisabled: acceptSlotsContainer && acceptSlotsContainer.parentElement
+          ? acceptSlotsContainer.parentElement.style.pointerEvents === 'none'
+          : false,
+        delinkDisplay: delinkSection ? delinkSection.style.display : ''
+      };
+    }
+
+    function restoreClearUndoSnapshot() {
+      if (!_clearUndoSnapshot) return;
+      _acceptSlots = cloneSlots(_clearUndoSnapshot.acceptSlots);
+      _rejectSlots = cloneSlots(_clearUndoSnapshot.rejectSlots);
+      _delinkSlots = _clearUndoSnapshot.delinkSlots.map(function(s) { return { tray_id: s.tray_id || null }; });
+      if (remarksInput) remarksInput.value = _clearUndoSnapshot.remarks || '';
+      if (fullLotCb) fullLotCb.checked = !!_clearUndoSnapshot.fullLot;
+
+      _clearUndoSnapshot.reasonValues.forEach(function(item) {
+        var inp = reasonsGrid.querySelector('.reject-qty-input[data-reason-id="' + item.reasonId + '"]');
+        if (inp) inp.value = item.value;
+      });
+
+      renderSlots(rejectSlotsContainer, _rejectSlots, 'reject');
+      renderSlots(acceptSlotsContainer, _acceptSlots, 'accept');
+      renderOriginalTrays();
+      if (acceptSlotsContainer && acceptSlotsContainer.parentElement) {
+        acceptSlotsContainer.parentElement.style.opacity = _clearUndoSnapshot.acceptDisabled ? '0.3' : '1';
+        acceptSlotsContainer.parentElement.style.pointerEvents = _clearUndoSnapshot.acceptDisabled ? 'none' : 'auto';
+      }
+      if (delinkSection) delinkSection.style.display = _clearUndoSnapshot.delinkDisplay || 'none';
+      updateSummary();
+      updateTotals();
     }
 
     // ── Close / Cancel ──
@@ -3560,6 +3639,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //Global Clear All button ──
     if (globalClearAllBtn) {
       globalClearAllBtn.addEventListener('click', function() {
+        captureClearUndoSnapshot();
         // Clear all tray assignments
         _acceptSlots.forEach(function(s) { s.tray_id = null; });
         _rejectSlots.forEach(function(s) { s.tray_id = null; });
@@ -3583,6 +3663,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ── Draft Save ──
+    // Brass Audit Pick Table modal shortcuts:
+    // D = draft, C = clear all, O = undo last clear.
+    document.addEventListener('keydown', function(event) {
+      var isOpen = overlay && overlay.style.display !== 'none';
+      if (!isOpen || document.querySelector('.swal2-container')) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+      var key = (event.key || '').toLowerCase();
+      var handled = false;
+      if (key === 'd') {
+        if (draftSaveBtn && !draftSaveBtn.disabled) {
+          draftSaveBtn.click();
+          handled = true;
+        }
+      } else if (key === 'c') {
+        if (globalClearAllBtn && !globalClearAllBtn.disabled) {
+          globalClearAllBtn.click();
+          handled = true;
+        }
+      } else if (key === 'o') {
+        restoreClearUndoSnapshot();
+        handled = true;
+      }
+
+      if (handled) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+      }
+    }, true);
+
     if (draftSaveBtn) {
       draftSaveBtn.addEventListener('click', function() {
         errorDiv.textContent = '';
@@ -4034,7 +4145,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const imageUrl = normalizeImageUrl(rawUrl);
 
     if (!imageUrl) {
-      renderMessage(trigger, "Image unavailable");
+      renderMessage(trigger, "Coming Soon");
       return;
     }
 
@@ -4150,7 +4261,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (error && error.name === "AbortError") {
           renderMessage(trigger, "Image request timed out");
         } else {
-          renderMessage(trigger, "Image unavailable");
+          renderMessage(trigger, "Coming Soon");
         }
       });
   }

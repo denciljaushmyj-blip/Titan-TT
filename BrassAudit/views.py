@@ -98,6 +98,36 @@ def _get_pick_table_hover_preview_url(model_master):
     return get_image_url(placeholder) if placeholder else None
 
 
+def _get_brass_audit_pick_lot_status(workflow_data):
+    """Return the Pick Table status from saved Brass Audit workflow fields.
+
+    In particular, ``brass_audit_accepted_qty_verified`` is set by the
+    verification endpoint and stored on ``TotalStockModel``.  ``workflow_data``
+    is built directly from that model during the GET request; do not replace
+    its values with request/UI state.
+    """
+    if workflow_data.get('brass_audit_onhold_picking') or workflow_data.get('brass_audit_draft'):
+        return 'Draft'
+    if workflow_data.get('brass_audit_hold_lot'):
+        return 'On Hold'
+
+    audit_completed = any((
+        workflow_data.get('brass_audit_accptance'),
+        workflow_data.get('brass_audit_rejection'),
+        workflow_data.get('brass_audit_few_cases_accptance'),
+    ))
+    # This is the Brass Audit -> Brass QC release flag.  Do not use
+    # send_brass_qc here: it belongs to a different workflow route and may
+    # remain set from an earlier stage.
+    if audit_completed and workflow_data.get('send_brass_audit_to_qc'):
+        return 'Released'
+    if audit_completed:
+        return 'Yet to Release'
+    if workflow_data.get('brass_audit_accepted_qty_verified'):
+        return 'In Progress'
+    return 'Yet to Start'
+
+
 @method_decorator(login_required, name='dispatch')
 class BrassAuditPickTableView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
@@ -310,17 +340,9 @@ class BrassAuditPickTableView(APIView):
             else:
                 data['action_state'] = 'DEFAULT'
 
-            # Lot status pill
-            if data.get('brass_audit_onhold_picking') or data.get('brass_audit_draft'):
-                data['lot_status'] = 'Draft'
-            elif data.get('brass_audit_hold_lot'):
-                data['lot_status'] = 'On Hold'
-            elif data.get('brass_audit_rejection') or data.get('brass_audit_few_cases_accptance') or data.get('brass_audit_accptance'):
-                data['lot_status'] = 'Yet to Release'
-            elif data.get('brass_audit_accepted_qty_verified'):
-                data['lot_status'] = 'Released'
-            else:
-                data['lot_status'] = 'Yet to Start'
+            # Lot status pill.  Resolve from the saved model row so a GET
+            # after refresh cannot depend on any transient browser state.
+            data['lot_status'] = _get_brass_audit_pick_lot_status(data)
 
             # Fallbacks
             if not data.get('brass_audit_physical_qty'):
@@ -1101,6 +1123,16 @@ def brass_audit_toggle_verified(request):
         "success": True,
         "lot_id": lot_id,
         "brass_audit_accepted_qty_verified": ts.brass_audit_accepted_qty_verified,
+        "lot_status": _get_brass_audit_pick_lot_status({
+            'brass_audit_onhold_picking': ts.brass_audit_onhold_picking,
+            'brass_audit_draft': ts.brass_audit_draft,
+            'brass_audit_hold_lot': ts.brass_audit_hold_lot,
+            'brass_audit_accptance': ts.brass_audit_accptance,
+            'brass_audit_rejection': ts.brass_audit_rejection,
+            'brass_audit_few_cases_accptance': ts.brass_audit_few_cases_accptance,
+            'send_brass_audit_to_qc': ts.send_brass_audit_to_qc,
+            'brass_audit_accepted_qty_verified': ts.brass_audit_accepted_qty_verified,
+        }),
         "last_process_module": ts.last_process_module,
         "can_delete": can_delete,
     })

@@ -5533,7 +5533,7 @@ document.addEventListener("DOMContentLoaded", function () {
     gallery.replaceChildren();
     const unavailableText = document.createElement("div");
     unavailableText.className = "model-image-unavailable";
-    unavailableText.textContent = "Image unavailable";
+    unavailableText.textContent = "Coming Soon";
     gallery.appendChild(unavailableText);
   }
 
@@ -5618,7 +5618,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch(function () {
         if (trigger.dataset.stockPreviewRequestId !== requestId) return;
-        setTooltipPreview(trigger, "", "Image unavailable");
+        setTooltipPreview(trigger, "", "Coming Soon");
       });
   }
 
@@ -5877,6 +5877,40 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // ═══ ERR3 FIX: Auto-uppercase tray ID inputs in IQF ═══
+  // IQF Pick Table modal shortcuts:
+  // Esc closes the IQF audit modal, D saves draft through the existing button.
+  document.addEventListener('keydown', function(event) {
+    var overlay = document.getElementById('iqfRejectionModalOverlay');
+    var isOpen = overlay && (
+      overlay.classList.contains('active') ||
+      overlay.style.visibility === 'visible' ||
+      overlay.style.opacity === '1'
+    );
+    if (!isOpen) return;
+
+    var key = event.key || '';
+    var handled = false;
+    if (key === 'Escape' || event.keyCode === 27) {
+      var closeButton = document.getElementById('iqfCancelBtn') || document.getElementById('iqfModalClose');
+      if (closeButton) {
+        closeButton.click();
+        handled = true;
+      }
+    } else if (key.toLowerCase() === 'd') {
+      var draftButton = document.getElementById('iqfDraftBtn');
+      if (draftButton && !draftButton.disabled) {
+        draftButton.click();
+        handled = true;
+      }
+    }
+
+    if (handled) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    }
+  }, true);
+
   document.addEventListener('input', function(e) {
     if (e.target && e.target.classList.contains('tray-scan-input')) {
       e.target.value = e.target.value.toUpperCase();
