@@ -9,10 +9,12 @@ from django.db import transaction
 from django.db.models.functions import Cast
 from django.db.models.fields.json import KeyTextTransform
 from django.core.paginator import Paginator
+import builtins
 import math
 import json
 import re
 import logging
+import sys
 from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
 from django.views.generic import TemplateView
@@ -37,6 +39,23 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from modelmasterapp.type_of_input import get_type_of_input_map, label_for_upload_type
 
 logger = logging.getLogger(__name__)
+
+
+def _zone1_safe_print(*args, **kwargs):
+    """Prevent debug output from breaking requests on non-UTF-8 consoles."""
+    try:
+        builtins.print(*args, **kwargs)
+    except UnicodeEncodeError:
+        stream = kwargs.get('file') or sys.stdout
+        encoding = getattr(stream, 'encoding', None) or 'utf-8'
+        safe_args = [
+            str(arg).encode(encoding, errors='replace').decode(encoding)
+            for arg in args
+        ]
+        builtins.print(*safe_args, **kwargs)
+
+
+print = _zone1_safe_print
 
 
 def _jul_ordered_unique(values):

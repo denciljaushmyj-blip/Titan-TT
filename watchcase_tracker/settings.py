@@ -35,7 +35,7 @@ SECRET_KEY = 'django-insecure-gjye57-rx)^o3)f$ix_jy#802*56@oljtx1zrpo6_$-hzvb#mv
 # process, which on a long-lived IIS worker leaks memory and makes every
 # request progressively slower (root cause of the escalating login latency).
 # Set DJANGO_DEBUG=True in your local .env for development.
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False').strip().lower() in ('1', 'true', 'yes', 'on')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').strip().lower() in ('1', 'true', 'yes', 'on')
 
 ALLOWED_HOSTS = [
     "trackandtrace.titan.in",
