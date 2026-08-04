@@ -1282,6 +1282,69 @@ document.addEventListener("DOMContentLoaded", function () {
       if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
     }
   }, true);
+
+  // ─── Guard: prevent backdrop/outside-click from closing the popup ─────────
+  // The popup must close ONLY via explicit actions (Close (X), Save Draft,
+  // Undo All, or the Escape/C keyboard shortcut above) — never by clicking
+  // outside the dialog box. This listener runs in the CAPTURE phase (the
+  // `true` argument) so it fires before any other click listener bound to
+  // this same element, and stopImmediatePropagation() stops those other
+  // listeners from running at all — this guards against a stale/cached copy
+  // of inputscreening_picktable.js still containing the old outside-click
+  // close behavior, without requiring that file to be redeployed.
+  var tvmBackdrop = document.getElementById("trayVerificationModal");
+  if (tvmBackdrop) {
+    tvmBackdrop.addEventListener("click", function (e) {
+      if (e.target === tvmBackdrop) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+  }
+
+  // ─── Accept-lot confirmation: block closing via outside click ─────────────
+  // The "Accept this lot?" confirmation (rendered as a SweetAlert2 popup by
+  // inputscreening_picktable.js) must NOT close when the user clicks outside
+  // the dialog box — same rule as trayVerificationModal above. It should
+  // close only via the explicit "Cancel" / "Yes, Accept" buttons (or the
+  // popup's own close (x), if any). SweetAlert2's `allowOutsideClick` option
+  // lives in that external JS file, so instead of relying on it, we watch
+  // for this specific popup being added to the page and block backdrop
+  // clicks directly here, in the CAPTURE phase, so this runs before
+  // SweetAlert2's own backdrop-click handler and stops it from firing.
+  function isAcceptLotPopup(container) {
+    var titleEl = container.querySelector(".swal2-title");
+    return !!(titleEl && /accept this lot/i.test(titleEl.textContent || ""));
+  }
+
+  function wireAcceptLotOutsideClick(container) {
+    if (!container || container.dataset.acceptOutsideClickWired) return;
+    container.dataset.acceptOutsideClickWired = "true";
+    container.addEventListener("click", function (e) {
+      // A click lands on the container itself only when it hits the
+      // backdrop (padding area) — clicks inside the popup box hit the
+      // popup element or its children instead.
+      if (e.target === container) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+  }
+
+  var acceptLotObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes && mutation.addedNodes.forEach(function (node) {
+        if (node.nodeType !== 1) return;
+        var container = node.classList && node.classList.contains("swal2-container")
+          ? node
+          : node.querySelector && node.querySelector(".swal2-container");
+        if (container && isAcceptLotPopup(container)) {
+          wireAcceptLotOutsideClick(container);
+        }
+      });
+    });
+  });
+  acceptLotObserver.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 
@@ -1809,5 +1872,3 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="{% static 'js/row_lock_guard.js' %}"></script>
 
 {% endblock %} {% endblock content %}
-
-

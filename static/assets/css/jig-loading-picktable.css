@@ -1030,27 +1030,6 @@
     overflow-y: visible !important;
   }
 
-  @media (max-width: 768px) {
-    .add-jig-window {
-      min-width: 90vw !important;
-      max-width: 95vw !important;
-      margin: 10px !important;
-      max-height: 92vh !important;
-    }
-    .jig-modal-header { padding: 14px 20px; }
-    .add-jig-window .jig-modal-content { padding: 16px 20px; }
-    .add-jig-window > *:not(.jig-modal-header):not(.jig-modal-footer) {
-      padding-left: 20px;
-      padding-right: 20px;
-    }
-    .form-fields-grid {
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-    }
-    .jig-modal-actions { flex-direction: column; align-items: stretch; }
-    .btn-action { justify-content: center; }
-  }
-
   @media (max-width: 480px) {
     .add-jig-window {
       min-width: 95vw !important;
@@ -1131,24 +1110,6 @@
     display: flex;
     gap: 10px;
     flex-wrap: nowrap;
-  }
-  @media (max-width: 900px) {
-    #jigAddModal.right-slide-modal,
-    .add-jig-window {
-      flex-direction: column !important;
-      height: auto !important;
-      max-width: 100vw !important;
-      min-width: 0 !important;
-      padding: 10px !important;
-    }
-    .jig-modal-section,
-    .jig-modal-form {
-      max-width: 100vw !important;
-      min-width: 0 !important;
-    }
-    .jig-modal-form .form-section {
-      grid-template-columns: 1fr !important;
-    }
   }
   /* Lot status pill common style (used in Brass Audit and Jig Loading) */
   .lot-status-pill {
@@ -2550,7 +2511,15 @@
   transition: transform 0.3s ease;
   display: flex; /* make it a column flex container */
   flex-direction: column;
-  overflow: hidden; /* inner area will scroll, keep footer visible */
+  overflow-y: hidden; /* inner area will scroll, keep footer visible */
+  /* NOTE: intentionally not "overflow: hidden" (which also clips overflow-x).
+     #jigAddModal is really the newer centered "Premium Modal System" (see rules
+     above), not this old slide-in panel — but it inherits this rule too since it
+     shares the .add-jig-window class. On narrow/tablet widths the modal content
+     (delink table, tray-id chip strip, etc.) can be slightly wider than the
+     modal box; clipping overflow-x here was silently cutting that content off
+     instead of letting it scroll, which is what made the tablet view look
+     broken/cut-off compared to desktop. */
 }
 
 .right-slide-modal.open .add-jig-window {
@@ -2882,6 +2851,19 @@ tr.row-inactive td:first-child {
 .split-panel-right {
   flex: 1;
   min-width: 100%;
+}
+/* When there are no Excess Trays for this lot, #splitPanelRight stays hidden
+   (display:none, set in JS) and JS adds "excess-hidden" to #splitPanelContainer.
+   The container itself is still a 2-column grid (inline style), so without this,
+   the Delink Trays panel is squeezed into only the left half of the modal while
+   the right half sits empty — barely noticeable on a wide desktop modal, but on
+   a tablet-width modal it crushes the 9-column delink table into a sliver and
+   makes cell text (e.g. the model number) get clipped away entirely. Letting the
+   left panel span both grid tracks whenever the right one is hidden gives it the
+   full modal width back. */
+.split-panel-container.excess-hidden #splitPanelLeft,
+.split-panel-container.excess-hidden .split-panel-left {
+  grid-column: 1 / -1;
 }
 /* Delink table wrapper: cancel the site-wide .table-responsive max-height/scroll
    (used by the main listing tables) — this one should grow with the modal's own

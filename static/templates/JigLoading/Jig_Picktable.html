@@ -1716,7 +1716,7 @@ body.sidebar-icon-only #order-listing td:nth-child(3) {
        both tbodies below live inside it, so every '#splitPanelContainer ...'
        selector in the script blocks can see delink AND excess scan inputs
        regardless of which box they're in. -->
-  <div class="split-panel-container" id="splitPanelContainer" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:10px; padding-bottom:10px; align-items:start;">
+  <div class="split-panel-container excess-hidden" id="splitPanelContainer" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:10px; padding-bottom:10px; align-items:start;">
 
     <!-- LEFT COLUMN (swapped to first): EXCESS TRAYS — a genuinely separate box, only
          shown when this lot actually has excess/top-tray qty (toggled by
@@ -2716,6 +2716,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (plannedQtyStatEl) plannedQtyStatEl.innerText = delinkPanel.total_delink_qty || 0;
     if (excessBody) excessBody.innerHTML = '';
     if (excessBox && !delinkTrays.length) excessBox.style.display = 'none';
+    var splitPanelContainerEl = document.getElementById('splitPanelContainer');
+    if (splitPanelContainerEl && excessBox && excessBox.style.display === 'none') splitPanelContainerEl.classList.add('excess-hidden');
 
     if (dBody) {
       dBody.innerHTML = '';
@@ -2999,6 +3001,8 @@ document.addEventListener('DOMContentLoaded', function () {
           excessCardsQueue.forEach(function(etr) { excessBody.appendChild(etr); });
         }
         if (excessBox) excessBox.style.display = excessCardsQueue.length ? '' : 'none';
+        var splitPanelContainerEl2 = document.getElementById('splitPanelContainer');
+        if (splitPanelContainerEl2) splitPanelContainerEl2.classList.toggle('excess-hidden', !excessCardsQueue.length);
         var excessCountEl = document.getElementById('excessPanelCount');
         if (excessCountEl) {
           var excessTotalQty = 0;
