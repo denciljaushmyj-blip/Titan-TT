@@ -35,7 +35,7 @@ SECRET_KEY = 'django-insecure-gjye57-rx)^o3)f$ix_jy#802*56@oljtx1zrpo6_$-hzvb#mv
 # process, which on a long-lived IIS worker leaks memory and makes every
 # request progressively slower (root cause of the escalating login latency).
 # Set DJANGO_DEBUG=True in your local .env for development.
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True').strip().lower() in ('1', 'true', 'yes', 'on')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').strip().lower() in ('1', 'true', 'yes', 'on')
 
 ALLOWED_HOSTS = [
     "trackandtrace.titan.in",
@@ -122,10 +122,6 @@ SOCIAL_AUTH_PIPELINE = (
 )
 
 MIDDLEWARE = [
-
-    
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     # First in the chain so it wraps everything below it (security, session,
     # auth, view, template) and can attribute the full request time to a
     # per-request breakdown. See watchcase_tracker/perf_logger.py.
@@ -134,7 +130,7 @@ MIDDLEWARE = [
     # VAPT #13/#33: strip version-disclosure headers (Server, X-Powered-By, etc.)
     'adminportal.middleware.SecurityHeadersMiddleware',
     # VAPT #35: restrict /admin/ to ADMIN_IP_ALLOWLIST
-    #'adminportal.middleware.AdminIPRestrictionMiddleware', # Django admin panel restricted
+    'adminportal.middleware.AdminIPRestrictionMiddleware', # Django admin panel restricted in Titan Server
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     # SafeSessionMiddleware = Django's SessionMiddleware + graceful handling of
@@ -213,6 +209,9 @@ REST_FRAMEWORK = {
     # Disables DRF's schema/metadata response on OPTIONS requests.
     # No CORS or API discovery is required in this application.
     'DEFAULT_METADATA_CLASS': None,
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '10/minute',
+    },
 }
 
 
@@ -220,7 +219,7 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'trackandtrace2026',
+        'NAME': 'watch_tracker',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
@@ -229,17 +228,17 @@ DATABASES = {
 }
 
 # UAT Database
-'''DATABASES = {
+""" DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'watchcasetrack',
+        'NAME': 'watch_tracker',
         'USER':'postgres',
         'PASSWORD':'postgres',
         'HOST':'127.0.0.1',
         'PORT':'5432',
         'CONN_MAX_AGE':60,
     }
-}'''
+} """
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -304,6 +303,8 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = True
+
 # SESSION_COOKIE_SECURE = False   # Issue #4: require HTTPS for session cookie
 #
 # Perf/session fix: this used to be hard-tied to DEBUG (False if DEBUG else
@@ -369,9 +370,6 @@ SOP_FILE_MAX_UPLOAD_SIZE = 20 * 1024 * 1024
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-# Maximum allowed model-image upload size: 10 MB
-MODEL_IMAGE_MAX_UPLOAD_SIZE = 10 * 1024 * 1024
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -450,14 +448,18 @@ LOGGING = {
 # Microsoft (Entra ID) / MSAL settings
 MSAL_CLIENT_ID = os.getenv("MSAL_CLIENT_ID", "54a2fd19-0009-4e29-9d7b-b33e9ae8fbfa")
 MSAL_CLIENT_SECRET = os.getenv("MSAL_CLIENT_SECRET")
-MSAL_TENANT_ID = os.getenv(
-    "MSAL_TENANT_ID",
-    "04132f71-f746-4a5b-a30e-66ea6d16714c",
-).strip()
+# MSAL_TENANT_ID = os.getenv("MSAL_TENANT_ID", "common")
 # Use the callback path without a trailing slash so it is compatible with the
 # common Azure App Registration redirect URI format.
 
-MSAL_REDIRECT_PATH = "/auth/microsoft/callback/"
+# MSAL_REDIRECT_PATH = "/auth/microsoft/callback/"
+
+
+
+MSAL_TENANT_ID = os.getenv("MSAL_TENANT_ID","04132f71-f746-4a5b-a30e-66ea6d16714c",).strip()
+ 
+MSAL_REDIRECT_URI_BASE = os.getenv("MSAL_REDIRECT_URI_BASE","https://trackandtrace.titan.in").strip().rstrip("/")
+
 
 # Optional fixed origin (scheme+host[:port]) for the OAuth redirect URI, e.g.
 # "http://localhost:8000" or "https://titan.example.com". When unset, the
@@ -465,5 +467,5 @@ MSAL_REDIRECT_PATH = "/auth/microsoft/callback/"
 # if that exact origin+MSAL_REDIRECT_PATH is registered in the Azure App
 # Registration's "Redirect URIs". Set this to pin the app to one Azure-registered
 # URI regardless of how a browser reaches it (127.0.0.1 vs localhost, etc).
-MSAL_REDIRECT_URI_BASE = os.getenv("MSAL_REDIRECT_URI_BASE", "https://trackandtrace.titan.in").strip().rstrip("/")
+MSAL_REDIRECT_URI_BASE = os.getenv("MSAL_REDIRECT_URI_BASE", "http://localhost:8000")
 MSAL_SCOPES = ["User.Read"]
