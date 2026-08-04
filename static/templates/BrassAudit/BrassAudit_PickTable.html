@@ -2123,11 +2123,12 @@ document.addEventListener('DOMContentLoaded', function() {
               if (lotStatusIndex >= 0) {
                 const lotStatusTd = stageTds[lotStatusIndex];
                 const lotStatusPill = lotStatusTd.querySelector('.d-inline-block.rounded-pill');
-                if (lotStatusPill && result.lot_status) {
-                  lotStatusPill.textContent = result.lot_status;
-                  if (result.lot_status === 'In Progress') {
-                    lotStatusPill.style.cssText = 'border:1px solid #1976d2; background-color:#e3f2fd; color:#0d47a1; font-size:13px; white-space:nowrap; padding:5px;';
-                    lotStatusPill.classList.remove('lot-status-pill');
+                if (lotStatusPill) {
+                  const text = lotStatusPill.textContent.trim();
+                  if (text === 'Yet to Start') {
+                    lotStatusPill.textContent = 'Yet to Release';
+                    lotStatusPill.style.cssText = 'border:1px solid #028084; background-color:#d1f8f0; color:#028084; font-size:13px; white-space:nowrap; padding:5px;';
+                    lotStatusPill.classList.add('lot-status-pill');
                   }
                 }
               }

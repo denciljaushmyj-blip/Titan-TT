@@ -340,9 +340,17 @@ class BrassAuditPickTableView(APIView):
             else:
                 data['action_state'] = 'DEFAULT'
 
-            # Lot status pill.  Resolve from the saved model row so a GET
-            # after refresh cannot depend on any transient browser state.
-            data['lot_status'] = _get_brass_audit_pick_lot_status(data)
+            # Lot status pill
+            if data.get('brass_audit_onhold_picking') or data.get('brass_audit_draft'):
+                data['lot_status'] = 'Draft'
+            elif data.get('brass_audit_hold_lot'):
+                data['lot_status'] = 'On Hold'
+            elif data.get('brass_audit_rejection') or data.get('brass_audit_few_cases_accptance') or data.get('brass_audit_accptance'):
+                data['lot_status'] = 'Yet to Release'
+            elif data.get('brass_audit_accepted_qty_verified'):
+                data['lot_status'] = 'Yet to Release'
+            else:
+                data['lot_status'] = 'Yet to Start'
 
             # Fallbacks
             if not data.get('brass_audit_physical_qty'):

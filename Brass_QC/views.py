@@ -302,6 +302,10 @@ class BrassPickTableView(APIView):
                 data['lot_status'] = 'Draft'
             elif data.get('brass_hold_lot'):
                 data['lot_status'] = 'On Hold'
+            elif data.get('brass_qc_rejection') or data.get('brass_qc_few_cases_accptance') or data.get('brass_qc_accptance'):
+                data['lot_status'] = 'Yet to Release'
+            elif data.get('brass_qc_accepted_qty_verified'):
+                data['lot_status'] = 'Yet to Release'
             else:
                 qc_completed = any((
                     data.get('brass_qc_rejection'),
@@ -663,6 +667,50 @@ def brass_qc_toggle_verified(request):
         "last_process_module": ts.last_process_module,
         "can_delete": can_delete,
     })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def brass_qc_delete_batch(request):
+    """
+    Permanently deletes a lot's TotalStockModel row (and its tray
+    assignments) from the Brass QC pick table.
+
+    Only allowed when:
+      - the requesting user is in the Admin group, AND
+      - the lot satisfies the same can_delete rule shown on the pick table
+        (not accepted / not rejected / not tray-scanned / qty verified)
+    Both checks are enforced here — the frontend Bin icon is a display
+    affordance only, never the source of truth.
+    """
+    from adminportal.views import is_admin_user
+    if not is_admin_user(request.user):
+        return JsonResponse({"success": False, "error": "Admin access required."}, status=403)
+
+    lot_id = (request.data.get('stock_lot_id') or request.data.get('lot_id') or '').strip()
+    if not lot_id:
+        return JsonResponse({"success": False, "error": "stock_lot_id is required"}, status=400)
+
+    ts = TotalStockModel.objects.filter(lot_id=lot_id).first()
+    if not ts:
+        return JsonResponse({"success": False, "error": "Lot not found"}, status=404)
+
+    can_delete = (
+        not ts.brass_qc_accptance and
+        not ts.brass_qc_rejection and
+        not ts.brass_accepted_tray_scan_status and
+        not ts.brass_qc_few_cases_accptance and
+        ts.brass_qc_accepted_qty_verified
+    )
+    if not can_delete:
+        return JsonResponse({"success": False, "error": "This lot can no longer be deleted."}, status=409)
+
+    with transaction.atomic():
+        BrassTrayId.objects.filter(lot_id=lot_id).delete()
+        ts.delete()
+
+    logger.info("Brass QC Delete Batch: lot_id=%s deleted by user=%s", lot_id, request.user)
+    return JsonResponse({"success": True, "message": "Lot deleted successfully.", "lot_id": lot_id})
 
 
 # Hold / Unhold Toggle with Remark
