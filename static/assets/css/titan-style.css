@@ -10763,3 +10763,80 @@ html.ttt-viewport-tablet .is-pick-table-page #order-listing thead th * {
 #order-listing#order-listing th[data-heading="Rejection Remarks"] .fa-filter {
   right: 6px !important;
 }
+
+/* ============================================================
+   FIX: Jig Loading — "Invalid format. Expected J###-####..." message
+   (#jigIdError) uses margin-top: -5px and no margin-bottom in the
+   template's own inline <style>, which pulls it up into the Jig ID
+   chip row above and leaves no breathing room below, so its letters
+   get visually clipped/overlapped by neighbouring elements.
+   Overriding here (instead of editing Jig_Picktable.html) with
+   !important so it wins regardless of the template's own rule order.
+   ============================================================ */
+.jig-header-meta-row #jigIdError {
+  margin-top: 14px !important;
+  /* Note: margin-bottom does nothing here — #jigIdError is position:absolute,
+     so it's out of normal flow and can't push the Primary row below it.
+     The real "space below" comes from .jig-modal-header-v2 padding-bottom
+     and #modelCardStrip margin-top further down — tuned together with this
+     margin-top so the message reads as centered between the two rows. */
+}
+
+/* ============================================================
+   FIX: Jig Loading — the Broken Hooks / Jig Composition row (bottom of
+   .jig-modal-header-v2) sits right on top of the Primary model card /
+   "+ Add Model" row below it (only ~10px header padding-bottom + ~10px
+   content padding-top, and #jigIdError is position:absolute so it takes
+   up no real space of its own), so the two rows read as congested.
+   Adding real breathing room between the header block and the content
+   below it.
+   ============================================================ */
+.jig-modal-header-v2 {
+  padding-bottom: 34px !important;
+}
+#modelCardStrip.model-card-strip {
+  margin-top: 14px !important;
+}
+
+/* ============================================================
+   FIX: Jig Loading — tablet-width gap in .add-jig-window's responsive
+   sizing. The base rule forces min-width: 1020px !important, and only
+   @media (max-width: 768px) [-> 90vw] and @media (max-width: 480px)
+   [-> 95vw] override it. Any viewport between 769px and 1019px (a
+   normal tablet width, e.g. 938px) falls through that gap and keeps
+   the 1020px min-width, so the modal is wider than the screen: the
+   header chip row (Jig ID / Nickel Bath / Tray Type / Lot Qty / Jig
+   Cap / Empty Hooks / Loaded / Delink Qty / Broken Hooks / Jig
+   Composition) overflows horizontally instead of wrapping, and gets
+   clipped/requires a horizontal scroll.
+   Closing that gap here so every tablet width shrinks the modal to
+   fit the viewport, same as it already does at 768px and below.
+   ============================================================ */
+@media (min-width: 769px) and (max-width: 1019px) {
+  .add-jig-window {
+    min-width: 92vw !important;
+    max-width: 96vw !important;
+    margin: 12px !important;
+  }
+  .jig-header-row,
+  .jig-header-meta-row {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* ============================================================
+   FIX: Jig Loading — modal top (Jig ID / Nickel Bath / Tray Type row)
+   unreachable by scrolling on short viewports (e.g. tablet landscape,
+   height ~611px). #jigAddModal.right-slide-modal centers the modal
+   with align-items: center. When the modal is taller than the
+   viewport, flexbox's default "unsafe" centering pushes the excess
+   above y:0 and does NOT create scrollable room to reach it — only
+   the bottom overflow is scrollable, the top is permanently clipped.
+   `align-items: safe center` keeps normal centering when it fits, but
+   falls back to top-alignment (with real, reachable overflow-y:auto
+   scroll room) whenever the modal doesn't fit — so every part of the
+   modal, top included, becomes reachable by scrolling the overlay.
+   ============================================================ */
+#jigAddModal.right-slide-modal {
+  align-items: safe center !important;
+}
