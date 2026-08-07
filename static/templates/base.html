@@ -49,6 +49,27 @@
          vertical-align: middle;
          display: inline-block;
          }
+         /* Circle-badge sidebar icons (letters instead of PNG icons) */
+         .sidebar .nav .nav-item .menu-icon.menu-icon-circle {
+         display: inline-flex !important;
+         align-items: center;
+         justify-content: center;
+         width: 24px !important;
+         height: 24px !important;
+         min-width: 24px !important;
+         border-radius: 50% !important;
+         margin-right: 12px !important;
+         vertical-align: middle;
+         font-size: 9.5px;
+         font-weight: 800;
+         letter-spacing: -0.3px;
+         color: #fff !important;
+         line-height: 1;
+         flex-shrink: 0;
+         }
+         .sidebar .nav .nav-item > .nav-link.active .menu-icon.menu-icon-circle {
+         box-shadow: 0 0 0 3px rgba(255,255,255,0.85), 0 0 0 5px #028084;
+         }
          
          /* Sidebar menu icons: always black by default */
          .sidebar .nav .nav-item .menu-icon,
@@ -60,13 +81,19 @@
          display: inline-flex;
          align-items: center;
          }
-         /* Active menu: icon and text white, bg teal */
-         .sidebar .nav .nav-item.active > .nav-link .menu-icon,
-         .sidebar .nav .nav-item.active > .nav-link i,
-         .sidebar .nav .nav-item.active > .nav-link .fa,
-         .sidebar .nav .nav-item.active > .nav-link .ti,
-         .sidebar .nav .nav-item.active > .nav-link .menu-title {
+         /* Active menu: icon and text white, bg teal.
+            NOTE: the JS that sets "active" applies it to the <a class="nav-link">
+            itself (not the parent <li>), so these selectors target .nav-link.active
+            rather than .nav-item.active > .nav-link. */
+         .sidebar .nav .nav-item > .nav-link.active,
+         .sidebar .nav .nav-item > .nav-link.active .menu-icon,
+         .sidebar .nav .nav-item > .nav-link.active i,
+         .sidebar .nav .nav-item > .nav-link.active .fa,
+         .sidebar .nav .nav-item > .nav-link.active .ti,
+         .sidebar .nav .nav-item > .nav-link.active .menu-title {
          color: #fff !important;
+         }
+         .sidebar .nav .nav-item > .nav-link.active {
          background: #028084 !important;
          border-radius: 8px;
          }
@@ -76,6 +103,22 @@
          .sidebar .nav .sub-menu .nav-link.active .fa,
          .sidebar .nav .sub-menu .nav-link.active .ti {
          color: #fff !important;
+         }
+         /* Hover state for top-level module links (works on the active module too,
+            not just inactive ones) - subtle highlight + ring, independent of the
+            data-tooltip name popup which still shows in collapsed sidebar mode. */
+         .sidebar .nav .nav-item > .nav-link:hover {
+         background: rgba(2,128,132,0.12) !important;
+         border-radius: 8px;
+         }
+         .sidebar .nav .nav-item > .nav-link.active:hover {
+         background: #026a6d !important;
+         }
+         .sidebar .nav .nav-item > .nav-link:hover .menu-icon.menu-icon-circle {
+         box-shadow: 0 0 0 3px rgba(2,128,132,0.35);
+         }
+         .sidebar .nav .nav-item > .nav-link.active:hover .menu-icon.menu-icon-circle {
+         box-shadow: 0 0 0 3px rgba(255,255,255,0.85), 0 0 0 5px #026a6d;
          }
          @media (min-width: 1200px) and (pointer: fine) {
          /* Only laptops/desktops with mouse/trackpad */
@@ -1214,7 +1257,7 @@
           }
         }
       </style>
-      <link rel="stylesheet" href="{% static 'assets/css/ttt-responsive-system.css' %}?v=tabdebug-20260604-3">
+      <link rel="stylesheet" href="{% static 'assets/css/ttt-responsive-system.css' %}?v=dp-completed-widths-2">
    </head>
    <body class="sidebar-icon-only{% block body_extra_class %}{% endblock %}">
       {% csrf_token %}
@@ -1756,14 +1799,14 @@
    <ul class="nav">
       <li class="nav-item">
          <a class="nav-link" href="{% url 'index' %}">
-         <img src="{% static 'assets/icons/35.png' %}" class="menu-icon" data-tooltip="Dashboard" alt="Dashboard" />
+         <span class="menu-icon menu-icon-circle" style="background:#028084;" data-tooltip="Dashboard" alt="Dashboard">D</span>
          <span class="menu-title">Dashboard</span>
          </a>
       </li>
       {% if is_admin or 'DP Pick Table' in allowed_modules or 'DP Complete Table' in allowed_modules or 'Data Upload' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-         <img src="{% static 'assets/icons/21.png' %}" class="menu-icon" data-tooltip="Day Planning" alt="Day Planning" />
+         <span class="menu-icon menu-icon-circle" style="background:#5C6BC0;" data-tooltip="Day Planning" alt="Day Planning">DP</span>
          <span class="menu-title">Day Planning</span>
          <i class="menu-arrow"></i>
          </a>
@@ -1794,7 +1837,7 @@
       {% if is_admin or 'Input Pick Table' in allowed_modules or 'Input Completed Table' in allowed_modules or 'Input Accept Table' in allowed_modules or 'Input Reject Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#ui-advanced" aria-expanded="false" aria-controls="ui-advanced">
-         <img src="{% static 'assets/icons/22.png' %}" class="menu-icon" data-tooltip="Input Screening" alt="Input Screening" />
+         <span class="menu-icon menu-icon-circle" style="background:#26A69A;" data-tooltip="Input Screening" alt="Input Screening">IS</span>
          <span class="menu-title">Input Screening</span>
          <i class="menu-arrow"></i>
          </a>
@@ -1828,7 +1871,7 @@
       {% if is_admin or 'Brass Qc Pick Table' in allowed_modules or 'Brass Qc Completed Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#editors" aria-expanded="false" aria-controls="editors">
-         <img src="{% static 'assets/icons/23.png' %}" class="menu-icon" alt="Brass QC" />
+         <span class="menu-icon menu-icon-circle" style="background:#FFA726;" data-tooltip="Brass QC" alt="Brass QC">BQ</span>
          <span class="menu-title">Brass QC</span>
          <i class="menu-arrow"></i>
          </a>
@@ -1852,7 +1895,7 @@
       {% if is_admin or 'IQF Pick Table' in allowed_modules or 'IQF Completed Table' in allowed_modules or 'IQF Accept Table' in allowed_modules or 'IQF Reject Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#iqf-menu" aria-expanded="false" aria-controls="iqf-menu">
-         <img src="{% static 'assets/icons/23.png' %}" class="menu-icon" alt="IQF" />
+         <span class="menu-icon menu-icon-circle" style="background:#8D6E63;" data-tooltip="IQF" alt="IQF">IQF</span>
          <span class="menu-title">IQF</span>
          <i class="menu-arrow"></i>
          </a>
@@ -1887,7 +1930,7 @@
       {% if is_admin or 'Brass Audit Pick Table' in allowed_modules or 'Brass Audit Complete Table' in allowed_modules or 'Brass Audit Reject Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#brass-audit" aria-expanded="false" aria-controls="brass-audit">
-         <img src="{% static 'assets/icons/23.png' %}" class="menu-icon" alt="Brass Audit" />
+         <span class="menu-icon menu-icon-circle" style="background:#EF5350;" data-tooltip="Brass Audit" alt="Brass Audit">BA</span>
          <span class="menu-title">Brass Audit</span>
          <i class="menu-arrow"></i>
          </a>
@@ -1916,7 +1959,7 @@
       {% if is_admin or 'Jig Pick Table' in allowed_modules or 'Jig Completed Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#jig-loading" aria-expanded="false" aria-controls="jig-loading">
-         <img src="{% static 'assets/icons/27.png' %}" class="menu-icon" alt="Jig Loading" />
+         <span class="menu-icon menu-icon-circle" style="background:#42A5F5;" data-tooltip="Jig Loading" alt="Jig Loading">JL</span>
          <span class="menu-title">Jig Loading</span>
          <i class="menu-arrow"></i>
          </a>
@@ -1940,7 +1983,7 @@
       {% if is_admin or 'IP Main' in allowed_modules or 'IP Completed' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#inprocessInspectionMenu" aria-expanded="false" aria-controls="inprocessInspectionMenu">
-         <img src="{% static 'assets/icons/28.png' %}" class="menu-icon" alt="Ip Inspection" />
+         <span class="menu-icon menu-icon-circle" style="background:#AB47BC;" data-tooltip="Ip Inspection" alt="Ip Inspection">IP</span>
          <span class="menu-title">Ip Inspection</span>
          <i class="menu-arrow"></i>
          </a>
@@ -1964,7 +2007,7 @@
       {% if is_admin or 'JUL Main Table' in allowed_modules or 'JUL Completed' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#jig-unloading-zone1" aria-expanded="false" aria-controls="jig-unloading-zone1">
-         <img src="{% static 'assets/icons/29.png' %}" class="menu-icon" alt="Jig Unloading Zone I" />
+         <span class="menu-icon menu-icon-circle" style="background:#66BB6A;" data-tooltip="Jig Unloading Zone I" alt="Jig Unloading Zone I">JU1</span>
          <span class="menu-title">Jig Unloading Zone I</span>
          <i class="menu-arrow"></i>
          </a>
@@ -1987,7 +2030,7 @@
       {% if is_admin or 'JUL Main Table Zone 2' in allowed_modules or 'JUL Completed Zone 2' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#jig-unloading-zone2" aria-expanded="false" aria-controls="jig-unloading-zone2">
-        <img src="{% static 'assets/icons/29.png' %}" class="menu-icon" alt="Jig Unloading Zone 2" />
+        <span class="menu-icon menu-icon-circle" style="background:#26C6DA;" data-tooltip="Jig Unloading Zone 2" alt="Jig Unloading Zone 2">JU2</span>
         <span class="menu-title">Jig Unloading Zone 2</span>
          <i class="menu-arrow"></i>
          </a>
@@ -2011,7 +2054,7 @@
       {% if is_admin or 'Nickel Main Table' in allowed_modules or 'Nickel Completed Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#nickel-inspection" aria-expanded="false" aria-controls="nickel-inspection">
-         <img src="{% static 'assets/icons/39.png' %}" class="menu-icon" alt="Nickel Wiping" />
+         <span class="menu-icon menu-icon-circle" style="background:#78909C;" data-tooltip="Nickel Wiping Zone I" alt="Nickel Wiping">NW1</span>
          <span class="menu-title">Nickel Wiping Zone I</span>
          <i class="menu-arrow"></i>
          </a>
@@ -2033,7 +2076,7 @@
       {% if is_admin or 'Nickel Inspection Zone 2 Pick Table' in allowed_modules or 'Nickel Inspection Zone 2 Completed Table' in allowed_modules or 'Nickel Inspection Zone 2 Reject Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#nickel-inspection-zone2" aria-expanded="false" aria-controls="nickel-inspection-zone2">
-         <img src="{% static 'assets/icons/39.png' %}" class="menu-icon" alt="Nickel Wiping Zone2" />
+         <span class="menu-icon menu-icon-circle" style="background:#9CCC65;" data-tooltip="Nickel Wiping Zone2" alt="Nickel Wiping Zone2">NW2</span>
          <span class="menu-title">Nickel Wiping Zone2</span>
          <i class="menu-arrow"></i>
          </a>
@@ -2056,7 +2099,7 @@
       {% if is_admin or 'NA Pick Table' in allowed_modules or 'NA Completed' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#nickelAuditMenu" aria-expanded="false" aria-controls="nickelAuditMenu">
-         <img src="{% static 'assets/icons/40.png' %}" class="menu-icon" alt="Nickel Audit Zone I" />
+         <span class="menu-icon menu-icon-circle" style="background:#FF7043;" data-tooltip="Nickel Audit Zone I" alt="Nickel Audit Zone I">NA1</span>
          <span class="menu-title">Nickel Audit Zone I</span>
          <i class="menu-arrow"></i>
          </a>
@@ -2075,7 +2118,7 @@
       {% if is_admin or 'Nickel Audit Zone 2 Pick Table' in allowed_modules or 'Nickel Audit Zone 2 Completed Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#nickelAuditMenuZone2" aria-expanded="false" aria-controls="nickelAuditMenuZone2">
-         <img src="{% static 'assets/icons/40.png' %}" class="menu-icon" alt="Nickel Audit Zone2" />
+         <span class="menu-icon menu-icon-circle" style="background:#F9A825;" data-tooltip="Nickel Audit Zone2" alt="Nickel Audit Zone2">NA2</span>
          <span class="menu-title">Nickel Audit Zone2</span>
          <i class="menu-arrow"></i>
          </a>
@@ -2096,7 +2139,7 @@
       {% if is_admin or 'Spider Spindle Z1 Pick Table' in allowed_modules or 'Spider Spindle Z1 Completed Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#spiderSpindleZ1Menu" aria-expanded="false" aria-controls="spiderSpindleZ1Menu">
-         <img src="{% static 'assets/icons/32.png' %}" class="menu-icon" alt="Spider Spindle Z1" />
+         <span class="menu-icon menu-icon-circle" style="background:#7E57C2;" data-tooltip="Spider Spindle Z1" alt="Spider Spindle Z1">SS1</span>
          <span class="menu-title">Spider Spindle Z1</span>
          <i class="menu-arrow"></i>
          </a>
@@ -2119,7 +2162,7 @@
         {% if is_admin or 'Spider Spindle Z2 Pick Table' in allowed_modules or 'Spider Spindle Z2 Completed Table' in allowed_modules %}
       <li class="nav-item">
          <a class="nav-link" data-bs-toggle="collapse" href="#spiderSpindleZ2Menu" aria-expanded="false" aria-controls="spiderSpindleZ2Menu">
-         <img src="{% static 'assets/icons/32.png' %}" class="menu-icon" alt="Spider Spindle Z2" />
+         <span class="menu-icon menu-icon-circle" style="background:#29B6F6;" data-tooltip="Spider Spindle Z2" alt="Spider Spindle Z2">SS2</span>
          <span class="menu-title">Spider Spindle Z2</span>
          <i class="menu-arrow"></i>
          </a>
@@ -3665,6 +3708,10 @@
           handleTrayNotFound(trayId);
           return null;
         }
+        if (!resultBelongsToCurrentPath(data)) {
+          navigateToTrayModule(data, trayId);
+          return null;
+        }
         return findTrayInCurrentPickTable(trayId, data)
           .then(function(match) {
             if (scanSequence !== activeScanSequence) return null;
@@ -3713,6 +3760,51 @@
       logScan('[SCAN_LOOKUP]', { error: error && error.message ? error.message : String(error), current_table_match: false });
       return false;
     }
+  }
+
+  // Cross-module navigation: when the scanned tray/JIG ID is found on a DIFFERENT
+  // module's page than the one currently open, redirect there instead of reporting
+  // "Not Exists". The destination page's auto-highlight script (further below in this
+  // file) reads ?highlight=<trayId>&lot=<lotId> from the URL and highlights the row.
+  function navigateToTrayModule(responseData, trayId) {
+    const targetUrl = responseData && responseData.url;
+    if (!targetUrl) {
+      handleTrayNotFound(trayId);
+      return;
+    }
+
+    const moduleName = (responseData && responseData.module) || '';
+    const lotId = (responseData && (responseData.lot_id || responseData.stock_lot_id)) || '';
+
+    try {
+      sessionStorage.setItem('globalScanModule', moduleName);
+      sessionStorage.setItem('globalScanTrayId', trayId);
+      if (lotId) {
+        sessionStorage.setItem('globalScanLotId', lotId);
+      } else {
+        sessionStorage.removeItem('globalScanLotId');
+      }
+    } catch (error) {
+      /* sessionStorage can be unavailable in some embedded browsers; navigation still works. */
+    }
+
+    setInfo('...', trayId + ' found in ' + moduleName + ' - opening...', '#028084');
+    setScanMessage('Found in ' + moduleName + ' \u2014 opening page...', '#028084');
+    if (scanResult) {
+      scanResult.innerHTML = '<div style="text-align:center;padding:10px;color:#028084;">Found in ' + moduleName + '. Opening page\u2026</div>';
+    }
+
+    logScan('[SCAN_CROSS_MODULE_NAV]', { tray_id: trayId, module: moduleName, lot_id: lotId, url: targetUrl });
+    dispatchGlobalScanEvent('globalScan:crossModule', { tray_id: trayId, module: moduleName, target_url: targetUrl });
+
+    const params = new URLSearchParams();
+    params.set('highlight', trayId);
+    if (lotId) params.set('lot', lotId);
+    const separator = targetUrl.indexOf('?') === -1 ? '?' : '&';
+
+    window.setTimeout(function() {
+      window.location.href = targetUrl + separator + params.toString();
+    }, 350);
   }
 
   function buildLookupContext(trayId, responseData) {
