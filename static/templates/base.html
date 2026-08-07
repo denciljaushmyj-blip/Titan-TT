@@ -532,6 +532,38 @@
           justify-content: center !important;
           }
 
+          /* Collapsed (icon-only) sidebar: circle badges like "SS1", "NW1",
+             "NA1" were wrapping onto two lines (e.g. "SS" over "1") because
+             the box above locks them to a fixed 24px width with no
+             white-space rule. Give the badge a touch more room and keep the
+             code on a single line, same as it already renders in the
+             expanded sidebar. */
+          body.sidebar-icon-only .sidebar .nav .nav-item .menu-icon.menu-icon-circle {
+          width: 27px !important;
+          min-width: 27px !important;
+          max-width: 27px !important;
+          height: 27px !important;
+          font-size: 8.5px !important;
+          letter-spacing: -0.4px !important;
+          white-space: nowrap !important;
+          overflow: visible !important;
+          padding: 0 !important;
+          }
+
+          /* Make the "you are here" indicator unmistakable in the collapsed
+             (icon-only) sidebar: a filled rounded highlight behind the link
+             plus a white ring around the circle badge itself. Without this,
+             the existing .nav-link.active background can be easy to miss
+             against the icon's own background color. */
+          body.sidebar-icon-only .sidebar .nav .nav-item > .nav-link.active {
+          background: #028084 !important;
+          border-radius: 10px !important;
+          box-shadow: 0 2px 6px rgba(2,128,132,0.45) !important;
+          }
+          body.sidebar-icon-only .sidebar .nav .nav-item > .nav-link.active .menu-icon.menu-icon-circle {
+          box-shadow: 0 0 0 2px rgba(255,255,255,0.9) !important;
+          }
+
           .main-panel {
           min-height: calc(100vh - 73px) !important;
           height: auto !important;
@@ -1127,6 +1159,18 @@
           --ttt-navbar-height: 60px;
           --ttt-sidebar-width: 250px;
           --ttt-sidebar-collapsed-width: 70px;
+        }
+
+        /* Tablet: use the wider sidebar width (already defined above as
+           --ttt-sidebar-tablet-width but previously never applied) so menu
+           labels like "Nickel Wiping Zone2" / "Spider Spindle Z1" get enough
+           room to render in full, the same as they do on desktop, instead
+           of being cut off with an ellipsis. */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          :root {
+            --ttt-sidebar-width: var(--ttt-sidebar-tablet-width, 280px);
+            --ttt-sidebar-collapsed-width: var(--ttt-sidebar-tablet-collapsed-width, 65px);
+          }
         }
 
         html,

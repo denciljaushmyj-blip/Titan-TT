@@ -3673,6 +3673,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
       var key = (event.key || '').toLowerCase();
       var handled = false;
+
+      // Don't let letter-key shortcuts (d/c/o) fire while the user is
+      // typing into an input/textarea/select (e.g. the remarks box).
+      var isLetterShortcut = key === 'd' || key === 'c' || key === 'o';
+      if (isLetterShortcut) {
+        var el = event.target;
+        var tag = el && el.tagName ? el.tagName.toLowerCase() : '';
+        var isTypingTarget = tag === 'input' || tag === 'textarea' || tag === 'select' || !!(el && el.isContentEditable);
+        if (isTypingTarget) return;
+      }
+
       if (key === 'd') {
         if (draftSaveBtn && !draftSaveBtn.disabled) {
           draftSaveBtn.click();
