@@ -3264,6 +3264,20 @@ def iqf_accept_delink_modal(request):
     if not lot_id:
         return Response({'success': False, 'error': 'Missing lot_id'}, status=400)
 
+    from .services.validators import validate_unique_tray_assignments
+
+    normalized_assignments, assignment_error = validate_unique_tray_assignments(
+        accepted_tray_ids,
+        rejected_tray_ids_in,
+        delinked_tray_ids,
+    )
+    if assignment_error:
+        return Response({'success': False, 'error': assignment_error}, status=400)
+
+    accepted_tray_ids = normalized_assignments['accept']
+    rejected_tray_ids_in = normalized_assignments['reject']
+    delinked_tray_ids = normalized_assignments['delink']
+
     try:
         iqf_rejection_total = int(rej_total_str)
     except (ValueError, TypeError):
