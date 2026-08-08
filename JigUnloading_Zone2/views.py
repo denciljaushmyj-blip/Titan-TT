@@ -893,14 +893,12 @@ class JU_Zone_MainTable(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Zone 2: All colors except IPS should be routed here
-        # Get all plating colors except IPS for Zone 2
-        allowed_colors = Plating_Color.objects.exclude(
-            plating_color='IPS'
+        # Zone 2: colors flagged for Jig Unload Zone 2 in Model Master
+        allowed_colors = Plating_Color.objects.filter(
+            jig_unload_zone_2=True
         ).values_list('plating_color', flat=True)
         
         print(f"🔍 Zone 2 - Allowed colors: {list(allowed_colors)}")
-        print(f"🔍 Zone 2 - Excluding IPS, routing colors: 3N, 2N, RG, CHG, CN, J-BLUE, BR, BRN, GUN, BLU, PLUM, BIC, etc.")
 
         # Get all plating colors and strip "IP-" prefix from stored values for matching
         allowed_colors_list = list(allowed_colors)
@@ -1768,15 +1766,11 @@ class JU_Zone_MainTable(LoginRequiredMixin, TemplateView):
 
         # ✅ FAST PATH: jigs flagged as fully unloaded — Zone 2's JigCompleted uses
         # last_process_module='Jig Unloading' (it does NOT have an unload_over field).
-        completed_jig_ids = set(
-            JigCompleted.objects.filter(last_process_module='Jig Unloading')
-            .values_list('jig_id', flat=True)
-        )
         completed_lot_ids = set(
             JigCompleted.objects.filter(last_process_module='Jig Unloading')
             .values_list('lot_id', flat=True)
         )
-        print(f"[ZONE2 FILTER] Fast-path jig_ids with last_process_module='Jig Unloading': {len(completed_jig_ids)}")
+        print(f"[ZONE2 FILTER] Fast-path lot_ids with last_process_module='Jig Unloading': {len(completed_lot_ids)}")
 
         # Get all unload records once
         unload_records = JigUnloadAfterTable.objects.filter(
@@ -1877,11 +1871,13 @@ class JU_Zone_MainTable(LoginRequiredMixin, TemplateView):
                     continue
 
             jig_lot_ids = set(_jfq.keys())
-            _jig_id_z2 = getattr(jig, 'jig_id', None) or jig.lot_id
 
             # ✅ FAST PATH: single-model jigs can be hidden by their completion flag.
             # Multi-model jigs must stay visible until every model lot_id is submitted.
-            if len(jig_lot_ids) <= 1 and (_jig_id_z2 in completed_jig_ids or jig.lot_id in completed_lot_ids):
+            # Scoped to this record's own lot_id — jig hardware IDs (jig_id) are reused
+            # across lots/cycles, so matching on jig_id alone would hide a brand-new
+            # pending lot just because an unrelated earlier lot shared the same jig.
+            if len(jig_lot_ids) <= 1 and jig.lot_id in completed_lot_ids:
                 print(f"🚫 [ZONE2 FAST PATH] Hiding completed single-model jig: {jig.lot_id}")
                 continue
 
