@@ -210,8 +210,8 @@
          padding-bottom: 0.42rem !important;
          }
          .sidebar .nav .nav-item .nav-link .menu-title {
-         font-size: 13px !important;
-         line-height: 1.15 !important;
+         font-size: 14px !important;
+         line-height: 1.2 !important;
          }
 
          }
@@ -1125,6 +1125,8 @@
          tr.dp-row-action-highlight > td:nth-child(2) {
          left: 80px; /* match your sticky left for 2nd column */
          }
+
+         
       </style>
 
       <!-- Required meta tags -->
@@ -2767,28 +2769,6 @@
             }
          });
       </script>
-      <!-- /* Highlight active sidebar link based on current URL */ -->
-      <script nonce="{{ csp_nonce }}">
-         document.addEventListener("DOMContentLoaded", function() {
-           // Highlight sidebar nav-link matching current URL
-           var currentUrl = window.location.pathname;
-           document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
-             if (link.href && link.href.includes(currentUrl)) {
-               link.classList.add('active');
-               // Also expand parent menu if it's a submenu
-               var parentCollapse = link.closest('.collapse');
-               if (parentCollapse) {
-                 parentCollapse.classList.add('show');
-                 var parentNav = parentCollapse.previousElementSibling;
-                 if (parentNav && parentNav.classList.contains('nav-link')) {
-                   parentNav.classList.add('active');
-                 }
-               }
-             }
-           });
-         });
-      </script>
-      <!-- /*  Expand sidebar when a menu icon is clicked in minimized mode */ -->
       <script nonce="{{ csp_nonce }}">
          document.addEventListener("DOMContentLoaded", function() {
            // Highlight sidebar nav-link matching current URL
@@ -2814,7 +2794,7 @@
                var body = document.body;
                if (body.classList.contains('sidebar-icon-only')) {
                  body.classList.remove('sidebar-icon-only');
-
+ 
                  var submenuSelector = menuLink.getAttribute('href');
                  var submenu = submenuSelector ? document.querySelector(submenuSelector) : null;
                  if (submenu) {
@@ -2832,6 +2812,7 @@
              });
            });
          });
+      
       </script>
       <!-- script for custom tooltips on navbar icons -->
       <script nonce="{{ csp_nonce }}">
@@ -5158,52 +5139,6 @@
 </div>
 
 <script src="{% static 'js/sop_viewer.js' %}" nonce="{{ csp_nonce }}"></script>
-
-<!-- /*  Expand sidebar when a menu icon is clicked in minimized mode */ -->
-      <script nonce="{{ csp_nonce }}">
-         document.addEventListener("DOMContentLoaded", function() {
-           // Highlight sidebar nav-link matching current URL
-           var currentUrl = window.location.pathname;
-           document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
-             if (link.href && link.href.includes(currentUrl)) {
-               link.classList.add('active');
-               // Also expand parent menu if it's a submenu
-               var parentCollapse = link.closest('.collapse');
-               if (parentCollapse) {
-                 parentCollapse.classList.add('show');
-                 var parentNav = parentCollapse.previousElementSibling;
-                 if (parentNav && parentNav.classList.contains('nav-link')) {
-                   parentNav.classList.add('active');
-                 }
-               }
-             }
-           });
-         
-           // Expand sidebar when a menu icon is clicked in minimized mode
-           document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(function(menuLink) {
-             menuLink.addEventListener('click', function() {
-               var body = document.body;
-               if (body.classList.contains('sidebar-icon-only')) {
-                 body.classList.remove('sidebar-icon-only');
- 
-                 var submenuSelector = menuLink.getAttribute('href');
-                 var submenu = submenuSelector ? document.querySelector(submenuSelector) : null;
-                 if (submenu) {
-                   window.setTimeout(function() {
-                     if (window.bootstrap && window.bootstrap.Collapse) {
-                       window.bootstrap.Collapse.getOrCreateInstance(submenu, { toggle: false }).show();
-                     } else {
-                       submenu.classList.add('show');
-                     }
-                     menuLink.setAttribute('aria-expanded', 'true');
-                     menuLink.classList.remove('collapsed');
-                   }, 0);
-                 }
-               }
-             });
-           });
-         });
-      </script>
 
    </body>
 </html>
