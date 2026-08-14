@@ -7,6 +7,38 @@
 
 <!-- Jig Loading - Inline Styles -->
 <style nonce="{{ csp_nonce }}">
+/* ===== FIX: Keep Jig Loading - Pick Table heading visible while scrolling ===== */
+/* FIX: The title bar being sticky at the SAME top:0 as the table's own
+   thead was the real cause of the "header gets sliced/hidden" bug — both
+   elements pinned to the top of the page and the title (higher z-index,
+   solid white bg) visually covered the top portion of the table header as
+   soon as the page scrolled. The title no longer needs to stick — the
+   table header below now handles staying visible on its own (see
+   .table-responsive / #order-listing thead th below). */
+.jig-pick-table-title {
+  position: static !important;
+  background: #ffffff;
+  padding-top: 4px;
+  padding-bottom: 8px;
+}
+
+/* ===== FIX: Make the table area itself the scrolling region, and pin the
+   header to the TOP of that region — not the page.
+   titan-style.css already sets .table-responsive to max-height:450px, and
+   ttt-responsive-system.css applies its OWN #order-listing thead th rules
+   under certain viewport/pointer conditions (html.ttt-viewport-tablet ...)
+   with higher specificity than a bare "#order-listing thead th". The
+   selectors below add the .card-body ancestor + !important on every
+   relevant property so this wins regardless of load order, viewport class,
+   or which of those two stylesheets happens to match. */
+.card-body > .jig-pick-table-scroll {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
 /* ===== FIX: Freeze first 3 columns (S.No, Last Updated, Plating Stk No) ===== */
 #order-listing {
   position: relative;
@@ -19,12 +51,17 @@
   position: relative;
 }
 
-/* Sticky header */
+/* Sticky header — pinned to the top of .table-responsive (its nearest
+   scrolling ancestor, set above), so it stays visible while the rows
+   scroll underneath it instead of scrolling away with them. Also raised
+   above the old title z-index (102) in case any external rule restores it,
+   so the header can never again render underneath the title bar. */
+.card-body #order-listing thead th,
 #order-listing thead th {
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 100;
+  position: sticky !important;
+  top: 0 !important;
+  background: #028084 !important;
+  z-index: 110 !important;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
@@ -874,7 +911,7 @@ tbody tr.jig-row-action-highlight:not(.delink-row-scanned):not(.delink-row-disab
 <div class="content-wrapper">
   <div class="col-12 grid-margin stretch-card">
     <div class="card-body" style="padding-bottom: 12px">
-      <div class="d-flex align-items-center gap-2 mb-4" style="flex-wrap: wrap">
+      <div class="d-flex align-items-center gap-2 mb-4 jig-pick-table-title" style="flex-wrap: wrap">
         <h5 class="text-left mt-0 mb-0" style="font-weight: 700">
           Jig Loading - Pick Table
         </h5>
@@ -888,7 +925,7 @@ tbody tr.jig-row-action-highlight:not(.delink-row-scanned):not(.delink-row-disab
           aria-hidden="true"
         />
       </div>
-      <div class="table-responsive">
+      <div class="table-responsive jig-pick-table-scroll">
         <table id="order-listing" class="table" data-lock-module="JIG_LOADING">
           <thead>
             <tr>
@@ -908,7 +945,7 @@ tbody tr.jig-row-action-highlight:not(.delink-row-scanned):not(.delink-row-disab
                 Trays <i class="fa fa-filter" aria-hidden="true"></i>
               </th>
               <th>
-                Process <br> el leftStatus <i class="fa fa-filter" aria-hidden="true"></i>
+                Process <br> Status <i class="fa fa-filter" aria-hidden="true"></i>
               </th>
               <th>Jig Type <i class="fa fa-filter" aria-hidden="true"></i></th>
               <th>
@@ -1722,7 +1759,7 @@ tbody tr.jig-row-action-highlight:not(.delink-row-scanned):not(.delink-row-disab
        both tbodies below live inside it, so every '#splitPanelContainer ...'
        selector in the script blocks can see delink AND excess scan inputs
        regardless of which box they're in. -->
-  <div class="split-panel-container excess-hidden" id="splitPanelContainer" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:10px; padding-bottom:10px; align-items:start;">
+  <div class="split-panel-container" id="splitPanelContainer" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:10px; padding-bottom:10px; align-items:start;">
 
     <!-- LEFT COLUMN (swapped to first): EXCESS TRAYS — a genuinely separate box, only
          shown when this lot actually has excess/top-tray qty (toggled by
@@ -2812,8 +2849,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (plannedQtyStatEl) plannedQtyStatEl.innerText = delinkPanel.total_delink_qty || 0;
     if (excessBody) excessBody.innerHTML = '';
     if (excessBox && !delinkTrays.length) excessBox.style.display = 'none';
-    var splitPanelContainerEl = document.getElementById('splitPanelContainer');
-    if (splitPanelContainerEl && excessBox && excessBox.style.display === 'none') splitPanelContainerEl.classList.add('excess-hidden');
 
     if (dBody) {
       dBody.innerHTML = '';
@@ -3097,8 +3132,6 @@ document.addEventListener('DOMContentLoaded', function () {
           excessCardsQueue.forEach(function(etr) { excessBody.appendChild(etr); });
         }
         if (excessBox) excessBox.style.display = excessCardsQueue.length ? '' : 'none';
-        var splitPanelContainerEl2 = document.getElementById('splitPanelContainer');
-        if (splitPanelContainerEl2) splitPanelContainerEl2.classList.toggle('excess-hidden', !excessCardsQueue.length);
         var excessCountEl = document.getElementById('excessPanelCount');
         if (excessCountEl) {
           var excessTotalQty = 0;
@@ -7184,13 +7217,9 @@ document.addEventListener('DOMContentLoaded', function() {
       tbody.insertBefore(row, tbody.firstElementChild);
     }
 
-    // Scroll table to top
-    const table = tbody.closest('table') || document.getElementById('order-listing');
-    if (table) {
-      setTimeout(function() {
-        table.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 50);
-    }
+    // Do not scroll the whole page when moving the row.
+    // The Pick Table has its own scroll area; scrolling the table element itself
+    // pushes the Jig Loading - Pick Table title out of the viewport.
   }
 
   // Restore the row that was moved to top back to its original position
@@ -7228,10 +7257,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
 
-      // Scroll row back into view
-      setTimeout(function() {
-        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 50);
+      // Do not scroll the whole page after restoring the row.
+      // The title is kept visible by .jig-pick-table-title.
     } catch(e) { console.warn('[RESTORE_POS]', e); }
   }
 
@@ -7744,135 +7771,76 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* # Jig ID Validation with formatter */
   function applyJigIdValidation(inputEl) {
-    // UI FIX: while typing, feedback is the chip's own outline (red = invalid,
-    // green = valid) only — no text alert, no layout shift. #jigIdError stays
-    // out of flow (position:absolute, see CSS) and is left untouched here on
-    // purpose; other flows (submit-time validation) may still populate it.
-    var chipEl = inputEl.closest('.jig-header-meta-chip');
-    var val = (inputEl.value || '').toUpperCase();
-    inputEl.value = val;  // force uppercase
+    if (!inputEl) return;
 
-    // Auto-insert hyphen at position 4 if user types without it
-    if (val.length >= 5 && val[4] !== '-' && /^\d/.test(val[4])) {
-      val = val.substring(0, 4) + '-' + val.substring(4);
-      inputEl.value = val;
+    var chipEl = inputEl.closest('.jig-header-meta-chip');
+
+    // Read the current value without selecting/replacing it.
+    var val = (inputEl.value || '').toUpperCase();
+
+    // Keep the DOM value synchronized, but DO NOT select the field.
+    if (inputEl.value !== val) {
+        var start = inputEl.selectionStart;
+        var end = inputEl.selectionEnd;
+
+        inputEl.value = val;
+
+        // Preserve scanner/cursor position.
+        try {
+            inputEl.setSelectionRange(start, end);
+        } catch (e) {}
     }
 
     var result = validateJigIdFormat(val);
+
     if (!result.valid) {
-      inputEl.classList.add('jig-id-error');
-      inputEl.classList.remove('jig-id-valid');
-      if (chipEl) { chipEl.classList.add('jig-chip-invalid'); chipEl.classList.remove('jig-chip-valid'); }
-      if (val.length === 9) inputEl.select();
+        inputEl.classList.add('jig-id-error');
+        inputEl.classList.remove('jig-id-valid');
+
+        if (chipEl) {
+            chipEl.classList.add('jig-chip-invalid');
+            chipEl.classList.remove('jig-chip-valid');
+        }
+
+        // IMPORTANT:
+        // Do NOT call inputEl.select().
+        // Barcode scanners behave like keyboards and selecting the
+        // complete field can cause the next scanned character to
+        // replace the entire Jig ID.
     } else if (val.length === 9) {
-      inputEl.classList.remove('jig-id-error');
-      inputEl.classList.add('jig-id-valid');
-      if (chipEl) { chipEl.classList.add('jig-chip-valid'); chipEl.classList.remove('jig-chip-invalid'); }
+        inputEl.classList.remove('jig-id-error');
+        inputEl.classList.add('jig-id-valid');
+
+        if (chipEl) {
+            chipEl.classList.add('jig-chip-valid');
+            chipEl.classList.remove('jig-chip-invalid');
+        }
+       
     } else {
-      inputEl.classList.remove('jig-id-error', 'jig-id-valid');
-      if (chipEl) { chipEl.classList.remove('jig-chip-invalid', 'jig-chip-valid'); }
+        inputEl.classList.remove('jig-id-error', 'jig-id-valid');
+
+        if (chipEl) {
+            chipEl.classList.remove('jig-chip-invalid', 'jig-chip-valid');
+        }
     }
-  }
-
-  /**
-   * Jig ID prefix lock — the first 5 chars ("J" + zero-padded capacity + "-")
-   * are fully determined by the jig's capacity, so the user only ever keys in
-   * the trailing 4 digits. Keeps the field self-consistent with
-   * validateJigIdFormat() above instead of relying on the user to type the
-   * capacity digits correctly by hand.
-   */
-  function _getJigIdPrefix() {
-    var capacity = parseInt(window.BACKEND_ORIGINAL_CAPACITY || window.jigCapacity || 0) || 0;
-    return capacity ? ('J' + String(capacity).padStart(3, '0') + '-') : null;
-  }
-
-  function _syncJigIdPrefix(inputEl) {
-    if (!inputEl) return;
-    var prefix = _getJigIdPrefix();
-    if (!prefix) return;
-    inputEl.dataset.jigPrefix = prefix;
-    inputEl.placeholder = prefix + '0000';
-    var val = (inputEl.value || '').toUpperCase();
-    if (!val.startsWith(prefix)) {
-      // Preserve any digits already typed (e.g. capacity resolved after the
-      // user started typing, or a stale prefix from a previously picked jig).
-      var digits = val.replace(/[^0-9]/g, '').slice(0, 4);
-      inputEl.value = prefix + digits;
-      applyJigIdValidation(inputEl);
-    }
-  }
-  window._syncJigIdPrefix = _syncJigIdPrefix;
-
-  // window.jigCapacity resolves immediately on modal open (from the jig button's
-  // data-jig-capacity attribute); window.BACKEND_ORIGINAL_CAPACITY resolves
-  // slightly later from the init API response. Hooking both as property setters
-  // re-syncs the prefix the instant either becomes known, without having to
-  // touch every one of their assignment call sites.
-  ['jigCapacity', 'BACKEND_ORIGINAL_CAPACITY'].forEach(function(propName) {
-    var current = window[propName];
-    Object.defineProperty(window, propName, {
-      configurable: true,
-      enumerable: true,
-      get: function() { return current; },
-      set: function(v) {
-        current = v;
-        _syncJigIdPrefix(document.getElementById('jigIdInput'));
-      }
-    });
-  });
-
+}
   // Attach handler once DOM is ready
+  // Prefix auto-lock removed — user types/scans the full Jig ID (e.g. J144-0000)
+  // themselves; validateJigIdFormat()/applyJigIdValidation() above still enforce
+  // the correct capacity-based format and flag it invalid otherwise.
   document.addEventListener('DOMContentLoaded', function() {
     var jigInput = document.getElementById('jigIdInput');
-    if (jigInput) {
-      jigInput.addEventListener('input', function() { applyJigIdValidation(jigInput); });
-      jigInput.addEventListener('blur', function() { applyJigIdValidation(jigInput); });
-      // Allow only alphanumeric and hyphen (J + digits + hyphen + digits) when the
-      // capacity — and therefore the fixed prefix — isn't known yet. Once known,
-      // only digits are accepted, and only after the locked prefix.
-      jigInput.addEventListener('keypress', function(e) {
-        var char = String.fromCharCode(e.which || e.keyCode);
-        var prefix = this.dataset.jigPrefix || '';
-        if (prefix) {
-          var suffixLen = (this.value || '').length - prefix.length;
-          if (!/[0-9]/.test(char) || this.selectionStart < prefix.length || suffixLen >= 4) {
-            e.preventDefault();
-          }
-          return;
-        }
-        if (!/[a-zA-Z0-9\-]/.test(char)) { e.preventDefault(); }
-      });
-      // Block Backspace/Delete from eating into the locked prefix.
-      jigInput.addEventListener('keydown', function(e) {
-        var prefix = this.dataset.jigPrefix || '';
-        if (!prefix) return;
-        var pos = this.selectionStart;
-        if ((e.key === 'Backspace' && pos <= prefix.length && this.selectionEnd <= prefix.length) ||
-            (e.key === 'Delete' && pos < prefix.length)) {
-          e.preventDefault();
-        }
-      });
-      // Keep the caret in the editable (post-prefix) portion of the field.
-      var _clampCaret = function() {
-        var prefix = this.dataset.jigPrefix || '';
-        if (prefix && this.selectionStart < prefix.length) {
-          this.setSelectionRange(prefix.length, prefix.length);
-        }
-      };
-      jigInput.addEventListener('click', _clampCaret);
-      jigInput.addEventListener('focus', function() { setTimeout(_clampCaret.bind(this), 0); });
-      // Sanitize pasted content down to the 4 trailing digits.
-      jigInput.addEventListener('paste', function(e) {
-        var prefix = this.dataset.jigPrefix || '';
-        if (!prefix) return;
-        e.preventDefault();
-        var text = (e.clipboardData || window.clipboardData).getData('text') || '';
-        this.value = prefix + text.replace(/[^0-9]/g, '').slice(0, 4);
+
+    if (!jigInput) return;
+
+    jigInput.addEventListener('input', function() {
         applyJigIdValidation(this);
-      });
-      _syncJigIdPrefix(jigInput);
-    }
-  });
+    });
+
+    jigInput.addEventListener('blur', function() {
+        applyJigIdValidation(this);
+    });
+});
 
   // Expose for external usage (submit handler pre-check)
   window.validateJigIdFormat = validateJigIdFormat;
@@ -8894,12 +8862,21 @@ if (window.jQuery) {
       }
       
       // Format check: J###-#### (9 chars)
-      if (!/^J\d{3}-\d{4}$/.test(val)) {
-        this.classList.add('jig-id-error');
-        this.classList.remove('jig-id-valid');
-        if (jigIdErrEl) { jigIdErrEl.textContent = 'Invalid format'; jigIdErrEl.style.display = 'block'; }
-        return;
-      }
+      // Capacity-based Jig ID validation
+var formatResult = validateJigIdFormat(val);
+
+if (!formatResult.valid) {
+    this.classList.add('jig-id-error');
+    this.classList.remove('jig-id-valid');
+
+    if (jigIdErrEl) {
+        jigIdErrEl.textContent = formatResult.message;
+        jigIdErrEl.style.display = 'block';
+    }
+
+    console.log('[JIG_VALIDATE] Capacity validation failed on blur:', formatResult.message);
+    return;
+}
       
       // Debounce validation: wait 300ms before calling backend
       validationTimeout = setTimeout(function() {
@@ -9339,6 +9316,29 @@ if (window.jQuery) {
     e.preventDefault();
 
     var payload = buildFullPayload();
+    // Validate Jig ID before saving draft
+    var jigIdInput = document.getElementById('jigIdInput');
+    var jigId = (jigIdInput ? jigIdInput.value : '').trim();
+
+    var jigValidation = validateJigIdFormat(jigId);
+
+    if (!jigValidation.valid) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Draft Failed',
+            text: 'Draft save failed: Invalid Jig ID. ' + jigValidation.message,
+            confirmButtonColor: '#028084'
+        });
+
+        console.log(
+            '[DRAFT] Blocked invalid Jig ID:',
+            jigId,
+            '|',
+            jigValidation.message
+        );
+
+        return;
+    }
     if (!payload.lot_id || !payload.batch_id) {
       Swal.fire({ icon: 'warning', title: 'Missing Information', text: 'Missing lot or batch information. Cannot save draft.', confirmButtonColor: '#028084' });
       return;
