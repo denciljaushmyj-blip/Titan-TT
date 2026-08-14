@@ -210,7 +210,7 @@ REST_FRAMEWORK = {
     # No CORS or API discovery is required in this application.
     'DEFAULT_METADATA_CLASS': None,
     'DEFAULT_THROTTLE_RATES': {
-        'user': '20/min',
+        'user': '60/min',
     },
 }
 
@@ -238,7 +238,7 @@ DATABASES = {
         'PORT':'5432',
         'CONN_MAX_AGE':60,
     }
-}"""""
+} """
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -360,7 +360,6 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files
-# ... other settings ...
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
