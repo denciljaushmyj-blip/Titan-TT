@@ -219,7 +219,7 @@ class BrassPickTableView(APIView):
             else:
                 data['no_of_trays'] = 0
             
-            if data.get('send_brass_qc'):
+            if data.get('send_brass_qc') or data.get('send_brass_audit_to_qc'):
                 data['brass_qc_rejection'] = False
                 data['brass_physical_qty'] = 0
                 data['brass_rejection_total_qty'] = 0
