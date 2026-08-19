@@ -22,7 +22,11 @@
         '#trayScanModal.open',
         '#trayScanModal_DayPlanning.open',
         '[role="dialog"]',
-        '.barcode-modal'
+        '.barcode-modal',
+        // ✅ FIX: Brass QC rejection modal wasn't recognised as a modal root,
+        // so the Escape ("close_active") shortcut swallowed the keystroke
+        // (stopImmediatePropagation) without ever closing it.
+        '#brassRejectModalOverlay'
     ].join(', ');
 
     var shortcutConfigs = [];
@@ -632,40 +636,61 @@
     }
 
     function goToPage(pageNumber) {
-        if (!pageNumber || pageNumber < 1) {
+        var targetPage = Number(pageNumber);
+
+        if (!Number.isInteger(targetPage) || targetPage < 1) {
             return false;
         }
+
+        /* Prefer DataTables when the table is actually using DataTables. */
         if (typeof jQuery !== 'undefined' && jQuery.fn && jQuery.fn.dataTable) {
             try {
                 var dataTablesApi = jQuery.fn.dataTable.tables({ visible: true, api: true });
                 if (dataTablesApi && dataTablesApi.length) {
                     var pageInfo = dataTablesApi.page.info();
-                    if (pageNumber <= pageInfo.pages) {
-                        dataTablesApi.page(pageNumber - 1).draw('page');
+                    if (pageInfo && targetPage <= pageInfo.pages) {
+                        dataTablesApi.page(targetPage - 1).draw('page');
                         return true;
                     }
                 }
             } catch (error) {
-                return false;
+                console.warn('[GLOBAL SHORTCUT] DataTables page navigation unavailable:', error);
             }
         }
-        // Support both Bootstrap 4 (.page-item .page-link) and simple (<li><a>) pagination structures
-        var pageLinks = Array.from(document.querySelectorAll('.pagination .page-item:not(.disabled) .page-link, .pagination li:not(.disabled):not(.active) a'));
-        var pageLink = pageLinks.find(function (linkElement) {
-            return linkElement.textContent.trim() === String(pageNumber) && isVisibleElement(linkElement);
+
+        /*
+         * If the requested page is currently visible, preserve the existing
+         * pagination click behavior. Hidden pages (for example 11 when the
+         * control shows 1 2 3 ... 15) are handled by the URL fallback below.
+         */
+        var pageLinks = Array.from(document.querySelectorAll(
+            '.pagination .page-item:not(.disabled) .page-link, ' +
+            '.pagination li:not(.disabled):not(.active) a'
+        ));
+
+        var visiblePageLink = pageLinks.find(function (linkElement) {
+            return (
+                linkElement.textContent.trim() === String(targetPage) &&
+                isVisibleElement(linkElement)
+            );
         });
-        if (pageLink) {
-            pageLink.click();
+
+        if (visiblePageLink) {
+            visiblePageLink.click();
             return true;
         }
 
-        var maxPageNumber = getMaxPaginationPageNumber();
-        if (maxPageNumber && pageNumber > maxPageNumber) {
-            return false;
-        }
+        /*
+         * Server-side pagination: navigate directly to any page number,
+         * even when that number is hidden behind an ellipsis. Existing
+         * filters/search/date parameters are preserved.
+         */
         var targetUrl = new URL(window.location.href);
-        targetUrl.searchParams.set('page', String(pageNumber));
-        window.location.href = targetUrl.toString();
+        targetUrl.searchParams.set('page', String(targetPage));
+
+        console.log('[GLOBAL SHORTCUT] Direct page navigation:', targetUrl.toString());
+
+        window.location.assign(targetUrl.toString());
         return true;
     }
 
