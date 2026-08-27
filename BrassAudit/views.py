@@ -389,7 +389,27 @@ class BrassAuditPickTableView(APIView):
                     data['display_accepted_qty'] = 0
 
                 display_qty = data.get('display_accepted_qty', 0)
-                if tray_capacity > 0 and display_qty > 0:
+                # Backend is the source of truth: report the ACTUAL number of
+                # trays that belong to this lot (from the shared audit tray
+                # resolver — BQC accept snapshot / BrassTrayId / IPTrayId /
+                # TrayId chain) instead of deriving it as ceil(qty / capacity),
+                # which under-counts whenever the lot is physically spread
+                # across partially-filled trays.  Fall back to the arithmetic
+                # estimate only when no tray rows can be resolved yet.
+                resolved_tray_count = 0
+                try:
+                    _res_trays, _res_source, _res_total = _resolve_lot_trays_audit(lot_id)
+                    resolved_tray_count = len([
+                        t for t in _res_trays
+                        if not t.get('is_delinked') and not t.get('is_rejected')
+                    ])
+                except Exception as _res_err:
+                    logger.warning(
+                        f"[BrassAuditPickTable] _resolve_lot_trays_audit failed for {lot_id}: {_res_err}"
+                    )
+                if resolved_tray_count > 0:
+                    data['no_of_trays'] = resolved_tray_count
+                elif tray_capacity > 0 and display_qty > 0:
                     data['no_of_trays'] = math.ceil(display_qty / tray_capacity)
                 else:
                     data['no_of_trays'] = 0

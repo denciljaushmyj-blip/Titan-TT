@@ -69,6 +69,84 @@ def _safe_int(value, default=0):
         return default
 
 
+def _is_input_screening_rejected_tray_active(tray_id):
+    """Return True when Input Screening still owns an active rejected tray state."""
+    normalized_tray_id = str(tray_id or '').strip().upper()
+    if not normalized_tray_id:
+        return False
+
+    from InputScreening.models import IPTrayId, IP_Rejected_TrayScan, IS_AllocationTray
+
+    released_for_reuse = (
+        TrayId.objects.filter(
+            tray_id=normalized_tray_id,
+            delink_tray=True,
+            rejected_tray=False,
+        ).exists() or
+        IPTrayId.objects.filter(
+            tray_id=normalized_tray_id,
+            delink_tray=True,
+            rejected_tray=False,
+        ).exists()
+    )
+
+    reason_exists = (
+        Q(rejection_reason_id__isnull=False) |
+        (Q(rejection_reason_text__isnull=False) & ~Q(rejection_reason_text=''))
+    )
+    active_partial_reject = (
+        IS_AllocationTray.objects
+        .filter(
+            tray_id=normalized_tray_id,
+            reject_lot__isnull=False,
+            qty__gt=0,
+            is_delinked=False,
+        )
+        .filter(reason_exists)
+        .exists()
+    )
+    if active_partial_reject and not released_for_reuse:
+        return True
+
+    if IPTrayId.objects.filter(
+        tray_id=normalized_tray_id,
+        rejected_tray=True,
+        delink_tray=False,
+    ).exists():
+        return True
+
+    if TrayId.objects.filter(
+        tray_id=normalized_tray_id,
+        rejected_tray=True,
+        delink_tray=False,
+    ).exists():
+        return True
+
+    legacy_reject_scan_exists = IP_Rejected_TrayScan.objects.filter(
+        rejected_tray_id=normalized_tray_id,
+    ).exists()
+    return legacy_reject_scan_exists and not released_for_reuse
+
+
+def _input_screening_rejected_tray_ids_from_payload(*payload_lists):
+    rejected_tray_ids = []
+    seen = set()
+    for payload_list in payload_lists:
+        if not isinstance(payload_list, list):
+            continue
+        for item in payload_list:
+            tray_id = ''
+            if isinstance(item, dict):
+                tray_id = item.get('tray_id', '')
+            else:
+                tray_id = item
+            tray_id = str(tray_id or '').strip().upper()
+            if tray_id and tray_id not in seen and _is_input_screening_rejected_tray_active(tray_id):
+                seen.add(tray_id)
+                rejected_tray_ids.append(tray_id)
+    return rejected_tray_ids
+
+
 
 
 def _get_series_tray_capacity(batch):
@@ -1026,6 +1104,21 @@ def iqf_submit_audit(request):
     # Remark is mandatory when proceeding
     if action == 'proceed' and not remark:
         return Response({'success': False, 'error': 'Remark is mandatory to proceed', 'remark_required': True}, status=400)
+
+    if action in ('draft', 'proceed'):
+        rejected_is_tray_ids = _input_screening_rejected_tray_ids_from_payload(
+            data.get('accepted_trays') or [],
+            data.get('rejected_trays') or [],
+        )
+        if rejected_is_tray_ids:
+            tray_label = ', '.join(rejected_is_tray_ids)
+            return Response({
+                'success': False,
+                'error': 'Tray rejected in Input Screening',
+                'tray_id': rejected_is_tray_ids[0],
+                'tray_ids': rejected_is_tray_ids,
+                'message': f'Tray rejected in Input Screening: {tray_label}',
+            }, status=400)
 
     try:
         # ─── 1. SINGLE SOURCE OF TRUTH: rw_qty from Brass QC/Audit rejection ───
@@ -3056,16 +3149,14 @@ def iqf_validate_tray_scan(request):
         })
 
     # ── RULE 2.5: Block trays that are REJECTED in Input Screening ──
-    # IPTrayId.rejected_tray=True means the tray was explicitly rejected by IS.
-    # Such trays must NEVER be accepted or reused in IQF (or any downstream module)
-    # regardless of TrayId master state (delinked, cleared, etc.).
-    from InputScreening.models import IPTrayId as _IPTrayId
-    if _IPTrayId.objects.filter(tray_id=tray_id, rejected_tray=True, delink_tray=False).exists():
-        print(f"🚫 [TRAY_VALIDATION] {tray_id}: IS-rejected tray — cannot be reused or accepted")
+    # Check current partial-reject allocations and legacy IPTrayId records before
+    # any branch can classify the tray as New Tray.
+    if _is_input_screening_rejected_tray_active(tray_id):
+        print(f"🚫 [TRAY_VALIDATION] {tray_id}: active IS-rejected tray — cannot be reused or accepted")
         return Response({
             'success': True,
             'status': 'invalid_format',
-            'message': 'Tray was rejected in Input Screening — cannot be accepted or reused',
+            'message': 'Tray rejected in Input Screening',
             'tray_id': tray_id,
         })
 

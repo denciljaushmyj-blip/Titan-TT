@@ -163,6 +163,18 @@ def find_jig_unload_tray_conflict(raw_tray_id, allowed_lot_ids=None, include_tra
     from modelmasterapp.models import TrayId
     from Jig_Unloading.models import JigUnload_TrayId, JigUnloadDraft, JigUnloadAutoSave, JUSubmittedZ1
 
+    # A tray that has been officially delinked in the TrayId master (CLAUDE.md
+    # §7 "Delink Rules" — the authoritative state update) is free for reuse even
+    # if an older submitted/draft/autosave JSON payload still lists it. The
+    # JSON-backed branches below have no per-tray delink flag of their own
+    # (unlike the JigUnload_TrayId branch, which already skips delinked rows),
+    # so honour the master delink state and skip them to avoid blocking a
+    # legitimately released tray forever. Live occupancy is still enforced by
+    # the JigUnload_TrayId branch, which only matches non-delinked rows.
+    master_delinked = TrayId.objects.filter(
+        _variant_query('tray_id', tray_variants), delink_tray=True
+    ).exists()
+
     if include_tray_master:
         for tray in TrayId.objects.filter(_variant_query('tray_id', tray_variants)).only(
             'id', 'tray_id', 'lot_id', 'scanned', 'delink_tray'
@@ -194,6 +206,11 @@ def find_jig_unload_tray_conflict(raw_tray_id, allowed_lot_ids=None, include_tra
             next(iter(record_lots), ''),
             tray.id,
         )
+
+    if master_delinked:
+        # Tray was officially released in the master — the stale JSON-backed
+        # references below no longer represent an active reservation.
+        return None
 
     submitted_rows = JUSubmittedZ1.objects.exclude(tray_data__isnull=True).only(
         'id', 'jig_completed_id', 'lot_id', 'tray_data', 'is_draft'

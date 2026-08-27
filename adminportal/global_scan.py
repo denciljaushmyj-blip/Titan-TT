@@ -22,6 +22,9 @@ from django.urls import reverse
 from django.views import View
 from django.db.models import Q
 
+from adminportal.middleware import _MODULE_URL_MAP
+from adminportal.services import get_user_allowed_module_names, is_admin_user
+
 logger = logging.getLogger(__name__)
 
 SCAN_TAG = '[GLOBAL_SCAN_API]'
@@ -60,6 +63,24 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
         result = self._search_all_modules(tray_id, current_path=current_path, user=request.user)
 
         if result:
+            if not self._user_can_access_result(request.user, result):
+                module_name = result.get('module') or 'another'
+                message = f"Currently it is available in '{module_name}' module"
+                logger.info(
+                    '%s search_restricted tray_id=%s module=%s user=%s',
+                    SCAN_TAG,
+                    tray_id,
+                    module_name,
+                    request.user.username,
+                )
+                return JsonResponse({
+                    'success': False,
+                    'found': True,
+                    'restricted': True,
+                    'tray_id': tray_id,
+                    'message': message,
+                }, status=403)
+
             # Add tray_id to response for frontend highlight
             result['tray_id'] = tray_id
             logger.info(
@@ -94,6 +115,25 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
         if not current_path:
             return False
         return self._normalize_path(response_url) == self._normalize_path(current_path)
+
+    def _required_modules_for_result(self, result):
+        response_url = (result or {}).get('url')
+        if not response_url:
+            return set()
+        normalized_url = self._normalize_path(response_url).lstrip('/')
+        for prefix, modules in _MODULE_URL_MAP.items():
+            if normalized_url.startswith(prefix.lower()):
+                return set(modules)
+        return set()
+
+    def _user_can_access_result(self, user, result):
+        if is_admin_user(user):
+            return True
+        required_modules = self._required_modules_for_result(result)
+        if not required_modules:
+            return True
+        allowed_modules = set(get_user_allowed_module_names(user))
+        return bool(allowed_modules.intersection(required_modules))
 
     def _tray_id_variants(self, tray_id):
         """Return exact tray id plus safe zero-padded suffix variants.
@@ -405,11 +445,20 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
             logger.info('%s no_candidates tray_id=%s', SCAN_TAG, tray_id)
             return None
 
-        # Step 2: Check each module's pick table (newest stage first)
+        # A scanned JIG ID must resolve to Jig Unloading Zone 1/2 before the
+        # lot-first workflow checks older/current upstream modules.
+        if self._is_jig_id_format(tray_id):
+            jig_unload_result = self._resolve_jig_unloading_by_jig_id(tray_id, lot_ids)
+            if jig_unload_result:
+                return jig_unload_result
+
+        # Step 2: Check each module's eligible Main/Pick table only.
+        # Completed/Reject/history tables are deliberately not eligible for
+        # global scan navigation/highlighting.
         checks = [
-            ('Jig Loading',     self._check_lot_in_jig_loading),
             ('Inprocess Inspection', self._check_lot_in_inprocess_inspection),
             ('Jig Unloading',   self._check_lot_in_jig_unloading),
+            ('Inprocess Inspection', self._check_lot_in_inprocess_inspection),
             ('Nickel Wiping',   self._check_lot_in_nickel_wiping),
             ('Nickel Wiping Z2', self._check_lot_in_nickel_wiping_z2),
             ('Nickel Audit Z1', self._check_lot_in_nickel_audit_z1),
@@ -421,6 +470,7 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
             ('Brass QC',        self._check_lot_in_brass_qc),
             ('Input Screening', self._check_lot_in_input_screening),
             ('Day Planning',    self._check_lot_in_day_planning),
+            ('Jig Loading',     self._check_lot_in_jig_loading),
         ]
 
         requested_path = self._normalize_path(current_path) if current_path else ''
@@ -430,6 +480,15 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
                 for lid in lot_ids:
                     result = check(lid)
                     if result:
+                        if not self._is_main_or_pick_result(result):
+                            logger.info(
+                                '%s module_match_skipped_non_pick_main module=%s lot_id=%s url=%s',
+                                SCAN_TAG,
+                                result.get('module'),
+                                lid,
+                                result.get('url'),
+                            )
+                            continue
                         logger.info('%s module_match module=%s lot_id=%s', SCAN_TAG, label, lid)
                         if fallback_result is None:
                             fallback_result = result
@@ -491,11 +550,94 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
         from modelmasterapp.models import TotalStockModel
         return TotalStockModel.objects.filter(lot_id=lot_id).first()
 
+    def _is_main_or_pick_result(self, result):
+        module_name = str((result or {}).get('module') or '').lower()
+        if 'completed' in module_name or 'complete' in module_name or 'reject' in module_name:
+            return False
+
+        response_url = (result or {}).get('url')
+        if not response_url:
+            return False
+        normalized_url = self._normalize_path(response_url)
+        excluded_terms = ('completed', 'complete', 'reject', 'rejection')
+        return not any(term in normalized_url for term in excluded_terms)
+
+    def _page_for_value(self, queryset, field_name, value, page_size=10):
+        if not value:
+            return None
+        values = list(queryset.values_list(field_name, flat=True))
+        target = str(value)
+        for index, candidate in enumerate(values):
+            if str(candidate) == target:
+                return (index // page_size) + 1
+        return None
+
     def _batch_str(self, stock, fallback):
         try:
             return stock.batch_id.batch_id if stock and stock.batch_id else fallback
         except Exception:
             return fallback
+
+    def _is_jig_id_format(self, value):
+        normalized = ''.join(str(value or '').split()).upper()
+        return bool(re.match(r'^(JL-[A-Z]\d{5}|J\d{3}-\d{4})$', normalized))
+
+    def _resolve_jig_unloading_by_jig_id(self, jig_id, candidate_lot_ids=None):
+        try:
+            from Jig_Loading.models import JigCompleted
+
+            normalized_jig_id = ''.join(str(jig_id or '').split()).upper()
+            lot_ids = {str(lot_id) for lot_id in (candidate_lot_ids or []) if lot_id}
+            active_jigs = JigCompleted.objects.filter(
+                jig_id__iexact=normalized_jig_id,
+                last_process_module='Inprocess Inspection',
+            ).order_by('-IP_loaded_date_time', '-updated_at')
+
+            jig = None
+            if lot_ids:
+                jig = active_jigs.filter(lot_id__in=lot_ids).first()
+            if not jig:
+                jig = active_jigs.first()
+            if not jig:
+                return None
+
+            stock = self._stock_for(jig.lot_id)
+            module_name, module_url = self._jig_unload_route(jig)
+            page = self._page_for_jig_unload_jig(jig, module_url)
+            return {
+                'module': module_name,
+                'url': module_url,
+                'lot_id': jig.lot_id,
+                'stock_lot_id': jig.lot_id,
+                'jig_completed_id': jig.id,
+                'jig_id': jig.jig_id or normalized_jig_id,
+                'batch_id': self._batch_str(stock, getattr(jig, 'batch_id', jig.lot_id)),
+                'page': page,
+            }
+        except Exception as e:
+            logger.error('%s _resolve_jig_unloading_by_jig_id: %s', SCAN_TAG, e)
+            return None
+
+    def _page_for_jig_unload_jig(self, target_jig, target_url, page_size=10):
+        try:
+            from Jig_Loading.models import JigCompleted
+
+            active_jigs = JigCompleted.objects.filter(
+                last_process_module='Inprocess Inspection',
+            ).order_by('-IP_loaded_date_time', '-updated_at').only(
+                'id', 'lot_id', 'batch_id', 'draft_data', 'jig_id'
+            )
+            position = 0
+            for candidate in active_jigs.iterator():
+                _, candidate_url = self._jig_unload_route(candidate)
+                if self._normalize_path(candidate_url) != self._normalize_path(target_url):
+                    continue
+                position += 1
+                if candidate.id == target_jig.id:
+                    return ((position - 1) // page_size) + 1
+        except Exception as e:
+            logger.debug('%s _page_for_jig_unload_jig failed: %s', SCAN_TAG, e)
+        return None
 
     def _jig_unload_route(self, jig):
         draft_data = getattr(jig, 'draft_data', {}) or {}
@@ -515,6 +657,21 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
                 plating_color = ''
 
         normalized_color = str(plating_color or '').upper().replace('IP-', '').strip()
+        try:
+            from modelmasterapp.models import Plating_Color
+            color = (
+                Plating_Color.objects.filter(
+                    Q(plating_color__iexact=normalized_color) |
+                    Q(plating_color__iexact=f'IP-{normalized_color}')
+                ).first()
+            )
+            if color and getattr(color, 'jig_unload_zone_2', False):
+                return 'Jig Unloading Zone 2', reverse('JU_Zone_MainTable')
+            if color and getattr(color, 'jig_unload_zone_1', False):
+                return 'Jig Unloading', reverse('Jig_Unloading_MainTable')
+        except Exception as e:
+            logger.debug('%s jig unload color route lookup failed: %s', SCAN_TAG, e)
+
         if normalized_color == 'IPS':
             return 'Jig Unloading', reverse('Jig_Unloading_MainTable')
         return 'Jig Unloading Zone 2', reverse('JU_Zone_MainTable')
@@ -548,7 +705,6 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
 
     def _check_lot_in_jig_loading(self, lot_id):
         try:
-            from Jig_Loading.models import JigCompleted
             stock = self._stock_for(lot_id)
 
             # 1) Already submitted -> sitting in the Jig Loading Completed
@@ -559,14 +715,6 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
             #    that gate only decides whether the lot should still appear on
             #    the active Jig Loading work screen, and wrongly hid already
             #    -submitted jigs whose current stock flags no longer matched it.
-            if JigCompleted.objects.filter(lot_id=lot_id, draft_status='submitted').exists():
-                return {
-                    'module': 'Jig Loading (Completed)',
-                    'url': reverse('JigCompletedTable'),
-                    'lot_id': lot_id,
-                    'batch_id': self._batch_str(stock, lot_id),
-                }
-
             if not stock:
                 return None
             eligible = (
@@ -1080,11 +1228,14 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
             if pick_table_queryset().filter(
                 Q(stock_lot_id=lot_id) | Q(lot_id=lot_id)
             ).exists():
+                page = self._page_for_value(pick_table_queryset(), 'stock_lot_id', lot_id)
                 return {
                     'module': 'Input Screening',
                     'url': reverse('IS_PickTable'),
                     'lot_id': lot_id,
+                    'stock_lot_id': lot_id,
                     'batch_id': self._batch_str(stock, lot_id),
+                    'page': page,
                 }
 
             # 2) Submitted (accepted/partial) -> Completed Table
@@ -1134,11 +1285,20 @@ class GlobalTraySearchView(LoginRequiredMixin, View):
             if JigCompleted.objects.filter(
                 lot_id=lot_id, draft_status='submitted', jig_position__isnull=True
             ).exists():
+                page = self._page_for_value(
+                    JigCompleted.objects.filter(
+                        draft_status='submitted',
+                        jig_position__isnull=True,
+                    ).order_by('-updated_at'),
+                    'lot_id',
+                    lot_id,
+                )
                 return {
                     'module': 'Inprocess Inspection',
                     'url': reverse('inprocess_inspection_main'),
                     'lot_id': lot_id,
                     'batch_id': self._batch_str(stock, lot_id),
+                    'page': page,
                 }
 
             return None

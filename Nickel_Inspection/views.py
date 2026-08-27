@@ -967,6 +967,7 @@ def nq_action(request):
                 series_valid, series_message, _ = validate_nickel_wiping_rejection_tray_series(
                     tray_id_val,
                     check_juat.tray_type,
+                    check_juat.plating_stk_no,
                 )
                 if not series_valid:
                     return Response({'success': True, 'valid': False, 'message': series_message})
@@ -1045,9 +1046,17 @@ def nq_action(request):
             return Response({'success': False, 'error': 'rejected_qty out of range'}, status=400)
         accepted_qty = total_qty - rejected_qty
         orig_cap = _nq_tray_capacity(juat.tray_type or '') or juat.tray_capacity or 20
-        rej_prefix, rej_cap = get_nickel_wiping_rejection_tray_allocation(juat.tray_type)
+        rej_prefix, rej_cap = get_nickel_wiping_rejection_tray_allocation(
+            juat.tray_type, juat.plating_stk_no
+        )
         orig_trays = _nq_get_original_trays_for_allocation(lot_id, juat)
-        allocation = build_nq_rejection_allocation(orig_trays, rejected_qty, rej_cap)
+        allocation = build_nq_rejection_allocation(
+            orig_trays,
+            rejected_qty,
+            rej_cap,
+            accept_capacity=orig_cap,
+            accepted_qty=accepted_qty,
+        )
         return Response({
             'success': True,
             'accepted_qty': accepted_qty,
@@ -1346,9 +1355,18 @@ def _nq_do_submit_reject(request, lot_id, juat):
     # the non-rejected remainder is being split out.
     if is_partial and not reason_ids:
         return Response({'success': False, 'error': 'reason_ids required for partial rejection'}, status=400)
-    _allowed_prefix, rej_cap = get_nickel_wiping_rejection_tray_allocation(juat.tray_type)
+    _allowed_prefix, rej_cap = get_nickel_wiping_rejection_tray_allocation(
+        juat.tray_type, juat.plating_stk_no
+    )
+    orig_cap = _nq_tray_capacity(juat.tray_type or '') or juat.tray_capacity or 20
     orig_trays = _nq_get_original_trays_for_allocation(lot_id, juat, create_missing=True)
-    allocation = build_nq_rejection_allocation(orig_trays, rejected_qty, rej_cap)
+    allocation = build_nq_rejection_allocation(
+        orig_trays,
+        rejected_qty,
+        rej_cap,
+        accept_capacity=orig_cap,
+        accepted_qty=accepted_qty,
+    )
 
     # A freed original tray (one the allocation would otherwise require to be
     # delinked) may instead be reused directly as its own reject container —
@@ -1377,6 +1395,8 @@ def _nq_do_submit_reject(request, lot_id, juat):
             allocation['accept_auto_trays'],
             original_trays=orig_trays,
             delink_trays=delink_trays_snapshot,
+            accepted_qty=accepted_qty,
+            accept_capacity=orig_cap,
         )
         validate_original_tray_coverage(
             accept_trays, delink_trays_snapshot, orig_trays, reject_trays=reject_trays,
@@ -1408,6 +1428,7 @@ def _nq_do_submit_reject(request, lot_id, juat):
         series_valid, series_message, _ = validate_nickel_wiping_rejection_tray_series(
             tid,
             juat.tray_type,
+            juat.plating_stk_no,
         )
         if not series_valid:
             return Response(

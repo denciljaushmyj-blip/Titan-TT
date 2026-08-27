@@ -215,11 +215,31 @@ class BrassPickTableView(APIView):
             data['is_delink_only'] = is_delink_only
 
             display_qty = data.get('display_accepted_qty', 0)
-            if tray_capacity > 0 and display_qty > 0:
+            # Backend is the source of truth: report the ACTUAL number of trays
+            # that belong to this lot (from the shared tray resolver) instead of
+            # deriving it as ceil(qty / capacity).  The mathematical minimum
+            # under-counts whenever the lot is physically spread across
+            # partially-filled trays (e.g. 10 real trays but qty only fills 2
+            # at full capacity).  Fall back to the qty/capacity estimate only
+            # when no tray rows can be resolved yet.
+            actual_tray_count = 0
+            try:
+                resolved_trays, _tray_source, _tray_total = resolve_lot_trays(lot_id)
+                actual_tray_count = len([
+                    t for t in resolved_trays
+                    if not t.get('is_delinked') and not t.get('is_rejected')
+                ])
+            except Exception as _tray_err:
+                logger.warning(
+                    f"[BrassPickTable] resolve_lot_trays failed for {lot_id}: {_tray_err}"
+                )
+            if actual_tray_count > 0:
+                data['no_of_trays'] = actual_tray_count
+            elif tray_capacity > 0 and display_qty > 0:
                 data['no_of_trays'] = math.ceil(display_qty / tray_capacity)
             else:
                 data['no_of_trays'] = 0
-            
+
             if data.get('send_brass_qc') or data.get('send_brass_audit_to_qc'):
                 data['brass_qc_rejection'] = False
                 data['brass_physical_qty'] = 0

@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 from django.shortcuts import render
+from django.db import transaction
 from django.db.models import OuterRef, Subquery, Exists, F
 from django.core.paginator import Paginator
 from django.templatetags.static import static
@@ -1160,29 +1161,38 @@ def na_hold_unhold(request):
     if len(remark) > 50:
         return Response({"success": False, "error": "Remark must be 50 characters or less"}, status=400)
 
-    juat = JigUnloadAfterTable.objects.filter(lot_id=lot_id).first()
-    if not juat:
-        return Response({"success": False, "error": "Lot not found"}, status=404)
+    with transaction.atomic():
+        juat = JigUnloadAfterTable.objects.select_for_update().filter(lot_id=lot_id).first()
+        if not juat:
+            return Response({"success": False, "error": "Lot not found"}, status=404)
 
-    now = timezone.now()
-    if action == 'hold':
-        juat.na_hold_lot = True
-        juat.na_holding_reason = remark
-        juat.na_hold_by = request.user
-        juat.na_hold_at = now
-        juat.na_release_lot = False
-        juat.na_release_reason = ''
-    else:
-        juat.na_hold_lot = False
-        juat.na_release_reason = remark
-        juat.na_release_by = request.user
-        juat.na_release_at = now
-        juat.na_release_lot = True
+        now = timezone.now()
+        if action == 'hold':
+            if juat.na_hold_lot:
+                return Response({"success": False, "error": "Lot is already on hold"}, status=400)
+            juat.na_hold_lot = True
+            juat.na_holding_reason = remark
+            juat.na_hold_by = request.user
+            juat.na_hold_at = now
+            juat.na_release_lot = False
+            update_fields = [
+                'na_hold_lot', 'na_holding_reason', 'na_hold_by', 'na_hold_at',
+                'na_release_lot',
+            ]
+        else:
+            if not juat.na_hold_lot:
+                return Response({"success": False, "error": "Lot is not on hold"}, status=400)
+            juat.na_hold_lot = False
+            juat.na_release_reason = remark
+            juat.na_release_by = request.user
+            juat.na_release_at = now
+            juat.na_release_lot = True
+            update_fields = [
+                'na_hold_lot',
+                'na_release_lot', 'na_release_reason', 'na_release_by', 'na_release_at',
+            ]
 
-    juat.save(update_fields=[
-        'na_hold_lot', 'na_holding_reason', 'na_hold_by', 'na_hold_at',
-        'na_release_lot', 'na_release_reason', 'na_release_by', 'na_release_at',
-    ])
+        juat.save(update_fields=update_fields)
     logger.info("[na_hold_unhold] lot=%s action=%s user=%s", lot_id, action, request.user)
     return Response({
         "success": True, "lot_id": lot_id, "action": action,

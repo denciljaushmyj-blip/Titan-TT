@@ -778,6 +778,9 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
+                      Action <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
                       Polishing Stk No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
@@ -827,9 +830,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                       Process Status
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                    <th>
-                      Action <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
+
                     <th>
                       Lot Status
                       <i class="fa fa-filter" aria-hidden="true"></i>
@@ -897,72 +898,6 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                           </div>
                         </div>
                       </span>
-                    </td>
-                    <td >{{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}</td>
-
-                    <td >{{ data.plating_color }}</td>
-                    <td >{{ data.category }}</td>
-                    <td >{{data.polish_finish}}</td>
-                    <td >{{data.tray_type}}-{{data.tray_capacity}}</td>
-                    <td >{{data.location__location_name}}</td>
-                    <td>{% include 'partials/_type_of_input_cell.html' with type_of_input=data.type_of_input %}</td>
-
-                    <td >{{data.no_of_trays}}</td>
-                    <td>
-                      <span class="lot-qty" style="min-width: 30px; text-align: right">{{ data.display_accepted_qty }}</span>
-                      <span style="display: inline-flex; align-items: center; gap: 4px;">
-                        
-                       
-                      </span>
-                    </td>
-                    <td>{{data.na_physical_qty}}</td>
-
-                    <td >
-                        {{ data.na_qc_accepted_qty|default:0 }}    
-                    </td>
-                    <td >
-                        {{ data.na_rejection_qty|default:0 }}
-                    </td>
-                    <!-- Process Status Column -->
-                    <td >
-                      <div class="d-flex">
-                        <!-- Q: Green if na_ac_accepted_qty_verified, else gray -->
-                        <div
-                          title="Tray Scan"
-                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-                          style="
-                            width: 25px;
-                            height: 25px;
-                            background-color: {% if data.na_ac_accepted_qty_verified %}#0c8249{% else %}#bdbdbd{% endif %};
-                            color: white;
-                            font-weight: bold;
-                            line-height: 20px;
-                            text-align: center;
-                            padding-top: 1px;
-                            padding-right: 1px;
-                          "
-                        >
-                          Q
-                        </div>
-                        <!-- QC: Green if na_qc_rejection or na_qc_accptance, else gray -->
-                        <div
-                          title="Tray Scan"
-                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-                          style="
-                            width: 25px;
-                            height: 25px;
-                            background-color: {% if data.na_qc_rejection or data.na_qc_accptance or data.na_qc_few_cases_accptance %}#0c8249{% else %}#bdbdbd{% endif %};
-                            color: white;
-                            font-weight: bold;
-                            line-height: 20px;
-                            text-align: center;
-                            padding-top: 1px;
-                            padding-right: 1px;
-                          "
-                        >
-                          QC
-                        </div>
-                      </div>
                     </td>
                     <td >
                       <!-- Acceptance/Rejection Status -->
@@ -1044,6 +979,79 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                                  alt="View"
                                  style="width: 20px; margin-right: 8px; height: auto; cursor:pointer;" />
                           </a>
+                    </td>
+                    <td >{{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}</td>
+
+                    <td >{{ data.plating_color }}</td>
+                    <td >{{ data.category }}</td>
+                    <td >{{data.polish_finish}}</td>
+                    <td >{{data.tray_type}}-{{data.tray_capacity}}</td>
+                    <td >{{data.location__location_name}}</td>
+                    <td>{% include 'partials/_type_of_input_cell.html' with type_of_input=data.type_of_input %}</td>
+
+                    <td >{{data.no_of_trays}}</td>
+                    <td>
+                      <span class="lot-qty" style="min-width: 30px; text-align: right">{{ data.display_accepted_qty }}</span>
+                      <span style="display: inline-flex; align-items: center; gap: 4px;">
+                        
+                       
+                      </span>
+                    </td>
+                    <td>{{data.na_physical_qty}}</td>
+
+                    <td >
+                        {{ data.na_qc_accepted_qty|default:0 }}    
+                    </td>
+                    <td >
+                        {{ data.na_rejection_qty|default:0 }}
+                    </td>
+                    <!-- Process Status Column -->
+                    <td >
+                      <div class="d-flex">
+                        <!-- Q: Green only for accepted lots -->
+                        <div
+                          title="Tray Scan"
+                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+                          style="
+                            width: 25px;
+                            height: 25px;
+                            background-color: {% if data.na_qc_accptance %}#0c8249{% else %}#bdbdbd{% endif %};
+                            color: white;
+                            font-weight: bold;
+                            line-height: 20px;
+                            text-align: center;
+                            padding-top: 1px;
+                            padding-right: 1px;
+                          "
+                        >
+                          Q
+                        </div>
+                        <!-- QC: full for accepted/rejected, half for partial rejected -->
+                        <div
+                          title="Tray Scan"
+                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+                          style="
+                            width: 25px;
+                            height: 25px;
+                            background:
+                              {% if data.na_qc_few_cases_accptance %}
+                                linear-gradient(to right, #0c8249 50%, #bdbdbd 50%);
+                              {% elif data.na_qc_rejection or data.na_qc_accptance %}
+                                #0c8249;
+                              {% else %}
+                                #bdbdbd;
+                              {% endif %}
+                            color: white;
+                            font-weight: bold;
+                            line-height: 20px;
+                            text-align: center;
+                            padding-top: 1px;
+                            padding-right: 1px;
+                          "
+                        >
+                          QC
+                        </div>
+                      </div>
                     </td>
                     <td>
                       {% if data.na_ac_accepted_qty_verified  %}
