@@ -61,6 +61,7 @@ from .services.validators import (
     is_input_screening_delink_only_tray,
     validate_accept_tray_current_lot,
     validate_tray_not_rejected_in_is,
+    validate_brass_qc_tray_occupancy,
 )
 from modelmasterapp.type_of_input import get_type_of_input_for_batch
 
@@ -1400,23 +1401,21 @@ def brass_qc_action(request):
                         if cand_category and cand_category != model_category:
                             return JsonResponse({"valid": False, "error": f"Tray type mismatch: model requires {model_category} tray, but selected tray is {cand_category}", "selected_tray_id": cand.tray_id, "auto_selected": True})
                     
-                    # Check cross-module occupancy
-                    occ_found = False
-                    for qs, module_name in [
-                        (IPTrayId.objects.filter(tray_id=cand.tray_id, rejected_tray=False, delink_tray=False, lot_id__isnull=False).exclude(lot_id=lot_id), "Input Screening"),
-                        (BrassTrayId.objects.filter(tray_id=cand.tray_id, rejected_tray=False, delink_tray=False, lot_id__isnull=False).exclude(lot_id=lot_id), "Brass QC"),
-                        (IQFTrayId.objects.filter(tray_id=cand.tray_id, rejected_tray=False, delink_tray=False, lot_id__isnull=False).exclude(lot_id=lot_id), "IQF"),
-                    ]:
-                        if qs.exists():
-                            occ_found = True
-                            break
-                    if occ_found:
-                        return JsonResponse({"valid": False, "error": f"Tray is currently occupied in {module_name}", "selected_tray_id": cand.tray_id, "auto_selected": True})
+                    # Brass QC-only cross-module occupancy check.
+                    if slot_type != 'accept':
+                        occupied_module, _occupied_error = validate_brass_qc_tray_occupancy(cand.tray_id, lot_id)
+                        if occupied_module:
+                            return JsonResponse({"valid": False, "error": "Tray is occupied.", "selected_tray_id": cand.tray_id, "auto_selected": True})
                     return JsonResponse({"valid": True, "auto_selected": True, "selected_tray_id": cand.tray_id})
                 if candidates:
                     return JsonResponse({"valid": False, "error": "Multiple matching trays found", "candidates": candidates}, status=400)
 
             return JsonResponse({"valid": False, "error": "Tray ID not found in system"}, status=404)
+
+        if slot_type != 'accept':
+            occupied_module, _occupied_error = validate_brass_qc_tray_occupancy(tray_id, lot_id)
+            if occupied_module:
+                return JsonResponse({"valid": False, "error": "Tray is occupied.", "selected_tray_id": tray_id, "auto_selected": True})
 
         if tray.lot_id and tray.lot_id != lot_id and not tray.delink_tray:
             return JsonResponse({"valid": False, "error": "Tray is currently occupied", "selected_tray_id": tray.tray_id, "auto_selected": True})
@@ -1437,29 +1436,6 @@ def brass_qc_action(request):
                     "auto_selected": True,
                 })
         
-        # ── Dynamic cross-module occupancy check ──
-        # Each check returns the module name so the error is always accurate.
-        occupancy_checks = [
-            (IPTrayId.objects.filter(
-                tray_id=tray_id, rejected_tray=False, delink_tray=False, lot_id__isnull=False
-             ).exclude(lot_id=lot_id), "Input Screening"),
-            (BrassTrayId.objects.filter(
-                tray_id=tray_id, rejected_tray=False, delink_tray=False, lot_id__isnull=False
-             ).exclude(lot_id=lot_id), "Brass QC"),
-            (IQFTrayId.objects.filter(
-                tray_id=tray_id, rejected_tray=False, delink_tray=False, lot_id__isnull=False
-             ).exclude(lot_id=lot_id), "IQF"),
-        ]
-        for qs, module_name in occupancy_checks:
-            # Only surface the module name to frontend; never expose lot IDs in HTML/UI
-            if qs.exists():
-                return JsonResponse({
-                    "valid": False,
-                    "error": f"Tray is currently occupied in {module_name}",
-                    "selected_tray_id": tray_id,
-                    "auto_selected": True,
-                })
-
         return JsonResponse({"valid": True})
 
     elif action == 'GET_REASONS':
@@ -1642,6 +1618,10 @@ def validate_tray_id(request):
                 return JsonResponse({"valid": False, "error": "Multiple matching trays found", "candidates": other_candidates}, status=400)
 
         return JsonResponse({"valid": False, "error": "Tray ID not found in system"}, status=404)
+
+    occupied_module, _occupied_error = validate_brass_qc_tray_occupancy(tray_id, lot_id)
+    if occupied_module:
+        return JsonResponse({"valid": False, "error": "Tray is occupied."})
 
     rejected_error = validate_tray_not_rejected_in_is(tray_id)
     if rejected_error:

@@ -1664,9 +1664,12 @@ def brass_audit_action(request):
         # assignment so operators see the real reason the tray cannot be used.
         from Brass_QC.services.validators import (
             validate_tray_not_rejected_in_brass_qc,
-            validate_tray_cross_module_occupancy,
+            validate_brass_qc_tray_occupancy,
         )
-        occupied_module, occupancy_error = validate_tray_cross_module_occupancy(tray_id, lot_id)
+        # Use the lifecycle-aware cross-module wrapper so active reject trays in
+        # Nickel Wiping / Nickel Audit are blocked as well.  The wrapper retains
+        # the existing current-lot and delink/release semantics.
+        occupied_module, occupancy_error = validate_brass_qc_tray_occupancy(tray_id, lot_id)
         if occupancy_error:
             return JsonResponse({
                 "valid": False,
@@ -1987,8 +1990,10 @@ def _handle_audit_submission(request, action):
                 if ta_action == "REJECT":
                     if not TrayId.objects.filter(tray_id=tid).exists():
                         return JsonResponse({"success": False, "error": f"Reject tray '{tid}' not found in master tray list"}, status=400)
-                    from Brass_QC.services.validators import validate_tray_cross_module_occupancy
-                    occupied_module, occupancy_error = validate_tray_cross_module_occupancy(tid, lot_id)
+                    from Brass_QC.services.validators import validate_brass_qc_tray_occupancy
+                    # Revalidate on PROCESS so a crafted/stale client payload cannot
+                    # bypass the same cross-module reject-tray protection used at scan.
+                    occupied_module, occupancy_error = validate_brass_qc_tray_occupancy(tid, lot_id)
                     if occupancy_error:
                         return JsonResponse({"success": False, "error": occupancy_error}, status=400)
                     slot_qty = int(ta.get("qty") or 0)

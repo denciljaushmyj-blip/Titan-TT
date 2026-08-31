@@ -192,6 +192,122 @@ def validate_nickel_wiping_rejection_tray_available(
     if not master_tray:
         return False, f'Tray {tray_key} not found in master'
 
+    # Cross-module guard for Nickel Wiping Z1/Z2. Both zones use this same
+    # service through the shared nq_action handler, so one lifecycle-aware
+    # check protects scan-time validation and final reject submission.
+    #
+    # Keep the current-lot exception: an original tray already belonging to
+    # this Nickel Wiping lot may legitimately be reused as its own reject
+    # container. Explicitly delinked/released trays also remain reusable.
+    current_lot = str(current_lot_id or '').strip()
+
+    try:
+        from Brass_QC.services.validators import (
+            validate_tray_cross_module_occupancy,
+            is_tray_rejected_in_brass_qc,
+        )
+
+        occupied_module, occupancy_error = validate_tray_cross_module_occupancy(
+            tray_key, current_lot or None
+        )
+        if occupancy_error:
+            return False, 'Tray is occupied.'
+
+        # Brass QC reject identity is snapshot-backed, so it can outlive the
+        # module mirror/master assignment. Reuse its release-aware helper.
+        if is_tray_rejected_in_brass_qc(tray_key):
+            return False, 'Tray is occupied.'
+    except ImportError:
+        # Preserve existing Nickel Wiping behavior if Brass QC services are not
+        # importable during an isolated app-management operation.
+        pass
+
+    # Brass Audit rejected trays can likewise be represented only in completed
+    # submission / partial-reject snapshots. Do not let a free-looking master
+    # row make such a tray reusable unless it was explicitly released/delinked.
+    explicitly_released = bool(
+        master_tray.delink_tray and not master_tray.scanned
+    )
+    if not explicitly_released:
+        try:
+            from BrassAudit.models import (
+                Brass_Audit_Submission,
+                BrassAudit_PartialRejectLot,
+            )
+
+            ba_submissions = Brass_Audit_Submission.objects.filter(
+                submission_type__in=['PARTIAL', 'FULL_REJECT'],
+                is_completed=True,
+            )
+            if current_lot:
+                ba_submissions = ba_submissions.exclude(lot_id=current_lot)
+            for submission in ba_submissions.only(
+                'lot_id', 'partial_reject_data', 'full_reject_data'
+            ):
+                snapshot = submission.partial_reject_data or submission.full_reject_data or {}
+                if _tray_rows_contain_tray_id(snapshot.get('trays'), tray_key):
+                    return False, 'Tray is occupied.'
+
+            ba_reject_lots = BrassAudit_PartialRejectLot.objects.exclude(
+                trays_snapshot__isnull=True
+            )
+            if current_lot:
+                ba_reject_lots = ba_reject_lots.exclude(new_lot_id=current_lot)
+            for reject_lot in ba_reject_lots.only('new_lot_id', 'trays_snapshot'):
+                if _tray_rows_contain_tray_id(reject_lot.trays_snapshot, tray_key):
+                    return False, 'Tray is occupied.'
+        except ImportError:
+            pass
+
+        # Nickel Audit Z1 and Z2 share these models. Exclude the current lot so
+        # an intentional NA -> NW rework return can continue, while reject trays
+        # owned by any other Nickel Audit lot remain unavailable.
+        try:
+            from Nickel_Audit.models import (
+                Nickel_AuditTrayId,
+                Nickel_Audit_Rejected_TrayScan,
+                NickelAudit_Submission,
+                NickelAudit_PartialRejectLot,
+            )
+
+            na_live = Nickel_AuditTrayId.objects.filter(
+                tray_id__iexact=tray_key,
+                delink_tray=False,
+                lot_id__isnull=False,
+            )
+            if current_lot:
+                na_live = na_live.exclude(lot_id=current_lot)
+            if na_live.exists():
+                return False, 'Tray is occupied.'
+
+            na_scans = Nickel_Audit_Rejected_TrayScan.objects.filter(
+                rejected_tray_id__iexact=tray_key
+            )
+            if current_lot:
+                na_scans = na_scans.exclude(lot_id=current_lot)
+            if na_scans.exists():
+                return False, 'Tray is occupied.'
+
+            na_submissions = NickelAudit_Submission.objects.filter(
+                submission_type__in=['PARTIAL', 'FULL_REJECT']
+            )
+            if current_lot:
+                na_submissions = na_submissions.exclude(lot_id=current_lot)
+            for submission in na_submissions.only('lot_id', 'reject_trays_data'):
+                if _tray_rows_contain_tray_id(submission.reject_trays_data, tray_key):
+                    return False, 'Tray is occupied.'
+
+            na_reject_lots = NickelAudit_PartialRejectLot.objects.exclude(
+                trays_snapshot__isnull=True
+            )
+            if current_lot:
+                na_reject_lots = na_reject_lots.exclude(new_lot_id=current_lot)
+            for reject_lot in na_reject_lots.only('new_lot_id', 'trays_snapshot'):
+                if _tray_rows_contain_tray_id(reject_lot.trays_snapshot, tray_key):
+                    return False, 'Tray is occupied.'
+        except ImportError:
+            pass
+
     active_lot_ids = _nickel_wiping_active_lot_ids(current_lot_id)
     if not active_lot_ids:
         return True, ''
