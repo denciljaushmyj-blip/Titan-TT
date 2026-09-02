@@ -325,7 +325,11 @@ class JigView(TemplateView):
 						base_qs = base_qs.none()
 						eligible_psns_for_filter = []
 					else:
-						eligible_psns, invalid_selected = resolve_add_model_eligible_psns(primary_psn, selected_model_psns)
+						selected_psns_for_validation = [
+							psn for psn in selected_model_psns
+							if psn and psn != primary_psn
+						]
+						eligible_psns, invalid_selected = resolve_add_model_eligible_psns(primary_psn, selected_psns_for_validation)
 						print(f'[JIG PICK] Add-model filter: eligible_psns={eligible_psns}, invalid_selected={invalid_selected}')
 
 						if invalid_selected or not eligible_psns:
@@ -5248,7 +5252,7 @@ class LotFetchAPI(APIView):
 
 			eligible_psns = []
 			if primary_psn:
-				eligible_psns, invalid_selected = resolve_add_model_eligible_psns(primary_psn, [primary_psn])
+				eligible_psns, invalid_selected = resolve_add_model_eligible_psns(primary_psn, [])
 				if invalid_selected:
 					eligible_psns = []
 			base_qs = TotalStockModel.objects.filter(
