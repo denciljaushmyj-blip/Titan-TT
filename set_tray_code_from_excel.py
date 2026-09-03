@@ -45,7 +45,7 @@ from modelmasterapp.models import ModelMaster, ModelMasterCreation, TrayType  # 
 # ─────────────────────────── knobs ───────────────────────────
 DRY_RUN = False
 XLSX_PATH = r"E:\Titan-TTT_2026\Doc\All SKU and Details.xlsx"
-SHEET = "All SKU"
+SHEET = "Sheet1"
 COL_PLATING_STK = 1        # "Plating Stock No"   (0-based)
 COL_TRAYCATE = 13          # "Traycate"
 COL_TRAY_COLOR = 18        # "In process Tray Color"
