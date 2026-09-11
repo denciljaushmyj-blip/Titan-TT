@@ -842,6 +842,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                         data-plating-stk-no="{{ data.plating_stk_no }}"
                         data-tray-qty-list="{{ data.tray_qty_list|default:'[]'|safe }}"
                         data-total-batch-quantity="{{ data.nq_lot_qty|default:0 }}"
+                        data-rejected-quantity="{{ data.nickel_rejection_total_qty|default:0 }}"
                         data-brass-missing-qty="{{ data.nq_missing_qty|default:0 }}">
                         <img src="{% static 'assets/icons/view.png' %}"
                             alt="View"
@@ -1750,6 +1751,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const row = link.closest('tr');
       const brassPhysicalQty = row ? row.getAttribute('data-brass-physical-qty') : "0";
       const displayAcceptedQty = link.getAttribute('data-total-batch-quantity') || "0";
+      const rejectedQty = link.getAttribute('data-rejected-quantity') || "0";
       const brassMissingQty = row ? row.getAttribute('data-brass-missing-qty') : "0";
       const brassQcAcceptedQtyVerified = row ? row.getAttribute('data-brass-qc-accepted-qty-verified') === 'True' : false;
 
@@ -1784,27 +1786,18 @@ document.addEventListener("DOMContentLoaded", function () {
       // Set dynamic value for Lot Qty from the backend-provided row context.
       const modalLotQtyValue = document.getElementById('modalLotQty');
       if (modalLotQtyValue) {
-        modalLotQtyValue.textContent = displayAcceptedQty || '';
+        // Rejected Table view must show only the quantity rejected from this lot,
+        // not the original/full lot quantity.
+        modalLotQtyValue.textContent = rejectedQty || '0';
       }
 
-      // Ã¢Å“â€¦ ENHANCED: Dynamic quantity display based on verification status
+      // Rejected Table modal always shows the rejected quantity as Lot Qty.
+      // Do not replace it with the original lot quantity or physical quantity.
       if (modalLotQty && modalQtyLabel) {
-        if (isVerified) {
-          // Show Physical Qty when verified
-          modalQtyLabel.textContent = "Physical Qty:";
-          modalLotQty.textContent = brassPhysicalQty; // <-- This should be the correct value
-          modalLotQty.style.color = "#28a745";
-          console.log(`Ã¢Å“â€¦ Showing Physical Qty: ${brassPhysicalQty}`);
-        } else {
-          // Show Lot Qty when not verified
-          modalQtyLabel.textContent = "Lot Qty:";
-          modalLotQty.textContent = displayAcceptedQty;
-          modalLotQty.style.color = "#e67e22";
-          console.log(`Ã¢Å“â€¦ Showing Lot Qty: ${displayAcceptedQty}`);
-        }
+        modalQtyLabel.textContent = "Lot Qty:";
+        modalLotQty.textContent = rejectedQty || '0';
+        modalLotQty.style.color = "#e67e22";
       }
-
-
 
       // Single source of truth for the tray listing (mirrors NI_Completed.html —
       // this lot belongs to Nickel Inspection, not Nickel Audit Zone 2, so both
@@ -1913,7 +1906,7 @@ document.addEventListener("DOMContentLoaded", function () {
       modal.classList.add("open");
       
       console.log(`Ã°Å¸Å½Â¯ [MODAL OPENED] Successfully displayed ${dataSource} data`);
-      console.log(`   Quantity Display: ${isVerified ? 'Physical Qty' : 'Lot Qty'} = ${isVerified ? brassPhysicalQty : displayAcceptedQty}`);
+      console.log(`   Quantity Display: Lot Qty = ${rejectedQty}`);
     });
   });
 

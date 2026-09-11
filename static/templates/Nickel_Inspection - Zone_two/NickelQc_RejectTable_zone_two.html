@@ -932,6 +932,7 @@ box-shadow: 2px 0 8px rgba(0,0,0,0.04);
                           data-plating-stk-no="{{ data.plating_stk_no }}"
                         data-tray-qty-list="{{ data.tray_qty_list|default:'[]'|safe }}"
                         data-total-batch-quantity="{{ data.nq_lot_qty|default:0 }}"
+                        data-rejected-quantity="{{ data.nickel_rejection_total_qty|default:0 }}"
                         data-brass-missing-qty="{{ data.nq_missing_qty|default:0 }}">
                         <img src="{% static 'assets/icons/view.png' %}"
                             alt="View"
@@ -1404,6 +1405,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const row = link.closest('tr');
       const brassPhysicalQty = row ? row.getAttribute('data-brass-physical-qty') : "0";
       const displayAcceptedQty = link.getAttribute('data-total-batch-quantity') || "0";
+      const rejectedQty = link.getAttribute('data-rejected-quantity') || "0";
       const brassMissingQty = row ? row.getAttribute('data-brass-missing-qty') : "0";
       const brassQcAcceptedQtyVerified = row ? row.getAttribute('data-brass-qc-accepted-qty-verified') === 'True' : false;
 
@@ -1427,7 +1429,9 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       const modalLotQtyValue = document.getElementById('modalLotQty');
       if (modalLotQtyValue) {
-        modalLotQtyValue.textContent = displayAcceptedQty || '';
+        // Rejected Table view must show only the quantity rejected from this lot,
+        // not the original/full lot quantity.
+        modalLotQtyValue.textContent = rejectedQty || '0';
       }
 
       
@@ -1625,7 +1629,7 @@ document.addEventListener("DOMContentLoaded", function () {
       modal.classList.add("open");
       
       console.log(`Ã°Å¸Å½Â¯ [MODAL OPENED] Successfully displayed ${dataSource} data`);
-      console.log(`   Quantity Display: ${isVerified ? 'Physical Qty' : 'Lot Qty'} = ${isVerified ? brassPhysicalQty : displayAcceptedQty}`);
+      console.log(`   Quantity Display: Lot Qty = ${rejectedQty}`);
     });
   });
 
