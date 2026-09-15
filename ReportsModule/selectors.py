@@ -159,14 +159,14 @@ def _first_remark(*values):
 
 
 def _module_cell(status, in_time=None, out_time=None, lot_qty=None, accepted_qty=None,
-                  rejected_qty=None, user=None, remarks=None):
+                  rejected_qty=None, user=None, remarks=None, accepted_label='Accepted'):
     """Format one module's cell — the same multi-line block for Preview and Excel."""
     if status in ('Not Reached', 'Not Applicable'):
         return 'IN : --\nOUT: --\nLot Qty : --\nStatus : ' + status
     lines = [f"IN : {_fmt(in_time) or '--'}", f"OUT: {_fmt(out_time) or '--'}"]
     lines.append(f"Lot Qty : {lot_qty if lot_qty is not None else '--'}")
     if accepted_qty is not None:
-        lines.append(f"Accepted : {accepted_qty}")
+        lines.append(f"{accepted_label} : {accepted_qty}")
     if rejected_qty is not None:
         lines.append(f"Rejected : {rejected_qty}")
     lines.append(f"Status : {status}")
@@ -178,7 +178,7 @@ def _module_cell(status, in_time=None, out_time=None, lot_qty=None, accepted_qty
 
 
 _TIME_LABELS = {'IN', 'OUT'}
-_QTY_LABELS = {'Lot Qty', 'Accepted', 'Rejected'}
+_QTY_LABELS = {'Lot Qty', 'Accepted', 'Loaded Jig', 'Rejected'}
 _STATUS_LABELS = {'Status'}
 
 
@@ -340,6 +340,16 @@ class JourneyRecords:
                     continue
                 self.submissions[stage][record.lot_id] = record
                 self.submission_history[stage][record.lot_id].append(record)
+        # A partial Jig Loading submission creates an EX-* excess lot for the
+        # quantity left behind.  Its creation time is the moment that new
+        # Jig Loading transaction begins, so it is the authoritative IN time
+        # for the remaining-lot block in the consolidated report.
+        model = apps.get_model('Jig_Loading', 'ExcessLotRecord')
+        for row in model.objects.filter(new_lot_id__in=lot_ids).values(
+                'new_lot_id', 'lot_qty', 'created_at'):
+            entry = self.entries[STAGE_JIG_LOADING].setdefault(row['new_lot_id'], {})
+            entry['in_time'] = _earliest(entry.get('in_time'), row['created_at'])
+            entry.setdefault('lot_qty', row['lot_qty'])
         # A split submission belongs to its parent lot, while the physical
         # tray-entry timestamp can be stored on its accepted/rejected child.
         # Link that persisted evidence back to the parent report transaction.
@@ -515,7 +525,8 @@ def submission_values(stage, record):
     elif stage == 'Jig Unloading':
         completed = not record.is_draft
         status = 'Completed'
-        values = {'lot_qty': record.total_qty}
+        # total_qty is the per-lot tray quantity captured at unloading.
+        values = {'lot_qty': record.total_qty, 'accepted_qty': record.total_qty}
         out_time = record.updated_at
     else:
         completed = getattr(record, 'is_completed', True) and not getattr(record, 'is_draft', False)
@@ -809,7 +820,7 @@ def _jig_loading_cells(jig_record, prev_out_time=None, records=None, lot_id=None
             values['lot_qty'] = jig_record.original_lot_qty
         values['remarks'] = _first_remark(jig_record.pick_remarks, jig_record.remarks)
     values.update(submission_values(STAGE_JIG_LOADING, submission))
-    jig_cell = _module_cell(**values)
+    jig_cell = _module_cell(**values, accepted_label='Loaded Jig')
     activity = _latest_time(values['in_time'], values['out_time'])
     # A submitted loading record is the actual handoff into IP Inspection.
     # IP_loaded_date_time belongs to IP Inspection, never Jig Loading.
@@ -831,6 +842,18 @@ def _late_module_cells(unload_record, zone_map, prev_out_time=None, records=None
     statuses = dict.fromkeys(columns)
     zone = zone_map.get(unload_record.plating_color_id if unload_record else plating_color_id)
     activity = None
+    latest_audit = None
+
+    # IP Inspection receives the quantity accepted by the corresponding Jig
+    # Loading submission.  A JigCompleted record can represent several lots,
+    # so its loaded_cases_qty may be the whole jig quantity and must not be
+    # used for this individual lot's Jig Unloading receipt.
+    jig_loading_submission = records.submission(STAGE_JIG_LOADING, lot_id) if records else None
+    ip_received_qty = submission_values(
+        STAGE_JIG_LOADING, jig_loading_submission
+    ).get('accepted_qty') if jig_loading_submission else None
+    if ip_received_qty is None and jig_record:
+        ip_received_qty = jig_record.loaded_cases_qty
 
     def put(name, values):
         nonlocal activity
@@ -847,7 +870,7 @@ def _late_module_cells(unload_record, zone_map, prev_out_time=None, records=None
         unloading_entry = dict(unloading_entry or {})
         unloading_entry['in_time'] = _earliest(
             unloading_entry.get('in_time'), jig_record.IP_loaded_date_time)
-        unloading_entry.setdefault('lot_qty', jig_record.loaded_cases_qty)
+        unloading_entry.setdefault('lot_qty', ip_received_qty)
     if zone and unloading_entry is not None:
         values = dict(status='In Progress', in_time=unloading_entry.get('in_time'),
                       lot_qty=unloading_entry.get('lot_qty'))
@@ -887,6 +910,8 @@ def _late_module_cells(unload_record, zone_map, prev_out_time=None, records=None
         jig_unload_source_id = jig_unload_source.lot_id
         jig_unloading_entry = ((records.entry('Jig Unloading', jig_unload_source_id)
                                 if records else None) or unloading_entry)
+        jig_unloading_submission = ((records.submission('Jig Unloading', jig_unload_source_id)
+                                     if records else None) or unloading_submission)
         wiping_entry = records.entry('Nickel Wiping', jig_unload_source_id) if records else None
         wiping_lot_ids = []
         wiping_lot_id = unload_record.lot_id
@@ -919,17 +944,28 @@ def _late_module_cells(unload_record, zone_map, prev_out_time=None, records=None
         # or Nickel allocations can be smaller, but must not rewrite the
         # historical Jig Unloading receipt quantity.
         jig_unload_lot_qty = (
-            jig_record.loaded_cases_qty
-            if jig_record and jig_record.loaded_cases_qty is not None
+            ip_received_qty
+            if ip_received_qty is not None
             else jig_unload_source.total_case_qty
         )
+        jig_unload_accepted_qty = submission_values(
+            'Jig Unloading', jig_unloading_submission
+        ).get('accepted_qty') if jig_unloading_submission else jig_unload_source.accepted_qty
+        if ju_done and not jig_unload_accepted_qty:
+            # The unload row defaults accepted_qty to zero.  A completed
+            # unload without an explicit accepted value still accepted every
+            # non-missing case, so derive that value from its receipt qty.
+            jig_unload_accepted_qty = max(
+                0, (jig_unload_lot_qty or 0)
+                - (jig_unload_source.unload_missing_qty or 0)
+            )
         put(f'Jig Unloading {zone.upper()}', dict(
             status=('Accepted' if jig_unload_source.unload_accepted else 'Completed') if ju_done else 'In Progress',
             in_time=(jig_unloading_entry or {}).get('in_time') or jig_unload_source.created_at,
             out_time=(jig_unload_source.Un_loaded_date_time or wiping_started_at)
                      if ju_done else None,
             lot_qty=jig_unload_lot_qty,
-            accepted_qty=jig_unload_source.accepted_qty if ju_done else None))
+            accepted_qty=jig_unload_accepted_qty if ju_done else None))
         # Nickel Audit can be entered again after a return through Nickel
         # Wiping. Collect its ledger across the same child/parent lineage as
         # wiping so an earlier Audit transaction is never replaced by the
@@ -941,6 +977,33 @@ def _late_module_cells(unload_record, zone_map, prev_out_time=None, records=None
         ) if records else [])
         latest_audit = max(audit_history, key=lambda record: record.created_at,
                            default=None)
+
+        def wiping_receipt_qty(at_time=None):
+            """Return the quantity handed into this Wiping transaction."""
+            prior_full_rejects = [
+                audit for audit in audit_history
+                if audit.submission_type == 'FULL_REJECT'
+                and (at_time is None or audit.created_at <= at_time)
+            ]
+            if prior_full_rejects:
+                return submission_values(
+                    'Nickel Audit', prior_full_rejects[-1]
+                ).get('rejected_qty')
+            return jig_unload_accepted_qty
+
+        def audit_receipt_qty(at_time=None):
+            """Return the accepted Wiping quantity handed into Audit."""
+            prior_wipings = [
+                wiping for wiping in wiping_history
+                if at_time is None or wiping.created_at <= at_time
+            ]
+            if prior_wipings:
+                return submission_values(
+                    'Nickel Wiping', prior_wipings[-1]
+                ).get('accepted_qty')
+            return getattr(unload_record, 'nq_qc_accepted_qty', None)
+
+        audit_received_qty = audit_receipt_qty()
         # Mutable `na_qc_rejection` is not cleared by every later audit
         # acceptance. Prefer the append-only audit ledger whenever present.
         # Only a latest full rejection routes the lot back to Nickel Wiping.
@@ -1003,12 +1066,27 @@ def _late_module_cells(unload_record, zone_map, prev_out_time=None, records=None
                                    'Partially Accepted') if done else 'In Progress',
                           in_time=transfer_time or (entry or {}).get('in_time'),
                           out_time=getattr(unload_record, prefix + '_last_process_date_time') if done else None,
-                          lot_qty=(entry or {}).get('lot_qty'),
+                          # A module displays the quantity it received from
+                          # the immediately preceding module, never a later
+                          # remaining quantity on the unload record.
+                          lot_qty=(jig_unload_lot_qty if stage == 'Nickel Wiping'
+                                   else audit_received_qty),
                           accepted_qty=getattr(unload_record, prefix + '_qc_accepted_qty') if done else None,
                           remarks=getattr(unload_record, prefix + '_pick_remarks'))
             values.update(submission_values(stage, submission))
+            if stage == 'Nickel Wiping':
+                # The Wiping transaction starts with the quantity actually
+                # unloaded for this lot.  Its own accepted/rejected result
+                # must never replace that receipt quantity.
+                values['lot_qty'] = wiping_receipt_qty(
+                    getattr(submission, 'created_at', None)
+                )
+            elif stage == 'Nickel Audit':
+                values['lot_qty'] = audit_receipt_qty(
+                    getattr(submission, 'created_at', None)
+                )
             if values['lot_qty'] is None:
-                values['lot_qty'] = unload_record.total_case_qty
+                values['lot_qty'] = (entry or {}).get('lot_qty') or unload_record.total_case_qty
             history = (wiping_history if stage == 'Nickel Wiping'
                        else audit_history if stage == 'Nickel Audit'
                        else records.submissions_for(stage, stage_lot_id) if records else [])
@@ -1035,6 +1113,10 @@ def _late_module_cells(unload_record, zone_map, prev_out_time=None, records=None
                     snapshot = dict(in_time=history_in_time,
                                     remarks=getattr(unload_record, prefix + '_pick_remarks'))
                     snapshot.update(submission_values(stage, record))
+                    if stage == 'Nickel Wiping':
+                        snapshot['lot_qty'] = wiping_receipt_qty(record.created_at)
+                    elif stage == 'Nickel Audit':
+                        snapshot['lot_qty'] = audit_receipt_qty(record.created_at)
                     history_values.append(snapshot)
                 text, status, history_activity = _module_transaction_blocks(history_values, values)
                 cells[f'{stage} {zone.upper()}'] = text
@@ -1050,11 +1132,20 @@ def _late_module_cells(unload_record, zone_map, prev_out_time=None, records=None
                     and unload_record.total_case_qty > 0)
         if not done and entry is None and not received:
             continue
+        latest_audit_qty = submission_values(
+            'Nickel Audit', latest_audit
+        ).get('accepted_qty') if latest_audit else None
+        spider_received_qty = (
+            latest_audit_qty
+            if latest_audit_qty is not None
+            else getattr(unload_record, 'na_qc_accepted_qty', None)
+        )
         put(stage, dict(status='Completed' if done else 'In Progress',
                         in_time=(unload_record.na_last_process_date_time if received else None)
                                 or (entry or {}).get('in_time'),
                         out_time=getattr(unload_record, f'ss_z{number}_completed_at') if done else None,
-                        lot_qty=unload_record.total_case_qty,
+                        lot_qty=(spider_received_qty if spider_received_qty is not None
+                                 else unload_record.total_case_qty),
                         remarks=unload_record.spider_pick_remarks))
     return cells, statuses, activity
 

@@ -2172,8 +2172,22 @@ document.addEventListener("DOMContentLoaded", function() {
           // qty afterward kept showing the earlier AQL-exceeding result).
           onReasonQtyChange();
           applyFullLotRejectionLock();
+          if (!fullRejCb.checked && errDiv.textContent === 'Remarks mandatory for full lot rejection.') {
+            errDiv.textContent = '';
+            var remarksInput = document.getElementById('naRejectRemarksInput');
+            if (remarksInput) remarksInput.style.border = '';
+          }
           if (!isFullLotRejectionActive() && state.allocDone) applyScanLockAndOrder();
         };
+      }
+      var fullRejectRemarksInput = document.getElementById('naRejectRemarksInput');
+      if (fullRejectRemarksInput) {
+        fullRejectRemarksInput.addEventListener('input', function () {
+          if (fullRejectRemarksInput.value.trim() && errDiv.textContent === 'Remarks mandatory for full lot rejection.') {
+            errDiv.textContent = '';
+            fullRejectRemarksInput.style.border = '';
+          }
+        });
       }
       applyFullLotRejectionLock();
     }
@@ -2891,6 +2905,16 @@ document.addEventListener("DOMContentLoaded", function() {
         errDiv.textContent = '';
         var payload = buildPayload();
         payload.action = 'SUBMIT_REJECT';
+        var remarksInput = document.getElementById('naRejectRemarksInput');
+        if (payload.full_lot_rejection && !payload.remarks) {
+          errDiv.textContent = 'Remarks mandatory for full lot rejection.';
+          if (remarksInput) {
+            remarksInput.style.border = '2px solid #c62828';
+            remarksInput.focus();
+          }
+          return;
+        }
+        if (remarksInput) remarksInput.style.border = '';
         if (!payload.reason_ids.length) { errDiv.textContent = 'Select at least one rejection reason.'; return; }
         if (!payload.rejected_qty) { errDiv.textContent = 'Enter rejected quantity.'; return; }
         submitBtn.disabled = true;

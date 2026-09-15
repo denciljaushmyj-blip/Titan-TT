@@ -2749,8 +2749,22 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             totalQtyDisp.textContent = '0';
             remainingDisp.textContent = state.totalQty;
+            if (errDiv.textContent === 'Remarks mandatory for full lot rejection.') {
+              errDiv.textContent = '';
+              var remarksInput = document.getElementById('nqRejectRemarksInput');
+              if (remarksInput) remarksInput.style.border = '';
+            }
           }
         };
+      }
+      var fullRejectRemarksInput = document.getElementById('nqRejectRemarksInput');
+      if (fullRejectRemarksInput) {
+        fullRejectRemarksInput.addEventListener('input', function () {
+          if (fullRejectRemarksInput.value.trim() && errDiv.textContent === 'Remarks mandatory for full lot rejection.') {
+            errDiv.textContent = '';
+            fullRejectRemarksInput.style.border = '';
+          }
+        });
       }
     }
 
@@ -3531,6 +3545,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reject_trays: rejTrays,
         accept_trays: accTrays,
         delink_trays: state.reuseTrays,
+        full_lot_rejection: !!(fullRejCb && fullRejCb.checked),
         remarks: document.getElementById('nqRejectRemarksInput').value.trim(),
         lot_id: state.lotId,
       };
@@ -3541,6 +3556,16 @@ document.addEventListener("DOMContentLoaded", function () {
         errDiv.textContent = '';
         var payload = buildPayload();
         payload.action = 'SUBMIT_REJECT';
+        var remarksInput = document.getElementById('nqRejectRemarksInput');
+        if (fullRejCb && fullRejCb.checked && !payload.remarks) {
+          errDiv.textContent = 'Remarks mandatory for full lot rejection.';
+          if (remarksInput) {
+            remarksInput.style.border = '2px solid #c62828';
+            remarksInput.focus();
+          }
+          return;
+        }
+        if (remarksInput) remarksInput.style.border = '';
         // Full Lot Rejection intentionally skips per-reason quantity entry (see fullRejCb
         // handler above) — only a partial rejection needs a reason to justify the split.
         if (!(fullRejCb && fullRejCb.checked) && !payload.reason_ids.length) {
