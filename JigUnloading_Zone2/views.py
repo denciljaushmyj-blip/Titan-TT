@@ -2925,6 +2925,8 @@ def JU_Zone_save_jig_unload_tray_ids(request):
         combined_lot_ids = data.get('combined_lot_ids', [])
         main_lot_id = data.get('main_lot_id', '')
         jig_lot_id = data.get('jig_lot_id', '')
+        model_no = str(data.get('model_no') or data.get('model_number') or '').strip()
+        jig_completed_id = data.get('jig_completed_id')
         
         # 🔧 NEW: Get jig-aware sources from frontend
         jig_aware_sources = data.get('jig_aware_sources', [])
@@ -2969,6 +2971,15 @@ def JU_Zone_save_jig_unload_tray_ids(request):
                 tray_id,
                 allowed_lot_ids=allowed_lot_ids_for_trays,
                 include_tray_master=True,
+                current_assignment={
+                    'jig_completed_id': jig_completed_id,
+                    'lot_id': main_lot_id or jig_lot_id,
+                    'main_lot_id': main_lot_id,
+                    'model_no': model_no,
+                    'combined_lot_ids': combined_lot_ids,
+                    'user_id': request.user.id if request.user.is_authenticated else None,
+                    'session_key': getattr(request.session, 'session_key', None),
+                },
             )
             if tray_conflict:
                 return JsonResponse({
@@ -3806,6 +3817,13 @@ def JU_Zone_save_jig_unload_draft(request):
                 tray_id,
                 allowed_lot_ids=allowed_lot_ids_for_trays,
                 include_tray_master=True,
+                current_assignment={
+                    'main_lot_id': main_lot_id,
+                    'model_number': model_number,
+                    'combined_lot_ids': combined_lot_ids,
+                    'user_id': request.user.id if request.user.is_authenticated else None,
+                    'session_key': getattr(request.session, 'session_key', None),
+                },
             )
             if tray_conflict:
                 return JsonResponse({
@@ -3989,6 +4007,9 @@ def JU_Zone_validate_tray_id(request):
     data = json.loads(request.body)
     tray_id = normalize_jig_unload_tray_id(data.get('tray_id', ''))
     lot_id = data.get('lot_id', '').strip()
+    model_no = str(data.get('model_no') or data.get('model_number') or '').strip()
+    jig_completed_id = data.get('jig_completed_id')
+    jig_id = str(data.get('jig_id') or '').strip()
 
     print(f"[DEBUG] JU_Zone_validate_tray_id called with tray_id: '{tray_id}', lot_id: '{lot_id}'")
 
@@ -4006,6 +4027,14 @@ def JU_Zone_validate_tray_id(request):
         tray_id,
         allowed_lot_ids=allowed_lot_ids_for_trays,
         include_tray_master=True,
+        current_assignment={
+            'jig_completed_id': jig_completed_id,
+            'lot_id': lot_id,
+            'model_no': model_no,
+            'jig_id': jig_id,
+            'user_id': request.user.id if request.user.is_authenticated else None,
+            'session_key': getattr(request.session, 'session_key', None),
+        },
     )
     if tray_conflict:
         return JsonResponse({
@@ -4090,7 +4119,9 @@ def JU_Zone_validate_tray_id(request):
             print(f"[DEBUG] ✅ Tray available: delinked and reusable")
             return JsonResponse({'success': True, 'message': 'Tray available - delinked'})
         elif lot_id:
-            # For Jig Unloading: tray assigned to the current lot being unloaded is VALID
+            # Lot membership alone is not tray ownership. Active Jig Unloading
+            # ownership has already been checked assignment-aware above; this
+            # branch only preserves the existing upstream current-lot eligibility.
             lot_ids_to_check = [lid.strip() for lid in lot_id.split(',')] if ',' in lot_id else [lot_id.strip()]
             tray_lot_str = str(tray.lot_id).strip()
             if tray_lot_str in lot_ids_to_check:
@@ -4132,6 +4163,9 @@ def JU_Zone_validate_tray_id_dynamic(request):
         tray_id = normalize_jig_unload_tray_id(data.get('tray_id', ''))
         lot_id = data.get('lot_id', '').strip()
         plating_color = data.get('plating_color', '').strip()
+        model_no = str(data.get('model_no') or data.get('model_number') or '').strip()
+        jig_completed_id = data.get('jig_completed_id')
+        jig_id = str(data.get('jig_id') or '').strip()
 
         print(f"[DEBUG] JU_Zone_validate_tray_id_dynamic Zone 2 called with tray_id: '{tray_id}', lot_id: '{lot_id}', plating_color: '{plating_color}'")
 
@@ -4339,6 +4373,14 @@ def JU_Zone_validate_tray_id_dynamic(request):
             tray_id,
             allowed_lot_ids=allowed_lot_ids_for_trays,
             include_tray_master=True,
+            current_assignment={
+                'jig_completed_id': jig_completed_id,
+                'lot_id': lot_id,
+                'model_no': model_no,
+                'jig_id': jig_id,
+                'user_id': request.user.id if request.user.is_authenticated else None,
+                'session_key': getattr(request.session, 'session_key', None),
+            },
         )
         if tray_conflict:
             return JsonResponse({
@@ -6228,6 +6270,14 @@ def JU_Zone_autosave_jig_unload(request):
 
             tray_data = data.get('tray_data', [])
             allowed_lot_ids_for_trays = [main_lot_id] + list(data.get('combined_lot_ids', []) or [])
+            autosave_assignment = {
+                'main_lot_id': main_lot_id,
+                'model_number': data.get('model_number', ''),
+                'combined_lot_ids': data.get('combined_lot_ids', []),
+                'jig_id': data.get('jig_id', ''),
+                'user_id': request.user.id if request.user.is_authenticated else None,
+                'session_key': request.session.session_key,
+            }
             seen_tray_ids = set()
             for i, tray in enumerate(tray_data):
                 if not isinstance(tray, dict):
@@ -6248,6 +6298,7 @@ def JU_Zone_autosave_jig_unload(request):
                     tray_id,
                     allowed_lot_ids=allowed_lot_ids_for_trays,
                     include_tray_master=True,
+                    current_assignment=autosave_assignment,
                 )
                 if tray_conflict:
                     return JsonResponse({

@@ -3890,6 +3890,13 @@ class SaveModelUnloadZ1View(APIView):
                 tray_id,
                 allowed_lot_ids=allowed_lot_ids_for_trays,
                 include_tray_master=True,
+                current_assignment={
+                    'jig_completed_id': jig_completed_id,
+                    'lot_id': lot_id,
+                    'model_no': model_no,
+                    'user_id': request.user.id if request.user.is_authenticated else None,
+                    'session_key': getattr(request.session, 'session_key', None),
+                },
             )
             if tray_conflict:
                 return Response({
@@ -3911,13 +3918,8 @@ class SaveModelUnloadZ1View(APIView):
                     'source': nickel_conflict.get('source', ''),
                 }, status=400)
 
-            # Top tray ID is the primary identifier for a model's tray batch.
-            # find_jig_unload_tray_conflict() above exempts records that belong to the
-            # same lot family (allowed_lot_ids_for_trays), which is correct for cross-lot
-            # occupancy but leaves a gap when an "Add Model" merge places several models
-            # under the same jig_completed_id: a top tray already claimed by a sibling
-            # model in that same lot family would silently pass. Enforce uniqueness of the
-            # top tray explicitly across sibling models here.
+            # Keep the older explicit top-tray sibling guard as a second layer.
+            # The assignment-aware helper above now handles all tray positions.
             if tray.get('is_top_tray'):
                 sibling_rows = JUSubmittedZ1.objects.filter(
                     jig_completed_id=jig_completed_id

@@ -2899,12 +2899,19 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           // Backend occupancy check: verify tray is free and not assigned to another lot
           const trayInput = this;
-          const currentLotId = (currentModelsData && currentModelsData.models && currentModelsData.models[currentModelIndex])
-            ? (currentModelsData.models[currentModelIndex].lot_id || '') : '';
+          const currentModel = (currentModelsData && currentModelsData.models && currentModelsData.models[currentModelIndex])
+            ? currentModelsData.models[currentModelIndex] : {};
+          const currentLotId = currentModel.lot_id || '';
           fetch(TRAY_VALIDATE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
-            body: JSON.stringify({ tray_id: currentVal, lot_id: currentLotId })
+            body: JSON.stringify({
+              tray_id: currentVal,
+              lot_id: currentLotId,
+              model_no: currentModel.model_no || '',
+              jig_completed_id: currentJigCompletedId || '',
+              jig_id: currentModel.jig_id || currentModel.source_jig || ''
+            })
           })
             .then(function(r) {
               return r.json().catch(function() {
