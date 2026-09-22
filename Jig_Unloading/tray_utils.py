@@ -555,6 +555,29 @@ def find_jig_unload_tray_conflict(
         record_lots.update(_collect_lot_aliases_from_payload(submitted.tray_data))
         if _same_submitted_assignment(submitted, assignment_context):
             continue
+
+        # A completed JUSubmittedZ1 row is historical traceability, not a
+        # permanent tray reservation.  Once a downstream process legitimately
+        # releases/delinks the physical tray, TrayId is marked delink_tray=True
+        # and scanned=False.  Do not let that old submitted JSON reserve the
+        # tray forever.
+        #
+        # IMPORTANT: drafts are deliberately NOT bypassed here.  An active JU
+        # draft/model-save must continue reserving its scanned tray so the same
+        # physical tray cannot be assigned to another active unload.
+        if (
+            not submitted.is_draft
+            and _is_jig_unload_tray_master_released(tray_id)
+        ):
+            logger.info(
+                "Ignoring historical JUSubmittedZ1 tray reservation for released "
+                "tray_id=%s submitted_id=%s lot_id=%s",
+                tray_id,
+                submitted.id,
+                submitted.lot_id,
+            )
+            continue
+
         source = 'Jig Unloading draft/model save' if submitted.is_draft else 'Jig Unloading model save'
         return _make_tray_conflict(tray_id, source, next(iter(record_lots), ''), submitted.id)
 

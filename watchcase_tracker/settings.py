@@ -242,7 +242,7 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'trackandtrace26',
+        'NAME': 'trackandtrace2026',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
