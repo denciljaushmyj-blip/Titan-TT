@@ -1859,6 +1859,60 @@ class Jig_Unloading_MainTable(LoginRequiredMixin, TemplateView):
                         lot_id_quantities = {jig_detail.lot_id: getattr(jig_detail, 'updated_lot_qty', 0)}
             jig_detail.lot_id_quantities = lot_id_quantities
 
+            # Add Model preview needs the individual source-lot allocation quantities,
+            # but the main table must keep its existing single total Lot Qty display.
+            # Keep these concepts separate so multi-lot allocation details do not leak
+            # into the main table as values such as "15, 128".
+            _add_model_lot_quantities = {}
+            _add_model_lot_model_map = {}
+            _multi_alloc = getattr(jig_detail, 'multi_model_allocation', None) or []
+            if isinstance(_multi_alloc, str):
+                try:
+                    _multi_alloc = json.loads(_multi_alloc)
+                except Exception:
+                    _multi_alloc = []
+
+            if isinstance(_multi_alloc, list):
+                for _allocation in _multi_alloc:
+                    if not isinstance(_allocation, dict):
+                        continue
+                    _lot_id = str(
+                        _allocation.get('lot_id')
+                        or _allocation.get('source_lot_id')
+                        or _allocation.get('combined_lot_id')
+                        or ''
+                    ).strip()
+                    if not _lot_id:
+                        continue
+                    try:
+                        _qty = int(
+                            _allocation.get('allocated_qty')
+                            or _allocation.get('qty')
+                            or _allocation.get('quantity')
+                            or _allocation.get('loaded_qty')
+                            or 0
+                        )
+                    except (TypeError, ValueError):
+                        _qty = 0
+                    if _qty > 0:
+                        _add_model_lot_quantities[_lot_id] = _qty
+
+                    _model_no = (
+                        _allocation.get('plating_stk_no')
+                        or _allocation.get('model_no')
+                        or _allocation.get('model')
+                        or _allocation.get('model_name')
+                    )
+                    if _model_no:
+                        _add_model_lot_model_map[_lot_id] = str(_model_no).strip()
+
+            # Single-lot/legacy rows keep the existing row data as a safe fallback.
+            if not _add_model_lot_quantities:
+                _add_model_lot_quantities = dict(lot_id_quantities or {})
+
+            jig_detail.add_model_lot_quantities = _add_model_lot_quantities
+            jig_detail.add_model_lot_model_map = _add_model_lot_model_map
+
             # Rebuild lot_id_model_map now that lot_id_quantities is properly set
             # Use jig_detail.lot_id directly as key (draft_data lot_id_quantities keys may have typos)
             if not getattr(jig_detail, 'lot_id_model_map', None) and lot_id_quantities:
